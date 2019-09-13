@@ -1,0 +1,9 @@
+---
+source: "sybase"
+target: "oracle"
+functions:
+  - abc(1,2)
+  - xxx(1,2)
+procedures:
+  - sp1(1,2)
+  - sp2(1,2)

@@ -1,16 +1,5 @@
-import net.sourceforge.jtds.jdbc.*;
-//import oracle.jdbc.*;
-import net.sourceforge.jtds.jdbc.Driver;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.mchange.v2.c3p0.*;
-import java.beans.PropertyVetoException;
-import java.util.Map;
+import java.util.Collection;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -38,21 +27,21 @@ public class DbDiff {
         String oracleUrl = "jdbc:oracle:thin:@localhost:1521/orclpdb1";
         String userName = "xxxx";
         String passWord = "xxx";
-        try {
-            sybaseConn = new DbConn();
-            // sybaseConn.dbConnect(sybaseDriver, sybaseUrl, userName, passWord);
-            oracleConn = new DbConn();
-            // oracleConn.dbConnect(oracleDriver, oracleUrl, userName, passWord);
+        // try {
+        // sybaseConn = new DbConn();
+        // // sybaseConn.dbConnect(sybaseDriver, sybaseUrl, userName, passWord);
+        // oracleConn = new DbConn();
+        // // oracleConn.dbConnect(oracleDriver, oracleUrl, userName, passWord);
 
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        try {
-            sybaseConn.readyaml("test.yaml");
-        } catch (Exception e) {
+        // } catch (Exception e) {
+        // System.out.println(e);
+        // }
+        // try {
+        // sybaseConn.readyaml("test.yaml");
+        // } catch (Exception e) {
 
-            System.out.println(e);
-        }
+        // System.out.println(e);
+        // }
 
     }
 }

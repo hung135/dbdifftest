@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Functions we need to write that process some data, put them here
@@ -68,6 +69,8 @@ public class DataUtils {
 
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("(?i)insert (?i)into ", "~~");
+        x = x.replaceAll(" .*?~~", "~~");
+        x = x.replaceAll(" .*?$", "~~");
         System.out.println(x);
         List<String> items = Arrays.asList(x.split("~~"));
         return convertListToSet(items);

@@ -172,7 +172,8 @@ public class DataUtilsTest extends TestCase {
         String password = env.get("SYBASE_PASSWORD");
         DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
 
-        db.getTableNames("dbo");
-        db.getColumn("titles1");
+        // db.getTableNames("dbo");
+        // db.getColumn("titles1");
+        db.getTableColumns("dbo");
     }
 }

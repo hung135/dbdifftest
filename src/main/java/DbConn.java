@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.sql.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DbConn {
@@ -101,16 +102,36 @@ public class DbConn {
         return conn;
     }
 
+    /**
+     * 
+     * 
+     * This could be faster with a query that returns it all in 1 pass
+     * 
+     * @param schemaName
+     * @return
+     * @throws SQLException
+     */
+    public List<String> getTableColumns(String schemaName) throws SQLException {
+        List<String> tables = this.getTableNames(schemaName);
+
+        // For Loop for iterating ArrayList
+        for (int i = 0; i < tables.size(); i++) {
+            System.out.print(tables.get(i) + " --table\n");
+            this.getColumn(tables.get(i));
+        }
+        return tables;
+    }
+
     public List<String> getTableNames(String schemaName) throws SQLException {
-        List<String> items = null;
+        List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
         ResultSet resultSet = databaseMetaData.getTables(null, null, null, new String[] { "TABLE" });
-        System.out.println("Printing TABLE_TYPE \"TABLE\" ");
-        System.out.println("----------------------------------");
+
         while (resultSet.next()) {
             // Print
-            System.out.println(resultSet.getString("TABLE_NAME"));
+            // System.out.println(resultSet.getString("TABLE_NAME"));
+            items.add(resultSet.getString("TABLE_NAME"));
         }
         return items;
     }
@@ -127,16 +148,13 @@ public class DbConn {
      * @throws SQLException
      */
     public List<String> getColumn(String tabeName) throws SQLException {
-        List<String> items = null;
+        List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
-        // getColumns(String catalog,
-        // String schemaPattern,
-        // String tableNamePattern,
-        // String columnNamePattern)
         ResultSet resultSet = databaseMetaData.getColumns(null, null, tabeName, null);
         while (resultSet.next()) {
             // Print
             System.out.println(resultSet.getString("COLUMN_NAME"));
+            items.add(resultSet.getString("COLUMN_NAME"));
         }
         return items;
     }
@@ -148,6 +166,7 @@ public class DbConn {
 
         // Let us check if it returns a true Result Set or not.
         Boolean ret = stmt.execute(sqlText);
+        stmt.close();
         return ret;
 
     }

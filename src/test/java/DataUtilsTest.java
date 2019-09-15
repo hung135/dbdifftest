@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -68,43 +66,38 @@ public class DataUtilsTest extends TestCase {
 
     // }
 
-    public void testOracle() {
+    @Test
+    public void testOracle() throws SQLException {
         Map<String, String> env = System.getenv();
+        Connection conn = null;
         String url = "jdbc:oracle:thin:@dboracle:1521:dev";
         Properties props = new Properties();
         props.setProperty("user", "system");
         props.setProperty("password", env.get("ORACLE_PWD"));
         // props.setProperty("ssl", "disable");
         System.out.println(props);
-        try {
-            Connection conn = DriverManager.getConnection(url, props);
-            // Connection conn =
-            // DriverManager.getConnection("jdbc:oracle:thin:@dboracle:1521:orcl", "system",
-            // "Docker12345");
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        conn = DriverManager.getConnection(url, props);
+        System.out.println("Connect to Oracle Successful");
+        // Connection conn =
+        // DriverManager.getConnection("jdbc:oracle:thin:@dboracle:1521:orcl", "system",
+        // "Docker12345");
 
     }
 
-    // public void testSybase() {
-    // Map<String, String> env = System.getenv();
+    @Test
+    public void testSybase() throws SQLException {
+        Map<String, String> env = System.getenv();
+        Connection conn = null;
+        // SYBASE_USER: sa
+        // SYBASE_PASSWORD: password
+        String url = "jdbc:jtds:sybase://dbsybase:5000/";
+        Properties props = new Properties();
+        props.setProperty("user", "sa");
+        props.setProperty("password", env.get("SYBASE_PASSWORD"));
+        // props.setProperty("ssl", "disable");
+        System.out.println(props);
+        conn = DriverManager.getConnection(url, props);
+        System.out.println("Connect to Sysbase Successful");
 
-    // // SYBASE_USER: sa
-    // // SYBASE_PASSWORD: password
-    // String url = "jdbc:jtds:sybase://dbsybase:5000/";
-    // Properties props = new Properties();
-    // props.setProperty("user", "sa");
-    // props.setProperty("password", env.get("SYBASE_PASSWORD"));
-    // // props.setProperty("ssl", "disable");
-    // System.out.println(props);
-    // try {
-    // Connection conn = DriverManager.getConnection(url, props);
-    // } catch (SQLException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-
-    // }
+    }
 }

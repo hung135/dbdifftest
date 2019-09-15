@@ -34,15 +34,15 @@ services:
   #     POSTGRES_USER: root
   #     POSTGRES_PASSWORD: docker 
 
-  # dbsybase:
-  #   image: nguoianphu/docker-sybase 
-  #   restart: unless-stopped
-  #   # ports:
-  #   #   - 2638:2638
-  #   environment:
-  #     #Admin user
-  #     SYBASE_USER: sa
-  #     SYBASE_PASSWORD: myPassword
+  dbsybase:
+    image: nguoianphu/docker-sybase 
+    restart: unless-stopped
+    # ports:
+    #   - 2638:2638
+    environment:
+      #Admin user
+      SYBASE_USER: sa
+      SYBASE_PASSWORD: myPassword
   dboracle:
     image: oracle/database:12.2.0.1-ee
     restart: unless-stopped

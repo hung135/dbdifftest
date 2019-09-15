@@ -23,7 +23,7 @@ public class DbDiff {
         DbConn oracleConn = null;
         String sybaseDriver = "net.sourceforge.jtds.jdbc.Driver";
         String oracleDriver = "oracle.jdbc.OracleDriver";
-        String sybaseUrl = "dbc:jtds:sybase://192.168.10.201:5000/SAMPLE";
+        String sybaseUrl = "jdbc:jtds:sybase://192.168.10.201:5000/SAMPLE";
         String oracleUrl = "jdbc:oracle:thin:@localhost:1521/orclpdb1";
         String userName = "xxxx";
         String passWord = "xxx";

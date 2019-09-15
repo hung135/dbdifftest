@@ -79,6 +79,5 @@ RUN if [ ! -d "/docker-java-home" ]; then ln -s "${JAVA_HOME}" /docker-java-home
 RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
 
 RUN echo 'source /git-prompt.sh' >>~/.bashrc
-RUN echo '__git_ps1' >>~/.bashrc
-
-RUN echo "PS1='\[\033[0;32m\]\[\033[0m\033[0;32m\]\u\[\033[0;36m\] @ \[\033[0;36m\]\h \w\[\033[0;32m\]$(__git_ps1)\n\[\033[0;32m\]└─\[\033[0m\033[0;32m\] \$\[\033[0m\033[0;32m\] ▶\[\033[0m\] '">>~/.bashrc
+RUN echo 'source /workspace/env.rc' >>~/.bashrc
+ 

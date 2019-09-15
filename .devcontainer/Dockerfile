@@ -16,18 +16,18 @@ ARG USER_GID=$USER_UID
 # Configure apt
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
-    #
-    # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
-    && groupadd --gid $USER_GID $USERNAME \
-    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    # [Optional] Add sudo support for the non-root user
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
-    #
-    # Verify git, needed tools installed
-    && apt-get -y install git iproute2 procps curl lsb-release vim fish
+  && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
+  #
+  # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
+  && groupadd --gid $USER_GID $USERNAME \
+  && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
+  # [Optional] Add sudo support for the non-root user
+  && apt-get install -y sudo \
+  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
+  && chmod 0440 /etc/sudoers.d/$USERNAME \
+  #
+  # Verify git, needed tools installed
+  && apt-get -y install git iproute2 procps curl lsb-release vim fish
 
 #-------------------Uncomment the following steps to install Maven CLI Tools----------------------------------
 ARG MAVEN_VERSION=3.6.1
@@ -42,7 +42,16 @@ COPY maven-settings.xml /usr/share/maven/ref/
 ENV MAVEN_HOME /usr/share/maven
 ENV MAVEN_CONFIG /root/.m2
 #-------------------------------------------------------------------------------------------------------------
-
+# Install Docker CE CLI
+RUN apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common lsb-release \
+  && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | (OUT=$(apt-key add - 2>&1) || echo $OUT) \
+  && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
+  && apt-get update \
+  && apt-get install -y docker-ce-cli fish vim postgresql-client \
+  #
+  # Install Docker Compose
+  && curl -sSL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+  && chmod +x /usr/local/bin/docker-compose 
 #-------------------Uncomment the following steps to install Gradle CLI Tools---------------------------------
 # ENV GRADLE_HOME /opt/gradle
 # ENV GRADLE_VERSION 5.4.1

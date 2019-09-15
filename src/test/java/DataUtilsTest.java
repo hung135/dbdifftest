@@ -11,60 +11,32 @@ import junit.framework.TestCase;
 import java.util.Map;
 
 public class DataUtilsTest extends TestCase {
-    // @Ignore
-    // public void testFunctions() {
+    @Test
+    public void testFunctions() {
 
-    // System.out
-    // .println(DataUtils.RegexExtract("\\w*.\\.\\.", " from db1..table1,
-    // db2..table2, db3..table3 'b' 'c'"));
-    // System.out.println(DataUtils.FindSybaseDatabase(
-    // " from db1..table1, db2..table2, db3..table3, db3.dbo.table4 where something
-    // = something '"));
-    // System.out.println(DataUtils.findTablesFromQuery(
-    // " dsfasdfa tdhei screasdf; asdfasdf before select select col1, (select 1 from
-    // xxx.xx) as z, aa,(select 1 from xxx.xx) from schema.table join x.table2 where
-    // x=(select abc from test.table1) as y "));
-    // System.out.println(DataUtils.findTablesFromInsert(
-    // " insert into xx.table1 (col1,col2) values (1,2),(2,3); insert into yy.table2
-    // as select * from test.table1"));
-    // }
+        System.out
+                .println(DataUtils.RegexExtract("\\w*.\\.\\.", " from db1..table1,  db2..table2, db3..table3 'b' 'c'"));
+        System.out.println(DataUtils.FindSybaseDatabase(
+                " from db1..table1, db2..table2, db3..table3, db3.dbo.table4 where something  = something '"));
+        System.out.println(DataUtils.findTablesFromQuery(
+                " dsfasdfa tdhei screasdf; asdfasdf before select select col1, (select 1 from   xxx.xx) as z, aa,(select 1 from xxx.xx) from schema.table join x.table2 where  x=(select abc from test.table1) as y "));
+        System.out.println(DataUtils.findTablesFromInsert(
+                " insert into xx.table1 (col1,col2) values (1,2),(2,3); insert into yy.table2 as select * from test.table1"));
+    }
 
-    // @Ignore
-    // public void testDbFunctions() {
-    // DbConn sybaseConn = null;
+    @Test
+    public void testPostgres() throws SQLException {
+        Map<String, String> env = System.getenv();
+        String url = "jdbc:postgresql://dbpg/postgres";
+        Properties props = new Properties();
+        props.setProperty("user", "root");
+        props.setProperty("password", env.get("PGPASSWORD"));
+        // props.setProperty("ssl", "disable");
+        System.out.println(props);
 
-    // String sybaseDriver = "net.sourceforge.jtds.jdbc.Driver";
+        Connection conn = DriverManager.getConnection(url, props);
 
-    // String sybaseUrl = "dbc:jtds:sybase://192.168.1.88:8000/MYSYBASE";
-    // String postgresDriver = "org.postgresql.Driver";
-    // String userName = "sa";
-    // String passWord = "myPassword";
-    // sybaseConn = new DbConn();
-    // try {
-    // sybaseConn.dbConnect(sybaseDriver, sybaseUrl, userName, passWord);
-    // } catch (SQLException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-
-    // }
-
-    // public void testPostgres() {
-    // Map<String, String> env = System.getenv();
-    // String url = "jdbc:postgresql://dbpg/postgres";
-    // Properties props = new Properties();
-    // props.setProperty("user", "root");
-    // props.setProperty("password", env.get("PGPASSWORD"));
-    // // props.setProperty("ssl", "disable");
-    // System.out.println(props);
-    // try {
-    // Connection conn = DriverManager.getConnection(url, props);
-    // } catch (SQLException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-
-    // }
+    }
 
     @Test
     public void testOracle() throws SQLException {

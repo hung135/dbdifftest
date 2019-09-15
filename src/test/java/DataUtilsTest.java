@@ -10,6 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import junit.framework.TestCase;
+import java.util.Map;
 
 public class DataUtilsTest extends TestCase {
     // @Ignore
@@ -50,13 +51,60 @@ public class DataUtilsTest extends TestCase {
 
     // }
 
-    public void testPostgres() {
+    // public void testPostgres() {
+    // Map<String, String> env = System.getenv();
+    // String url = "jdbc:postgresql://dbpg/postgres";
+    // Properties props = new Properties();
+    // props.setProperty("user", "root");
+    // props.setProperty("password", env.get("PGPASSWORD"));
+    // // props.setProperty("ssl", "disable");
+    // System.out.println(props);
+    // try {
+    // Connection conn = DriverManager.getConnection(url, props);
+    // } catch (SQLException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
 
-        String url = "jdbc:postgresql://localhost/test";
+    // }
+
+    // public void testOracle() {
+    // Map<String, String> env = System.getenv();
+    // String url = "jdbc:jtds:sybase://192.168.1.88:8000/SAMPLE";
+    // Properties props = new Properties();
+    // props.setProperty("user", "sa");
+    // props.setProperty("password", env.get("PGPASSWORD"));
+    // // props.setProperty("ssl", "disable");
+    // System.out.println(props);
+    // try {
+    // // Connection conn = DriverManager.getConnection(url, props);
+
+    // Connection conn =
+    // DriverManager.getConnection("jdbc:oracle:thin:@myhost:1521:orcl", "scott",
+    // "tiger");
+    // } catch (SQLException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
+
+    // }
+
+    public void testSybase() {
+        Map<String, String> env = System.getenv();
+
+        // environment:
+        // SYBASE_USER: guest
+        // SYBASE_PASSWORD: guest1234
+        // SYBASE_DB: guest
+        // #Admin user
+        // SYBASE_USER: sa
+        // SYBASE_PASSWORD: password
+        String url = "jdbc:jtds:sybase://dbsybase:5000/";
         Properties props = new Properties();
-        props.setProperty("user", "fred");
-        props.setProperty("password", "secret");
-        props.setProperty("ssl", "true");
+        props.setProperty("user", "sa");
+        props.setProperty("password", env.get("SYBASE_PASSWORD"));
+        // props.setProperty("ssl", "disable");
+        System.out.println(props);
         try {
             Connection conn = DriverManager.getConnection(url, props);
         } catch (SQLException e) {

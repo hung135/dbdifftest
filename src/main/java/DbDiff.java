@@ -20,6 +20,8 @@ public class DbDiff {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("CLITester", options);
 
+        /** Should be able to use this example straing from Yaml file for dbtype */
+        Enum dbtype = Enum.valueOf(DbConn.DbType.class, "SYBASE");
         // This should be all you need to get a jdbc connection
         try {
             DbConn sybaseConn = new DbConn(DbConn.DbType.SYBASE, "sa", sybasePassword, "dbsybase", "5000", "master");

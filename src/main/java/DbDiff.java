@@ -21,8 +21,12 @@ public class DbDiff {
         formatter.printHelp("CLITester", options);
 
         // This should be all you need to get a jdbc connection
-        DbConn sybaseConn = new DbConn(DbConn.DbType.SYBASE, userName, sybasePassword, host, port, databaseName);
-        DbConn oracleConn = new DbConn(DbConn.DbType.ORACLE, userName, password, host, port, "dev");
+        try {
+            DbConn sybaseConn = new DbConn(DbConn.DbType.SYBASE, "sa", sybasePassword, "dbsybase", "5000", "master");
+            DbConn oracleConn = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1542", "dev");
+        } catch (Exception e) {
+            System.out.println(e);
 
+        }
     }
 }

@@ -1,0 +1,21 @@
+# Database Tasks
+-  sybase-dev:
+    host: dbsybase
+    port: 5000
+    user: sa
+    password_envar: SYBASEPASSWORD
+    database_name: master
+    tasks: 
+      - DumpTableToExcel
+      - GetViewSchemaReference
+      - GetProceSchemaReference
+-  oracle-dev:
+   host: dboracle
+    port: 1542
+    user: system
+    password_envar: ORACLEPASSWORD
+    database_name: dev
+    tasks: 
+      - DumpTableToExcel
+      - GetViewSchemaReference
+      - GetProceSchemaReference

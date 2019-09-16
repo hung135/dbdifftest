@@ -1,0 +1,2 @@
+- Generic Maven Project to Connect to 2 different Database via JDBC.
+- Queryes Tables, Views, Fucntions and reports differences found

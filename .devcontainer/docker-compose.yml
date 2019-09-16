@@ -17,16 +17,40 @@ services:
     environment:
       DOCKERIZED: dbpg
       PGUSER: root
-      PGPASSWORD: LocalPassword
+      PGPASSWORD: docker 
       PGHOST: dbpg
       PGPORT: 5432
+      SYBASE_PASSWORD: myPassword
+      ORACLE_SID: dev
+      ORACLE_PDB: ORCLPDB1
+      ORACLE_PWD: Docker12345
+      ORACLE_CHARACTERSET: 'UTF8'
+  # dbpg:
+  #   image: postgres
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: docker 
 
-  dbpg:
-    image: postgres
+  dbsybase:
+    image: nguoianphu/docker-sybase 
     restart: unless-stopped
-    ports: 
-      - 5432:5432
+    # ports:
+    #   - 2638:2638
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: LocalPassword
-
+      #Admin user
+      SYBASE_USER: sa
+      SYBASE_PASSWORD: myPassword
+  dboracle:
+    image: oracle/database:12.2.0.1-ee
+    restart: unless-stopped
+    # ports:
+    #   - 1521:1521
+    #   - 5500:5500 
+    environment:
+      ORACLE_SID: dev
+      ORACLE_PDB: ORCLPDB1
+      ORACLE_PWD: Docker12345
+      ORACLE_CHARACTERSET: 'UTF8'

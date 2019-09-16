@@ -68,11 +68,16 @@ RUN apt-get install -y apt-transport-https ca-certificates curl gnupg-agent soft
 # RUN apt-get autoremove -y \
 #     && apt-get clean -y \
 #     && rm -rf /var/lib/apt/lists/*
-ENV DEBIAN_FRONTEND=
+#ENV DEBIAN_FRONTEND=
 
 # Allow for a consistant java home location for settings - image is changing over time
 RUN if [ ! -d "/docker-java-home" ]; then ln -s "${JAVA_HOME}" /docker-java-home; fi
 RUN echo 'alias java="/usr/local/openjdk-11/bin/java"' >> ~/.bashrc
 RUN echo 'alias buildjar="mvn compile assembly:single"' >>~/.bashrc
 RUN echo 'alias buildjarclean="mvn clean compile assembly:single"' >>~/.bashrc
-RUN echo 'alias test="mvn test"' >>~/.bashrc
+# RUN echo 'alias test="mvn test"' >>~/.bashrc
+RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+
+RUN echo 'source /git-prompt.sh' >>~/.bashrc
+RUN echo 'source /workspace/env.rc' >>~/.bashrc
+ 

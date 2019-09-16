@@ -4,7 +4,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Objects;
+import org.yaml.snakeyaml.Yaml;
+
+import java.sql.Statement;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * Functions we need to write that process some data, put them here
@@ -94,6 +101,34 @@ public class DataUtils {
         x = x.replaceAll("~~~~", "~~");
         List<String> items = Arrays.asList(x.split("~~"));
         return convertListToSet(items);
+
+    }
+
+    public void readyaml(String yamlFilePath) {
+
+        Yaml yaml = new Yaml();
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
+        Map<String, Object> obj = yaml.load(inputStream);
+        System.out.print(obj);
+
+    }
+
+    public static void getSybaseStoredProcs(Connection conn) throws SQLException {
+
+        String query = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
+                + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid";
+
+        Statement stmt = conn.createStatement();
+
+        ResultSet rs = stmt.executeQuery(query);
+
+        while (rs.next()) {
+            String name1 = rs.getString("name1");
+            String name = rs.getString("name");
+            String txt = rs.getString("text");
+
+            System.out.println(name1 + ", " + name + ", " + txt);
+        }
 
     }
 }

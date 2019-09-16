@@ -60,21 +60,21 @@ public class DataUtilsTest extends TestCase {
 
     // }
 
-    @Test
-    public void testSybase() throws SQLException {
-        Map<String, String> env = System.getenv();
-        Connection conn = null;
+    // @Test
+    // public void testSybase() throws SQLException {
+    // Map<String, String> env = System.getenv();
+    // Connection conn = null;
 
-        String url = "jdbc:jtds:sybase://dbsybase:5000/";
-        Properties props = new Properties();
-        props.setProperty("user", "sa");
-        props.setProperty("password", env.get("SYBASE_PASSWORD"));
+    // String url = "jdbc:jtds:sybase://dbsybase:5000/";
+    // Properties props = new Properties();
+    // props.setProperty("user", "sa");
+    // props.setProperty("password", env.get("SYBASE_PASSWORD"));
 
-        System.out.println(props);
-        conn = DriverManager.getConnection(url, props);
-        System.out.println("Connect to Sysbase Successful");
+    // // System.out.println(props);
+    // conn = DriverManager.getConnection(url, props);
+    // System.out.println("Connect to Sysbase Successful");
 
-    }
+    // }
 
     @Test
     public void testSybaseObj() throws SQLException {
@@ -153,7 +153,7 @@ public class DataUtilsTest extends TestCase {
         DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
         File file = new File(getClass().getClassLoader().getResource("create_sybase.sql").getFile());
 
-        System.out.println(file.toString());
+        // System.out.println(file.toString());
 
         BufferedReader br = new BufferedReader(new FileReader(file));
         String sqlText = "";
@@ -161,19 +161,19 @@ public class DataUtilsTest extends TestCase {
         while ((st = br.readLine()) != null)
             sqlText = sqlText + " " + st;
         br.close();
-        System.out.println(sqlText);
+        // System.out.println(sqlText);
         sybaseDBConn.executeSql(sqlText);
 
     }
 
     @Test
     public void testGetTableNames() throws SQLException, IOException {
-        Map<String, String> env = System.getenv();
+
         String password = env.get("SYBASE_PASSWORD");
         DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
 
         // db.getTableNames("dbo");
         // db.getColumn("titles1");
-        db.getTableColumns("dbo");
+        System.out.println(db.getTableColumns("dbo"));
     }
 }

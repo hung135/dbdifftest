@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import dataobjs.*;
 
 public class DbConn {
     private Connection conn;
@@ -111,15 +112,19 @@ public class DbConn {
      * @return
      * @throws SQLException
      */
-    public List<String> getTableColumns(String schemaName) throws SQLException {
+    public List<Table> getTableColumns(String schemaName) throws SQLException {
         List<String> tables = this.getTableNames(schemaName);
+        List<Table> items = new ArrayList<>();
 
         // For Loop for iterating ArrayList
         for (int i = 0; i < tables.size(); i++) {
-            System.out.print(tables.get(i) + " --table\n");
-            this.getColumn(tables.get(i));
+            String tableName = tables.get(i);
+            Table tbl = new Table(tableName);
+            tbl.columnNames = this.getColumn(tableName);
+            items.add(tbl);
+
         }
-        return tables;
+        return items;
     }
 
     public List<String> getTableNames(String schemaName) throws SQLException {
@@ -153,8 +158,19 @@ public class DbConn {
         ResultSet resultSet = databaseMetaData.getColumns(null, null, tabeName, null);
         while (resultSet.next()) {
             // Print
-            System.out.println(resultSet.getString("COLUMN_NAME"));
+            // System.out.println(resultSet.getString("COLUMN_NAME"));
             items.add(resultSet.getString("COLUMN_NAME"));
+        }
+        return items;
+    }
+
+    public List<String> getTriggers(String tabeName) throws SQLException {
+        List<String> items = new ArrayList<>();
+        DatabaseMetaData databaseMetaData = conn.getMetaData();
+
+        ResultSet result = databaseMetaData.getTables("%", null, "%", new String[] { "TRIGGER" });
+        while (result.next()) {
+            items.add(result.getString("TABLE_NAME"));
         }
         return items;
     }

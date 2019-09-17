@@ -13,6 +13,8 @@ ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
+COPY release-manager/requirements* /tmp/pip-tmp/
+
 # Configure apt
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
@@ -70,14 +72,27 @@ RUN apt-get install -y apt-transport-https ca-certificates curl gnupg-agent soft
 #     && rm -rf /var/lib/apt/lists/*
 #ENV DEBIAN_FRONTEND=
 
+# Release manager setup
+RUN apt-get install -y python3-pip
+RUN pip3 install -r /tmp/pip-tmp/requirements.txt
+
 # Allow for a consistant java home location for settings - image is changing over time
 RUN if [ ! -d "/docker-java-home" ]; then ln -s "${JAVA_HOME}" /docker-java-home; fi
 RUN echo 'alias java="/usr/local/openjdk-11/bin/java"' >> ~/.bashrc
 RUN echo 'alias buildjar="mvn compile assembly:single"' >>~/.bashrc
 RUN echo 'alias buildjarclean="mvn clean compile assembly:single"' >>~/.bashrc
+RUN echo 'alias runjar="java -jar ${JAREXPORT}"' >>~/.bashrc
+RUN echo 'alias jartest="mvn clean test"' >> ~/.bashrc
+
+# Release manager
+RUN echo 'alias release="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO}"' >>~/.bashrc
+RUN echo 'alias releasejar="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO} -c -a ${JAREXPORT}"' >> ~/.bashrc
+
+# Build and release
+RUN echo 'alias buildrelease="jartest && releasejar"' >> ~/.bashrc
+
 # RUN echo 'alias test="mvn test"' >>~/.bashrc
 RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
 
 RUN echo 'source /git-prompt.sh' >>~/.bashrc
 RUN echo 'source /workspace/env.rc' >>~/.bashrc
- 

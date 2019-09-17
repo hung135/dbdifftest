@@ -82,10 +82,14 @@ RUN echo 'alias java="/usr/local/openjdk-11/bin/java"' >> ~/.bashrc
 RUN echo 'alias buildjar="mvn compile assembly:single"' >>~/.bashrc
 RUN echo 'alias buildjarclean="mvn clean compile assembly:single"' >>~/.bashrc
 RUN echo 'alias runjar="java -jar ${JAREXPORT}"' >>~/.bashrc
+RUN echo 'alias jartest="mvn clean test"' >> ~/.bashrc
 
 # Release manager
 RUN echo 'alias release="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO}"' >>~/.bashrc
 RUN echo 'alias releasejar="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO} -c -a ${JAREXPORT}"' >> ~/.bashrc
+
+# Build and release
+RUN echo 'alias buildrelease="jartest && releasejar"' >> ~/.bashrc
 
 # RUN echo 'alias test="mvn test"' >>~/.bashrc
 RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh

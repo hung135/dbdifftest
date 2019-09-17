@@ -79,7 +79,7 @@ public class DataUtils {
 
     }
 
-    public static String findTablesFromInsert(String dataString) {
+    public static Set<String> findTablesFromInsert(String dataString) {
 
         String x = dataString;
 

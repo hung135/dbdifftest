@@ -2,21 +2,32 @@
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
+import dataobjs.YamlConfig;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 public class DbDiff {
     public static final Map<String, String> env = System.getenv();
-    public  void readyaml( ) {
-        String yamlFilePath="config.yaml";
-        Yaml yaml = new Yaml(); 
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
-        Map<String, Object> obj = yaml.load(inputStream);
-        System.out.print(obj);
+    // public  void readyaml( ) {
+    //     String yamlFilePath="config.yaml";
+    //     Yaml yaml = new Yaml(); 
+    //     InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
+    //     Map<String, Object> obj = yaml.load(inputStream);
+    //     System.out.print(obj);
 
+    // }
+    public void readyaml( ) {
+        String yamlFilePath="config.yaml";
+        Yaml yaml = new Yaml(new Constructor(YamlConfig.class)); 
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
+        Iterable<Object> configs = yaml.loadAll(inputStream);
+        for(Object conf : configs){
+            ((YamlConfig) conf).toString();
+        }
     }
 
     public static void main(String[] args) throws ParseException {
@@ -25,7 +36,8 @@ public class DbDiff {
 
         Options options = new Options();
         options.addOption("p", "print", false, "Send print request to printer.")
-                .addOption("g", "gui", false, "Show GUI Application").addOption("f", "file", false, "File")
+                .addOption("g", "gui", false, "Show GUI Application")
+                .addOption("f", "file", false, "File")
                 .addOption("n", true, "No. of copies to print");
 
         HelpFormatter formatter = new HelpFormatter();

@@ -1,15 +1,26 @@
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.yaml.snakeyaml.Yaml;
 
 public class DbDiff {
     public static final Map<String, String> env = System.getenv();
+    public  void readyaml( ) {
+        String yamlFilePath="config.yaml";
+        Yaml yaml = new Yaml(); 
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
+        Map<String, Object> obj = yaml.load(inputStream);
+        System.out.print(obj);
+
+    }
 
     public static void main(String[] args) throws ParseException {
+        DbDiff main = new DbDiff();
         String sybasePassword = env.get("SYBASE_PASSWORD");
 
         Options options = new Options();
@@ -25,10 +36,12 @@ public class DbDiff {
         // This should be all you need to get a jdbc connection
         try {
             DbConn sybaseConn = new DbConn(DbConn.DbType.SYBASE, "sa", sybasePassword, "dbsybase", "5000", "master");
-            DbConn oracleConn = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1542", "dev");
+            //DbConn oracleConn = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1542", "dev");
         } catch (Exception e) {
             System.out.println(e);
 
         }
+        System.out.println("---------");
+        main.readyaml();
     }
 }

@@ -43,14 +43,14 @@ services:
       #Admin user
       SYBASE_USER: sa
       SYBASE_PASSWORD: myPassword
-  dboracle:
-    image: oracle/database:12.2.0.1-ee
-    restart: unless-stopped
-    # ports:
-    #   - 1521:1521
-    #   - 5500:5500 
-    environment:
-      ORACLE_SID: dev
-      ORACLE_PDB: ORCLPDB1
-      ORACLE_PWD: Docker12345
-      ORACLE_CHARACTERSET: 'UTF8'
+  # dboracle:
+  #   image: oracle/database:12.2.0.1-ee
+  #   restart: unless-stopped
+  #   # ports:
+  #   #   - 1521:1521
+  #   #   - 5500:5500 
+  #   environment:
+  #     ORACLE_SID: dev
+  #     ORACLE_PDB: ORCLPDB1
+  #     ORACLE_PWD: Docker12345
+  #     ORACLE_CHARACTERSET: 'UTF8'

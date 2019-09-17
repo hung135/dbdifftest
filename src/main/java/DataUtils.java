@@ -11,7 +11,10 @@ import java.util.Arrays;
 import org.yaml.snakeyaml.Yaml;
 
 import java.sql.Statement;
+
 import java.io.FileWriter;
+
+import java.io.File;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -107,15 +110,6 @@ public class DataUtils {
         x = x.replaceAll("~~~~", "~~");
         List<String> items = Arrays.asList(x.split("~~"));
         return convertListToSet(items);
-
-    }
-
-    public void readyaml(String yamlFilePath) {
-
-        Yaml yaml = new Yaml();
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
-        Map<String, Object> obj = yaml.load(inputStream);
-        System.out.print(obj);
 
     }
 

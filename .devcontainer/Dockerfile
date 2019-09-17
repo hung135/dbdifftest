@@ -75,6 +75,9 @@ RUN if [ ! -d "/docker-java-home" ]; then ln -s "${JAVA_HOME}" /docker-java-home
 RUN echo 'alias java="/usr/local/openjdk-11/bin/java"' >> ~/.bashrc
 RUN echo 'alias buildjar="mvn compile assembly:single"' >>~/.bashrc
 RUN echo 'alias buildjarclean="mvn clean compile assembly:single"' >>~/.bashrc
+
+RUN echo 'alias runjar="java -jar /workspace/target/DbTest-jar-with-dependencies.jar"' >>~/.bashrc
+
 # RUN echo 'alias test="mvn test"' >>~/.bashrc
 RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
 

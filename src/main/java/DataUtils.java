@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.yaml.snakeyaml.Yaml;
 
 import java.sql.Statement;
+import java.io.File;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -104,15 +105,7 @@ public class DataUtils {
 
     }
 
-    public void readyaml(String yamlFilePath) {
-
-        Yaml yaml = new Yaml();
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
-        Map<String, Object> obj = yaml.load(inputStream);
-        System.out.print(obj);
-
-    }
-
+   
     public static void getSybaseStoredProcs(Connection conn) throws SQLException {
 
         String query = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "

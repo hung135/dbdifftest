@@ -1,8 +1,12 @@
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.opencsv.CSVWriter;
+
+import org.apache.log4j.Logger;
 
 import oracle.net.aso.i;
 
 import java.beans.PropertyVetoException;
+import java.io.FileWriter;
 import java.util.Properties;
 import java.sql.*;
 import java.sql.SQLException;
@@ -13,6 +17,9 @@ import dataobjs.*;
 
 public class DbConn {
     private Connection conn;
+    final static Logger logger = Logger.getLogger(DbConn.class);
+    private Statement stmt; // tbd
+    public ResultSet rs;
 
     public enum DbType {
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
@@ -184,6 +191,62 @@ public class DbConn {
         Boolean ret = stmt.execute(sqlText);
         stmt.close();
         return ret;
+
+    }
+
+    /**
+     * 
+     * ToDos: Don't for get to figure out how to close the stmnt and rs , Executes a
+     * quey and sets the instance rs variable to be used later.
+     * 
+     * @param selectQuery
+     * @return Boolean stating if there are records
+     * @throws Exception
+     */
+    public Boolean query(String selectQuery) throws Exception {
+        Boolean hasRecords = false;
+
+        try {
+
+            Statement stmt = this.conn.createStatement();
+            this.rs = stmt.executeQuery(selectQuery);
+            if (this.rs.next() == true) {
+                hasRecords = true;
+                this.rs.beforeFirst();
+            }
+
+        } catch (SQLException e) {
+            logger.error("Sql exception " + e.getMessage());
+        }
+        return hasRecords;
+
+    }
+
+    /**
+     * Take a query and writes it to a CSV file with the header
+     * 
+     * @param selectQuery
+     * @param fullFilePath
+     * @throws Exception
+     */
+    public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
+
+        try {
+
+            Statement stmt = this.conn.createStatement();
+            ResultSet rs = stmt.executeQuery(selectQuery);
+            // int numCols = rs.getMetaData().getColumnCount();
+
+            CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+            Boolean includeHeaders = true;
+
+            writer.writeAll(rs, includeHeaders);
+
+            writer.close();
+
+        } catch (SQLException e) {
+            logger.error("Sql exception " + e.getMessage());
+        }
 
     }
 

@@ -2,11 +2,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import com.opencsv.CSVWriter;
+
 import java.util.List;
 import java.util.Arrays;
 import org.yaml.snakeyaml.Yaml;
 
 import java.sql.Statement;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -17,6 +22,7 @@ import java.util.Map;
  * Functions we need to write that process some data, put them here
  */
 public class DataUtils {
+    final static Logger logger = Logger.getLogger(DataUtils.class);
 
     DataUtils() {
         System.out.println("Constructor called");
@@ -70,7 +76,7 @@ public class DataUtils {
 
     }
 
-    public static Set<String> findTablesFromInsert(String dataString) {
+    public static String findTablesFromInsert(String dataString) {
 
         String x = dataString;
 
@@ -131,4 +137,21 @@ public class DataUtils {
         }
 
     }
+
+    public void writeStringListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
+
+        try {
+
+            CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+            Boolean includeHeaders = true;
+
+            writer.writeAll(stringList, includeHeaders);
+            writer.close();
+
+        } catch (Exception e) {
+            logger.error("Exception " + e.getMessage());
+        }
+
+    }
+
 }

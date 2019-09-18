@@ -30,6 +30,7 @@ services:
       GITHUBRELEASE: '/workspace/.devcontainer/release-manager/pyGithubManager.py'
       GITHUBKEY: '/root/.githubkey'
       REPO: 'hung135/dbdifftest'
+      SYBASEPASSWORD: myPassword
 
   # dbpg:
   #   image: postgres

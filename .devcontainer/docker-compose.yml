@@ -28,8 +28,9 @@ services:
       ORACLE_CHARACTERSET: 'UTF8'
       JAREXPORT: '/workspace/target/DbTest-jar-with-dependencies.jar'
       GITHUBRELEASE: '/workspace/.devcontainer/release-manager/pyGithubManager.py'
-      GITHUBKEY: '/root/.githubkey'
+      GITHUBKEY: '/root/.gitkey'
       REPO: 'hung135/dbdifftest'
+      SYBASEPASSWORD: myPassword
 
   # dbpg:
   #   image: postgres

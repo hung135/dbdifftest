@@ -1,3 +1,4 @@
 out/*
 target/*
 *$py.class
+*.tar

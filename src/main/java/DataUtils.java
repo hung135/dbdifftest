@@ -84,7 +84,10 @@ public class DataUtils {
         String x = dataString;
 
         x = x.replaceAll("\n", " ");
+        x = x.replaceAll("/\\*.*\\*/", " ");
+        System.out.println(x);
         x = x.replaceAll("(?i)insert (?i)into ", "~~");
+        System.out.println(x);
         x = x.replaceAll(" .*?~~", "~~");
         x = x.replaceAll(" .*?$", "~~");
         System.out.println(x);

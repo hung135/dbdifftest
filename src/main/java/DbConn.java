@@ -1,7 +1,9 @@
+
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.opencsv.CSVWriter;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 import oracle.net.aso.i;
 
@@ -17,7 +19,7 @@ import dataobjs.*;
 
 public class DbConn {
     private Connection conn;
-    final static Logger logger = Logger.getLogger(DbConn.class);
+   // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
 
@@ -33,23 +35,28 @@ public class DbConn {
         DbType(String driver, String url) {
             this.driver = driver;
             this.url = url;
+            System.out.println(url);
         }
 
         public String driver() {
+            System.out.println(driver);
             return driver;
         }
 
         public String url() {
+            System.out.println(url);
             return url;
         }
     }
 
-    DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
+    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException {
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             cpds.setDriverClass(dbtype.driver());
+            System.out.println("driver loaded");
         } catch (PropertyVetoException e) {
+            System.out.println(e);
         }
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
 
@@ -66,7 +73,7 @@ public class DbConn {
         cpds.setTestConnectionOnCheckout(true);
 
         this.conn = cpds.getConnection();
-
+        System.out.println("Conn Completed");
     }
 
     public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
@@ -216,9 +223,35 @@ public class DbConn {
             }
 
         } catch (SQLException e) {
-            logger.error("Sql exception " + e.getMessage());
+            System.out.println(e);
+           // logger.error("Sql exception " + e.getMessage());
         }
         return hasRecords;
+
+    }
+    public List<String []> queryToList(String selectQuery) throws Exception {
+        List<String [] > items = new ArrayList<>();
+
+        try {
+
+            Statement stmt = this.conn.createStatement();
+            this.rs = stmt.executeQuery(selectQuery);
+            ResultSetMetaData metadata = this.rs.getMetaData();
+            int columnCount = metadata.getColumnCount();
+            while(this.rs.next()){
+                String [] row = new String [columnCount];
+                for (int i = 1; i <= columnCount; i++) {
+                    /** Adding header row */
+                    row[i-1]=(this.rs.getString(i));
+                }
+                items.add(row);
+            }
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+           // logger.error("Sql exception " + e.getMessage());
+        }
+        return items;
 
     }
 
@@ -230,13 +263,15 @@ public class DbConn {
      * @throws Exception
      */
     public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
-
+        System.out.println(selectQuery);
         try {
 
             Statement stmt = this.conn.createStatement();
             ResultSet rs = stmt.executeQuery(selectQuery);
             // int numCols = rs.getMetaData().getColumnCount();
+            System.out.println(selectQuery);
 
+            System.out.println(fullFilePath);
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -245,9 +280,13 @@ public class DbConn {
             writer.close();
 
         } catch (SQLException e) {
-            logger.error("Sql exception " + e.getMessage());
+            //logger.error("Sql exception " + e.getMessage());
+            System.out.println(e);
         }
 
+    }
+    public void print_test(String selectQuery) {
+        System.out.println(selectQuery);
     }
 
 }

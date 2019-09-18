@@ -86,7 +86,7 @@ RUN echo 'alias buildjar="mvn compile assembly:single"' >>~/.bashrc
 RUN echo 'alias buildjarclean="mvn clean compile assembly:single"' >>~/.bashrc
 RUN echo 'alias runjar="java -jar ${JAREXPORT}"' >>~/.bashrc
 RUN echo 'alias jartest="mvn clean test"' >> ~/.bashrc
- 
+RUN echo 'alias buildrunjython="mvn compile assembly:single && /usr/local/openjdk-11/bin/java -jar /opt/jython27.jar"' >>~/.bashrc 
 
 # Release manager
 RUN echo 'alias release="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO}"' >>~/.bashrc

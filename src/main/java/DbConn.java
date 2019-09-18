@@ -3,7 +3,7 @@
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.opencsv.CSVWriter;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 import oracle.net.aso.i;
 
@@ -19,7 +19,7 @@ import dataobjs.*;
 
 public class DbConn {
     private Connection conn;
-    final static Logger logger = Logger.getLogger(DbConn.class);
+   // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
 
@@ -35,13 +35,16 @@ public class DbConn {
         DbType(String driver, String url) {
             this.driver = driver;
             this.url = url;
+            System.out.println(url);
         }
 
         public String driver() {
+            System.out.println(driver);
             return driver;
         }
 
         public String url() {
+            System.out.println(url);
             return url;
         }
     }
@@ -51,7 +54,9 @@ public class DbConn {
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             cpds.setDriverClass(dbtype.driver());
+            System.out.println("driver loaded");
         } catch (PropertyVetoException e) {
+            System.out.println(e);
         }
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
 
@@ -68,7 +73,7 @@ public class DbConn {
         cpds.setTestConnectionOnCheckout(true);
 
         this.conn = cpds.getConnection();
-
+        System.out.println("Conn Completed");
     }
 
     public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
@@ -218,7 +223,8 @@ public class DbConn {
             }
 
         } catch (SQLException e) {
-            logger.error("Sql exception " + e.getMessage());
+            System.out.println(e);
+           // logger.error("Sql exception " + e.getMessage());
         }
         return hasRecords;
 
@@ -232,13 +238,13 @@ public class DbConn {
      * @throws Exception
      */
     public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
-
+        System.out.println(selectQuery);
         try {
 
             Statement stmt = this.conn.createStatement();
             ResultSet rs = stmt.executeQuery(selectQuery);
             // int numCols = rs.getMetaData().getColumnCount();
-
+            System.out.println(selectQuery);
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -247,7 +253,8 @@ public class DbConn {
             writer.close();
 
         } catch (SQLException e) {
-            logger.error("Sql exception " + e.getMessage());
+            //logger.error("Sql exception " + e.getMessage());
+            System.out.println(e);
         }
 
     }

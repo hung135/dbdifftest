@@ -229,6 +229,31 @@ public class DbConn {
         return hasRecords;
 
     }
+    public List<String []> queryToList(String selectQuery) throws Exception {
+        List<String [] > items = new ArrayList<>();
+
+        try {
+
+            Statement stmt = this.conn.createStatement();
+            this.rs = stmt.executeQuery(selectQuery);
+            ResultSetMetaData metadata = this.rs.getMetaData();
+            int columnCount = metadata.getColumnCount();
+            while(this.rs.next()){
+                String [] row = new String [columnCount];
+                for (int i = 1; i <= columnCount; i++) {
+                    /** Adding header row */
+                    row[i-1]=(this.rs.getString(i));
+                }
+                items.add(row);
+            }
+            
+        } catch (SQLException e) {
+            System.out.println(e);
+           // logger.error("Sql exception " + e.getMessage());
+        }
+        return items;
+
+    }
 
     /**
      * Take a query and writes it to a CSV file with the header
@@ -245,6 +270,8 @@ public class DbConn {
             ResultSet rs = stmt.executeQuery(selectQuery);
             // int numCols = rs.getMetaData().getColumnCount();
             System.out.println(selectQuery);
+
+            System.out.println(fullFilePath);
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 

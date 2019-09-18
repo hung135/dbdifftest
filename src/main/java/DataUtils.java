@@ -79,12 +79,15 @@ public class DataUtils {
 
     }
 
-    public static String findTablesFromInsert(String dataString) {
+    public static Set<String> findTablesFromInsert(String dataString) {
 
         String x = dataString;
 
         x = x.replaceAll("\n", " ");
+        x = x.replaceAll("/\\*.*\\*/", " ");
+        System.out.println(x);
         x = x.replaceAll("(?i)insert (?i)into ", "~~");
+        System.out.println(x);
         x = x.replaceAll(" .*?~~", "~~");
         x = x.replaceAll(" .*?$", "~~");
         System.out.println(x);

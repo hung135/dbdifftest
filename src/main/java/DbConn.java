@@ -1,3 +1,5 @@
+
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.opencsv.CSVWriter;
 
@@ -44,7 +46,7 @@ public class DbConn {
         }
     }
 
-    DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
+    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException {
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
@@ -248,6 +250,9 @@ public class DbConn {
             logger.error("Sql exception " + e.getMessage());
         }
 
+    }
+    public void print_test(String selectQuery) {
+        System.out.println(selectQuery);
     }
 
 }

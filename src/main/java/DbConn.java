@@ -47,6 +47,14 @@ public class DbConn {
             System.out.println(url);
             return url;
         }
+
+        public static DbType getMyEnumIfExists(String value) {
+            for (DbType db : DbType.values()) {
+                if (db.name().equalsIgnoreCase(value))
+                    return db;
+            }
+            return null;
+        }
     }
 
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)

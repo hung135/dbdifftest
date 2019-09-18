@@ -17,8 +17,9 @@ SELECTQUERY = """SELECT c.text FROM sysusers u, syscomments c, sysobjects o
 
 def readyaml(yaml):
     parser = YamlParser() # NOT THREAD SAFE
-    parsed_yaml = parser.readyaml(yaml)
+    parsed_yaml = parser.ReadYAML(yaml)
 
+    print(parsed_yaml)
     database_objects, tasks = [], []
     for key in parsed_yaml:
         if key == "tasks":
@@ -33,18 +34,20 @@ def readyaml(yaml):
     print("\nTasks found:")
     for task in tasks:
        print("\t{0}".format(task))
+    return database_objects
 
-    print("Executing sysbase")
-    execute_sql_test_sysbase(database_objects)
-
-
-def execute_sql_test_sysbase(database_objects):
+def create_db_connections(database_objects):
+    connections = []
     for base in database_objects:
-        if base.dbtype == "SYBASE":
-            sysBaseConnection = DbConn.DbType.SYBASE
-            db = DbConn(sysBaseConnection, base.user, base.password, base.host, base.port, base.database_name);
-            result = db.queryToList(SELECTQUERY)
-            print(result)
+        baseConnection = DbConn.DbType.getMyEnumIfExists(base.dbtype)
+        if baseConnection is not None:
+            con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name)
+            connections.append(con)
+    return connections
+
+def execute_sql_test_sysbase(db):
+    result = db.queryToList(SELECTQUERY)
+    print(result)
 
 def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
@@ -53,8 +56,13 @@ def parse_cli():
     return args 
 
 def execute(args):
-    databases = readyaml(args.yaml)
-    print(databases)
+    config = readyaml(args.y)
+    databases_connections = create_db_connections(config)
+
+    print("\nConnection stats:")
+    print("\t{0} active connections:".format(len(databases_connections)))
+    for db in databases_connections:
+        print("\t\t{0}".format(db))
 
 if __name__ == "__main__":
     args = parse_cli()

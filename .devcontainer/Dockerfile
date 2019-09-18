@@ -89,11 +89,10 @@ RUN echo 'alias jartest="mvn clean test"' >> ~/.bashrc
 RUN echo 'alias buildrunjython="mvn compile assembly:single && /usr/local/openjdk-11/bin/java -jar /opt/jython27.jar"' >>~/.bashrc 
 
 # Release manager
-RUN echo 'alias release="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO}"' >>~/.bashrc
-RUN echo 'alias releasejar="python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO} -c -a ${JAREXPORT}"' >> ~/.bashrc
-
-# Build and release
-RUN echo 'alias buildrelease="jartest && releasejar"' >> ~/.bashrc
+# RUN echo 'alias release="python3 /workspace/release-manager/pyGithubManager.py ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO}"' >>~/.bashrc
+# RUN echo 'alias releaseparm="release -c \"${git symbolic-ref --short HEAD}\" -m \"${date -I}\" -a ${JAREXPORT}"' >> ~/.bashrc
+RUN echo 'alias package="rm -f /workspace/dbdiff.tar && tar -cvf /workspace/dbdiff.tar jython_scripts/ ${JAREXPORT}"' >> ~/.bashrc
+RUN echo 'alias releasepackage="bash /workspace/.devcontainer/releasepackage.sh"' >> ~/.bashrc
 
 # RUN echo 'alias test="mvn test"' >>~/.bashrc
 RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh

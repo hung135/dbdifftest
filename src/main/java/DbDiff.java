@@ -1,14 +1,13 @@
 
-import java.io.InputStream;
-import java.util.Collection;
+// import java.io.InputStream;
+// import java.util.Collection;
 import java.util.Map;
-import dataobjs.YamlConfig;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+// import org.yaml.snakeyaml.Yaml;
+// import org.yaml.snakeyaml.constructor.Constructor;
 
 public class DbDiff {
     public static final Map<String, String> env = System.getenv();
@@ -20,16 +19,6 @@ public class DbDiff {
     //     System.out.print(obj);
 
     // }
-    public void readyaml( ) {
-        String yamlFilePath="config.yaml";
-        Yaml yaml = new Yaml(new Constructor(YamlConfig.class)); 
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(yamlFilePath);
-        Iterable<Object> configs = yaml.loadAll(inputStream);
-        for(Object conf : configs){
-            ((YamlConfig) conf).toString();
-        }
-    }
-
     public static void main(String[] args) throws ParseException {
         DbDiff main = new DbDiff();
         String sybasePassword = env.get("SYBASE_PASSWORD");
@@ -54,6 +43,6 @@ public class DbDiff {
 
         }
         System.out.println("---------");
-        main.readyaml();
+        // main.readyaml();
     }
 }

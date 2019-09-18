@@ -1,20 +1,20 @@
 # Database Tasks
-dbtype: "SYBASE"
-host: "dbsybase"
-port: "5000"
-user: "sa"
-password_envar: "SYBASEPASSWORD"
-database_name: "master"
-
-# oracle-dev:
-# dbtype: ORACLE
-# host: dboracle
-# port: 1542
-# user: system
-# password_envar: ORACLEPASSWORD
-# database_name: dev
-# tasks: 
-#   -  DumpTableToExcel
-#   -  GetViewSchemaReference
-#   -  GetProceSchemaReference
+sys-dev:
+  dbtype: "SYBASE"
+  host: "dbsybase"
+  port: "5000"
+  user: "sa"
+  password_envar: "SYBASEPASSWORD"
+  database_name: "master"
+oracle-dev:
+  dbtype: ORACLE
+  host: dboracle
+  port: 1542
+  user: system
+  password_envar: ORACLEPASSWORD
+  database_name: dev
+tasks: 
+  -  DumpTableToExcel
+  -  GetViewSchemaReference
+  -  GetProceSchemaReference
 

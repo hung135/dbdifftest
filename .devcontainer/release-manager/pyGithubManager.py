@@ -21,15 +21,19 @@ def _get_release_based_tag(releases, tag):
 
 def create_release(repository, releases, name, message, tag=None):
     if not tag:
-        tag = re.findall(".\d", releases[0].tag_name)
-        tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
-        tag = "".join(tag)
+        try:
+            tag = re.findall(".\d", releases[0].tag_name)
+            tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
+            tag = "".join(tag)
+        except IndexError:
+            tag = "v0.0.1"
 
     release = repository.create_git_release(tag, name, message, prerelease=True)
     return release
 
 def upload_asset(filep, tag=None, release=None, releases=None):
     if not _file_exist(filep):
+        print(filep)
         _error_out("File not found")
     if not release:
         release = _get_release_based_tag(releases, tag)
@@ -94,7 +98,7 @@ def read_key(path_or_key):
         with open(path_or_key, "r") as f:
             key = f.read()
             f.close()
-        return key # key from path
+        return key.strip() # key from path
     return path_or_key # key
 
 def run(args):
@@ -123,7 +127,7 @@ def run(args):
         
     if args.delete:
         [x.delete_release() for x in releases if x.title == args.delete or x.tag_name == args.delete]
-        print("Deleted release")
+        print("Deleted release: {0}".format(args.delete))
 
     if args.print:
         [print("%s | %s" %(release.title, release.tag_name)) for release in releases]

@@ -1,14 +1,9 @@
-DumpTableToExcel:
-  sys-dev:
-      sql: SELECT * FROM newauthors
-  sys-dev1:
-      sql: SELECT c.text FROM sysusers u, syscomments c, sysobjects o WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid
 TableDump:
   sys-dev:
-    schema: dbo
+    schemaOrOwner: dbo
     writePath: /workspace/target/tmp/
   sys-dev1:
-    schema: dbo
+    schemaOrOwner: dbo
     writePath: /workspace/target/tmp2/
 TableRowCount:
   sys-dev:

@@ -93,7 +93,7 @@ def task_execution(databases_connections, task_config):
 
                         module = importlib.import_module("logic.migration")
                         class_ = getattr(module, task.key)
-                        instance = class_(connection, *task.parameters[con_key])
+                        instance = class_(connection, **task.parameters[con_key])
 
                     except Exception as e:
                         print("Task {0} caused an exception:\n\t{1}".format(task.key, e))

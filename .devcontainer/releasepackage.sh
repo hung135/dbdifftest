@@ -3,5 +3,8 @@ GITB=$(git symbolic-ref --short HEAD)
 # Instructions
 cd /workspace/
 rm -f dbdiff.tar
-tar -cvf dbdiff.tar jython_scripts/ ${JAREXPORT}
+cd /workspace/jython_scripts
+tar -cvf /workspace/dbdiff.tar . 
+cd /workspace/
+tar -rvf dbdiff.tar ${JAREXPORT}
 python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r ${REPO} -c ${GITB} -m ${DATE} -a /workspace/dbdiff.tar

@@ -4,6 +4,7 @@ import DataUtils
 import java.lang.Object
  
 import csv
+import md5
 
 
 class TableDump(object):
@@ -49,5 +50,33 @@ class TableRowCount(object):
        
  
  
+    def __repr__(self):
+        return str(self.__dict__)
+
+
+class TableSampleCheckSum(object):
+    def __init__(self, dbConn,schemaOrOwner,writePath,sampleSize):
+    path=os.path.abspath(writePath)
+    print("All the tables in this DB")
+    x=(dbConn.getTableNames(schemaOrOwner))
+    table_row_hash = []
+
+    for a in x:
+        sample= dbConn.queryToList('select * from {0}.{1} limit {2}'.format(schemaOrOwner,a),path+a+'.csv',sampleSize)
+        m = md5.new()
+        for row in sample:
+            
+            for col in row:
+                
+                m.update(col)
+        table_row_hash.append([a,m.digest()])
+    print("writing table sample Hash: ",path)
+    header=["TableName","SampleDataHash"]
+    outPutTable = csv.writer(open(path, 'w'), delimiter=',',
+                        quotechar='|')
+    outPutTable.writerow(header)
+    for row in table_row_hash:
+        outPutTable.writerow(row)
+
     def __repr__(self):
         return str(self.__dict__)

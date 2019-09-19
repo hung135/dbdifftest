@@ -1,4 +1,6 @@
-# Database Tasks
+#Database Connection Info
+# Please remember to set your Password to an Environment variable
+# to the variable name identified in password_envar
 sys-dev:
   dbtype: "SYBASE"
   host: "dbsybase"

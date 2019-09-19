@@ -271,15 +271,15 @@ public class DbConn {
      * @throws Exception
      */
     public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
-        System.out.println(selectQuery);
+        //System.out.println(selectQuery);
         try {
-
+            System.out.println("Writing to file: " +fullFilePath);
             Statement stmt = this.conn.createStatement();
             ResultSet rs = stmt.executeQuery(selectQuery);
             // int numCols = rs.getMetaData().getColumnCount();
-            System.out.println(selectQuery);
+            //System.out.println(selectQuery);
 
-            System.out.println(fullFilePath);
+            
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -289,7 +289,7 @@ public class DbConn {
 
         } catch (SQLException e) {
             //logger.error("Sql exception " + e.getMessage());
-            System.out.println(e);
+            System.out.println("Error: "+selectQuery+"\n"+e);
         }
 
     }

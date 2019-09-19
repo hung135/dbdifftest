@@ -13,3 +13,14 @@ sys-dev1:
   user: "sa"
   password_envar: "SYBASEPASSWORD"
   database_name: "master"
+# oracle-dev:
+#   dbtype: ORACLE
+#   host: dboracle
+#   port: 1542
+#   user: system
+#   password_envar: ORACLEPASSWORD
+#   database_name: dev
+ 
+ 
+
+ 

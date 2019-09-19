@@ -28,11 +28,13 @@ def readyaml(db_yaml, task_yaml):
     parsed_task_yaml = parser.ReadYAML(task_yaml)
 
     database_objects, tasks = [], []
+ 
     for key in parsed_db_yaml:
         database_objects.append(Database(parsed_db_yaml[key], key))
     for key in parsed_task_yaml:
         tasks.append(Task(parsed_task_yaml[key], key))
     return database_objects, tasks
+ 
 
 # Returns {database.key: conn}
 def create_db_connections(database_objects):
@@ -41,10 +43,12 @@ def create_db_connections(database_objects):
         baseConnection = DbConn.DbType.getMyEnumIfExists(base.dbtype)
         if baseConnection is not None:
             con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name)
+
             databases_connections[base.key] = con
         else:
             baseConnection[base.key] = None
     return databases_connections
+ 
 
 def execute_sql_test_sysbase(connection, task):
     if "sql" in task.keys():

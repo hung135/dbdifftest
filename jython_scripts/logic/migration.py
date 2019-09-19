@@ -58,6 +58,7 @@ class TableRowCount(object):
 
 class TableSampleCheckSum(object):
     def __init__(self, dbConn,schemaOrOwner,writePath,sampleSize):
+ 
     path=os.path.abspath(writePath)
     print("All the tables in this DB")
     x=(dbConn.getTableNames(schemaOrOwner))
@@ -72,16 +73,17 @@ class TableSampleCheckSum(object):
         for row in sample:
             
             for col in row:
-                
+ 
+                    
                 m.update(col)
-        table_row_hash.append([a,m.digest()])
-    print("writing table sample Hash: ",path)
-    header=["TableName","SampleDataHash"]
-    outPutTable = csv.writer(open(path, 'w'), delimiter=',',
-                        quotechar='|')
-    outPutTable.writerow(header)
-    for row in table_row_hash:
-        outPutTable.writerow(row)
+            table_row_hash.append([a,m.digest()])
+        print("writing table sample Hash: ",path)
+        header=["TableName","SampleDataHash"]
+        outPutTable = csv.writer(open(path, 'w'), delimiter=',',
+                            quotechar='|')
+        outPutTable.writerow(header)
+        for row in table_row_hash:
+            outPutTable.writerow(row)
 
     def __repr__(self):
         return str(self.__dict__)

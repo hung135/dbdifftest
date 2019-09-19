@@ -1,5 +1,3 @@
-import os
-
 class Database(object):
     key = None
     dbtype = None

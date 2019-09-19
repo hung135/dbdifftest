@@ -1,9 +1,9 @@
 TableDump:
   sys-dev:
-    schema: dbo
+    schemaOrOwner: dbo
     writePath: /workspace/target/tmp/
   sys-dev1:
-    schema: dbo
+    schemaOrOwner: dbo
     writePath: /workspace/target/tmp2/
 TableRowCount:
   sys-dev:

@@ -1,11 +1,26 @@
 import sys
+import os
 import argparse
 import csv
-import os 
-#windows make sure you use c:\\xxx\\file.jar
-jarpath=os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar")
+# <<<<<<< HEAD
+# import os 
+# #windows make sure you use c:\\xxx\\file.jar
+# jarpath=os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar")
+# #JAVA ITEMS
+# sys.path.append(jarpath)
+# =======
+import importlib
+
 #JAVA ITEMS
-sys.path.append(jarpath)
+sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
+# Jtyhon needs to be implicit. os.path.sep is broken; hence why we do it like so:
+# This is only for the packaged scripts
+sys.path.append(
+    os.path.abspath(
+        "{0}{1}{2}".format(os.path.abspath(os.path.dirname(__file__)), os.sep, os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar"))
+    )
+)
+ 
 import YamlParser
 import DbConn
 import DataUtils
@@ -45,7 +60,6 @@ def create_db_connections(database_objects):
         baseConnection = DbConn.DbType.getMyEnumIfExists(base.dbtype)
         if baseConnection is not None:
             con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name)
-
             databases_connections[base.key] = con
         else:
             baseConnection[base.key] = None
@@ -67,20 +81,24 @@ def parse_cli():
     return args 
 
 def task_execution(databases_connections, task_config):
-    output = {} # task.key: {instruction_key: output, instruction_key: output}
     for task in task_config:
         print("Running task: {0}".format(task.key))
         if task.e:
             print("\tError occured in the task: {0}".format(task.e))
         else:
-            output[task.key] = {}
-            for instruction_key in task.instructions:
-                if instruction_key in databases_connections.keys():
-                    connection = databases_connections[instruction_key]
-                    res = execute_sql_test_sysbase(connection, task.instructions[instruction_key])
+            for con_key in task.parameters:
+                if con_key in databases_connections.keys():
+                    try:
+                        connection = databases_connections[con_key]
+
+                        module = importlib.import_module("logic.migration")
+                        class_ = getattr(module, task.key)
+                        instance = class_(connection, *task.parameters[con_key])
+
+                    except Exception as e:
+                        print("Task {0} caused an exception:\n\t{1}".format(task.key, e))
                 else:
-                    res = "Task {0} with key {1} not found".format(task.key, instruction_key)
-                output[task.key][instruction_key] = res
+                    print("Task {0} with key {1} not found".format(task.key, con_key))
     return output
 
 def export_results(rows, filename):
@@ -88,21 +106,11 @@ def export_results(rows, filename):
         writer = csv.writer(csvfile, delimiter=",")
         writer.writerows(rows)
 
-def create_report(output):
-    print("\n-------Results-------")
-    for key in output:
-        print("Task: {0}".format(key))
-        for instruction in output[key]:
-            rows = output[key][instruction]
-            print("\t{0} results returned {1}".format(instruction, len(rows)))
-            if len(rows) > 0:
-                export_results(rows, "{0}-{1}.csv".format(key,instruction))
-
 def execute(args):
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
-    output = task_execution(databases_connections, task_config)
-    create_report(output)
+    task_execution(databases_connections, task_config)
+    print("Task execution complete")
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ public class DbConn {
 
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException {
-        this.dbtype = dbtype;
+        this.dbType = dbtype;
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             cpds.setDriverClass(dbtype.driver());

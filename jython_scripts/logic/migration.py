@@ -11,6 +11,8 @@ class TableDump(object):
 
     def __init__(self, dbConn,schemaOrOwner,writePath):
         path=os.path.abspath(writePath)
+        if not os.path.exists(path):
+            os.makedirs(path)
         print("All the tables in this DB")
         x=(dbConn.getTableNames(schemaOrOwner))
         for a in x:

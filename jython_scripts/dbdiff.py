@@ -1,10 +1,18 @@
 import sys
+import os
 import argparse
 import csv
 import importlib
 
 #JAVA ITEMS
 sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
+# Jtyhon needs to be implicit. os.path.sep is broken; hence why we do it like so:
+# This is only for the packaged scripts
+sys.path.append(
+    os.path.abspath(
+        "{0}{1}{2}".format(os.path.abspath(os.path.dirname(__file__)), os.sep, os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar"))
+    )
+)
 import YamlParser
 import DbConn
 import DataUtils

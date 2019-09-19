@@ -25,10 +25,10 @@ import java.util.Map;
  * Functions we need to write that process some data, put them here
  */
 public class DataUtils {
-    final static Logger logger = Logger.getLogger(DataUtils.class);
+    //final static Logger logger = Logger.getLogger(DataUtils.class);
 
-    DataUtils() {
-        System.out.println("Constructor called");
+    public DataUtils() {
+        System.out.println("DataUtils Obj Init");
     }
 
     // Generic function to convert list to set
@@ -146,7 +146,25 @@ public class DataUtils {
             writer.close();
 
         } catch (Exception e) {
-            logger.error("Exception " + e.getMessage());
+            System.out.println(e);
+            //logger.error("Exception " + e.getMessage());
+        }
+
+    }
+
+    public void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
+
+        try {
+            
+            CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+            Boolean includeHeaders = true;
+
+            writer.writeAll(stringList,includeHeaders);
+            writer.close();
+
+        } catch (Exception e) {
+            System.out.println(e);
+            //logger.error("Exception " + e.getMessage());
         }
 
     }

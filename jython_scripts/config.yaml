@@ -1,12 +1,14 @@
-# Database Tasks
-sys-dev1:
+#Database Connection Info
+# Please remember to set your Password to an Environment variable
+# to the variable name identified in password_envar
+sys-dev:
   dbtype: "SYBASE"
   host: "dbsybase"
   port: "5000"
   user: "sa"
   password_envar: "SYBASEPASSWORD"
   database_name: "master"
-sys-dev2:
+sys-dev1:
   dbtype: "SYBASE"
   host: "dbsybase"
   port: "5000"
@@ -20,8 +22,7 @@ sys-dev2:
 #   user: system
 #   password_envar: ORACLEPASSWORD
 #   database_name: dev
-tasks: 
-  -  DumpTableToExcel
-  -  GetViewSchemaReference
-  -  GetProceSchemaReference
+ 
+ 
 
+ 

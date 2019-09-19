@@ -17,7 +17,6 @@ class Database(object):
             if entry.key == "password_envar":
                 setattr(self, entry.key, entry.value)
                 setattr(self, "password", os.getenv(entry.value))
-
             setattr(self, entry.key, entry.value)
 
     def __repr__(self):

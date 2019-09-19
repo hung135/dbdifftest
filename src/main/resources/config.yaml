@@ -14,7 +14,11 @@ oracle-dev:
   password_envar: ORACLEPASSWORD
   database_name: dev
 tasks: 
-  -  DumpTableToExcel
+  -  DumpTableToExcel:
+      oracle-dev:
+        sql: select * from TABLE
+      sys-dev:
+        sql: select * from tablex
   -  GetViewSchemaReference
   -  GetProceSchemaReference
 

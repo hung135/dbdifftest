@@ -91,7 +91,6 @@ def task_execution(databases_connections, task_config):
                         print("Task {0} caused an exception:\n\t{1}".format(task.key, e))
                 else:
                     print("Task {0} with key {1} not found".format(task.key, con_key))
-    return output
 
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:

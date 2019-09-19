@@ -24,6 +24,7 @@ def readyaml(yaml):
     for key in parsed_yaml:
         if key == "tasks":
             tasks = [val for val in parsed_yaml[key]]
+            print(tasks)
         else:
             database_objects.append(Database(parsed_yaml[key]))
 
@@ -34,6 +35,7 @@ def readyaml(yaml):
     print("\nTasks found:")
     for task in tasks:
        print("\t{0}".format(task))
+
     return database_objects
 
 def create_db_connections(database_objects):
@@ -43,6 +45,11 @@ def create_db_connections(database_objects):
         if baseConnection is not None:
             con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name)
             connections.append(con)
+    from logic.migration import TableDump,TableRowCount
+    
+    #x=TableDump(con,'dbo','/workspace/target/tmp')
+    x=TableRowCount(con,'dbo' ,'/workspace/target/table_row_count.csv')
+
     return connections
 
 def execute_sql_test_sysbase(db):

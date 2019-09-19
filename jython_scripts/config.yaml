@@ -21,7 +21,14 @@ sys-dev2:
 #   password_envar: ORACLEPASSWORD
 #   database_name: dev
 tasks: 
-  -  DumpTableToExcel
-  -  GetViewSchemaReference
-  -  GetProceSchemaReference
+  -  DumpTableToExcel:
+      oracle-dev:
+        sql: select * from TABLE
+      sys-dev:
+        sql: select * from tablex
+  - DumpAllTablesToCSV:
+      oracle-dev:
+      sys-dev:
+ 
+ 
 

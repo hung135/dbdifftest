@@ -82,8 +82,8 @@ RUN wget http://search.maven.org/remotecontent?filepath=org/python/jython-standa
 
 RUN echo 'alias java="/usr/local/openjdk-11/bin/java"' >> ~/.bashrc
 RUN echo 'alias jython="/usr/local/openjdk-11/bin/java -jar /opt/jython27.jar"' >> ~/.bashrc
-RUN echo 'alias buildjar="mvn compile assembly:single"' >>~/.bashrc
-RUN echo 'alias buildjarclean="mvn clean compile assembly:single"' >>~/.bashrc
+RUN echo 'alias buildjar="mvn compile assembly:single -f /workspace/pom.xml"' >>~/.bashrc
+RUN echo 'alias buildjarclean="mvn clean compile assembly:single -f /workspace/pom.xml"' >>~/.bashrc
 RUN echo 'alias runjar="java -jar ${JAREXPORT}"' >>~/.bashrc
 RUN echo 'alias jartest="mvn clean test"' >> ~/.bashrc
 RUN echo 'alias buildrunjython="mvn compile assembly:single && /usr/local/openjdk-11/bin/java -jar /opt/jython27.jar"' >>~/.bashrc 

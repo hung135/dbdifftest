@@ -6,14 +6,23 @@ DumpTableToExcel:
 TableDump:
   sys-dev:
     schema: dbo
-    write_path: /workspace/target/tmp/
+    writePath: /workspace/target/tmp/
   sys-dev1:
     schema: dbo
-    write_path: /workspace/target/tmp2/
+    writePath: /workspace/target/tmp2/
 TableRowCount:
   sys-dev:
-    schema: dbo
-    write_path: /workspace/target/tmp/table_rowcount.csv
+    schemaOrOwner: dbo
+    fileName: /workspace/target/tmp/table_rowcount.csv
   sys-dev1:
-    schema: dbo
-    write_path: /workspace/target/tmp2/table_rowcount.csv
+    schemaOrOwner: dbo
+    fileName: /workspace/target/tmp2/table_rowcount.csv
+TableSampleCheckSum:
+  sys-dev:
+    schemaOrOwner: dbo
+    writePath: /workspace/target/tmp/table_row_checksum1.csv
+    sampleSize: 2
+  sys-dev1:
+    schemaOrOwner: dbo
+    writePath: /workspace/target/tmp2/table_row_checksum2.csv
+    sampleSize: 2

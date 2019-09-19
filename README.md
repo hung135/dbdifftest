@@ -20,3 +20,7 @@ Changelog (no order):
 - Added a directory YAML reader
 - Updated dbdiff to hold mulitple connections
 - Added `-y` arg for execution
+- Added `-t` arg for execution
+- Added reflection to find the correct `logic` class instance
+- Updated `task` object to reflect the new changes
+- Added a `CSV` out

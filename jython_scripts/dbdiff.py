@@ -1,9 +1,11 @@
 import sys
 import argparse
 import csv
-
+import os 
+#windows make sure you use c:\\xxx\\file.jar
+jarpath=os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar")
 #JAVA ITEMS
-sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
+sys.path.append(jarpath)
 import YamlParser
 import DbConn
 import DataUtils

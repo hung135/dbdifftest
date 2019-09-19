@@ -60,9 +60,12 @@ class TableSampleCheckSum(object):
     print("All the tables in this DB")
     x=(dbConn.getTableNames(schemaOrOwner))
     table_row_hash = []
-
+    sql='select * from {0}.{1} limit {2}'
+    if dbConn.dbType=='SYBASE':
+        sql='select TOP {2} * from {0}.{1}'
+    if dbConn.
     for a in x:
-        sample= dbConn.queryToList('select * from {0}.{1} limit {2}'.format(schemaOrOwner,a),path+a+'.csv',sampleSize)
+        sample= dbConn.queryToList(sql.format(schemaOrOwner,a),path+a+'.csv',sampleSize)
         m = md5.new()
         for row in sample:
             

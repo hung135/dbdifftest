@@ -22,6 +22,7 @@ public class DbConn {
    // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
+    public DbType dbType;
 
     public enum DbType {
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
@@ -31,6 +32,7 @@ public class DbConn {
 
         private String driver;
         private String url;
+        
 
         DbType(String driver, String url) {
             this.driver = driver;
@@ -59,6 +61,7 @@ public class DbConn {
 
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException {
+        this.dbtype=dbtype;
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {
             cpds.setDriverClass(dbtype.driver());

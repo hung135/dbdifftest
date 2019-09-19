@@ -1,27 +1,27 @@
-TableDump:
-  sys-dev:
-    schemaOrOwner: dbo
-    writePath: /workspace/target/tmp/
-  sys-dev1:
-    schemaOrOwner: dbo
-    writePath: /workspace/target/tmp2/
+# TableDump:
+#   sys-dev:
+#     schemaOrOwner: dbo
+#     writePath: ./
+#   sys-dev1:
+#     schemaOrOwner: dbo
+#     writePath: ./
 TableRowCount:
   sys-dev:
     schemaOrOwner: dbo
-    fileName: /workspace/target/tmp/table_rowcount.csv
+    fileName: ./table_rowcount.csv
   sys-dev1:
     schemaOrOwner: dbo
-    fileName: /workspace/target/tmp2/table_rowcount.csv
+    fileName: ./table_rowcount2.csv
 TableSampleCheckSum:
   sys-dev:
     schemaOrOwner: dbo
-    writePath: /workspace/target/tmp/table_row_checksum1.csv
+    writePath: ./md5/table_row_checksum1.csv
     sampleSize: 2
   sys-dev1:
     schemaOrOwner: dbo
-    writePath: /workspace/target/tmp2/table_row_checksum2.csv
+    writePath: ./md5/table_row_checksum2.csv
     sampleSize: 2
 TableLoadCsv:
     schemaOrOwner: dbo
     tableName: newauthors
-    filePath: /workspace/target/tmp2/table_row_checksum2.csv
+    filePath: ./md5/table_row_checksum2.csv

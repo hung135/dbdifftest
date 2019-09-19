@@ -1,12 +1,12 @@
 # Database Tasks
-sys-dev1:
+sys-dev:
   dbtype: "SYBASE"
   host: "dbsybase"
   port: "5000"
   user: "sa"
   password_envar: "SYBASEPASSWORD"
   database_name: "master"
-sys-dev2:
+sys-dev1:
   dbtype: "SYBASE"
   host: "dbsybase"
   port: "5000"

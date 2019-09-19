@@ -20,15 +20,6 @@ sys-dev1:
 #   user: system
 #   password_envar: ORACLEPASSWORD
 #   database_name: dev
-tasks: 
-  -  DumpTableToExcel:
-      oracle-dev:
-        sql: select * from TABLE
-      sys-dev:
-        sql: select * from tablex
-  - DumpAllTablesToCSV:
-      oracle-dev:
-      sys-dev:
  
  
 

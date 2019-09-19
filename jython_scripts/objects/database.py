@@ -1,6 +1,7 @@
 import os
 
 class Database(object):
+    key = None
     dbtype = None
     host = None
     port = None
@@ -9,8 +10,9 @@ class Database(object):
     database_name = None
     password = None
 
-    def __init__(self, hashMap):
+    def __init__(self, hashMap, key):
         self._set_values(hashMap)
+        self.key = key
 
     def _set_values(self, hashMap):
         for entry in hashMap.entrySet():

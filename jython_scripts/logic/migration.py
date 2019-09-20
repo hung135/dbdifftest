@@ -80,7 +80,7 @@ class TableSampleCheckSum(object):
                 for row in sample:
                     for col in row:
                         #adds each column to md5 hash algorith,
-                        m.update(col)
+                        m.update(str(col))
                     table_row_hash.append([a,m.hexdigest()])
                 #print("writing table sample Hash: ",writePath)
                 header=["TableName","SampleDataHash"]

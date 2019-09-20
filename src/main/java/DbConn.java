@@ -26,8 +26,16 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+ 
+import dataobjs.Table;
 
-import dataobjs.*;
+import java.io.FileOutputStream;
+import java.io.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.ss.usermodel.*;
+import java.util.*;
+ 
 
 public class DbConn {
     private Connection conn;
@@ -74,7 +82,7 @@ public class DbConn {
             throws SQLException, PropertyVetoException {
         this.dbType = dbtype;
         ComboPooledDataSource cpds = new ComboPooledDataSource();
-
+        // props.put("JAVA_CHARSET_MAPPING", "UTF8");
         cpds.setDriverClass(dbtype.driver());
 
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
@@ -153,7 +161,6 @@ public class DbConn {
             Table tbl = new Table(tableName);
             tbl.columnNames = this.getColumn(tableName);
             items.add(tbl);
-
         }
         return items;
     }
@@ -248,13 +255,18 @@ public class DbConn {
         this.rs = stmt.executeQuery(selectQuery);
         ResultSetMetaData metadata = this.rs.getMetaData();
         int columnCount = metadata.getColumnCount();
+        for (int i = 1; i <= columnCount; i++) {
+            System.out.println(metadata.getTableName(i) + " senstive: " + metadata.isCaseSensitive(i) + " name: "
+                    + metadata.getCatalogName(i) + " type: " + metadata.getColumnTypeName(i) + " schema: "
+                    + metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i));
+        }
         while (this.rs.next()) {
             String[] row = new String[columnCount];
             for (int i = 1; i <= columnCount; i++) {
                 /** Adding header row */
-                byte[] data = rs.getBytes(i);
-                row[i - 1] = new String(data, StandardCharsets.UTF_8);
-                //row[i - 1] = (this.rs.getString(i));
+                // byte[] data = rs.getBytes(i);
+                // row[i - 1] = new String(data, StandardCharsets.UTF_8);
+                row[i - 1] = (this.rs.getString(i));
             }
             items.add(row);
         }
@@ -290,6 +302,63 @@ public class DbConn {
 
     public void print_test(String selectQuery) {
         System.out.println(selectQuery);
+    }
+
+    public void queryToExcel(String selectQuery, String sheetName,String fullFilePath) throws Exception {
+
+        Statement stmt = this.conn.createStatement();
+        /* Create Workbook and Worksheet objects */
+        HSSFWorkbook new_workbook = new HSSFWorkbook(); // create a blank workbook object
+        HSSFSheet sheet = new_workbook.createSheet(sheetName); // create a worksheet with caption score_details
+        /* Define the SQL query */
+        ResultSet query_set = stmt.executeQuery(selectQuery);
+        /* Create Map for Excel Data */
+        Map<String, Object[]> excel_data = new HashMap<String, Object[]>(); // create a map and define data
+        int row_counter = 0;
+
+        ResultSetMetaData metadata = this.rs.getMetaData();
+        int columnCount = metadata.getColumnCount();
+        String[] columnNames = new String[columnCount];
+        for (int i = 1; i <= columnCount; i++) {
+            columnNames[i - 1] = metadata.getColumnName(i);
+        }
+        /* Populate data into the Map */
+        while (query_set.next()) {
+            row_counter = row_counter + 1;
+
+            Object[] row_data = new Object[columnCount];
+            for (int i = 1; i <= columnCount; i++) {
+                row_data[i - 1] = query_set.getString(columnNames[i - i]);
+
+                // excel_data.put(Integer.toString(row_counter), new Object[] {dept_id,
+                // dept_name});
+            }
+            excel_data.put(Integer.toString(row_counter), row_data);
+        }
+        /* Close all DB related objects */
+        query_set.close();
+        stmt.close();
+
+        /* Load data into logical worksheet */
+        Set<String> keyset = excel_data.keySet();
+        int rownum = 0;
+        for (String key : keyset) { // loop through the data and add them to the cell
+            Row row = sheet.createRow(rownum++);
+            Object[] objArr = excel_data.get(key);
+            int cellnum = 0;
+            for (Object obj : objArr) {
+                Cell cell = row.createCell(cellnum++);
+                if (obj instanceof Double)
+                    cell.setCellValue((Double) obj);
+                else
+                    cell.setCellValue((String) obj);
+            }
+        }
+
+        FileOutputStream output_file = new FileOutputStream(new File(fullFilePath)); // create XLS file
+        new_workbook.write(output_file);// write excel document to output stream
+        output_file.close(); // close the file
+        new_workbook.close();
     }
 
     /**

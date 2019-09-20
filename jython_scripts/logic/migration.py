@@ -42,10 +42,7 @@ class TableRowCount(object):
                 tableCount.append(tmp)
             except:
                  tableCount.append([a,'SQL Execute Error'])
-            
-       
-
-         
+     
         header=["TableName","RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
                          quotechar='|')
@@ -99,3 +96,10 @@ class TableSampleCheckSum(object):
 
     def __repr__(self):
         return str(self.__dict__)
+
+class TableLoadCsv(object):
+    def __init__(self, dbConn,schemaOrOwner,files_tables):
+        
+        for tableName,filePath in files_tables:
+            
+            print("Mocking Loading csv: ",tableName,filePath)

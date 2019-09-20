@@ -252,7 +252,9 @@ public class DbConn {
             String[] row = new String[columnCount];
             for (int i = 1; i <= columnCount; i++) {
                 /** Adding header row */
-                row[i - 1] = (this.rs.getString(i));
+                byte[] data = rs.getBytes(i);
+                row[i - 1] = new String(data, StandardCharsets.UTF_8);
+                //row[i - 1] = (this.rs.getString(i));
             }
             items.add(row);
         }

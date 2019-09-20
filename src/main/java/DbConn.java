@@ -310,13 +310,14 @@ public class DbConn {
         /* Create Workbook and Worksheet objects */
         HSSFWorkbook new_workbook = new HSSFWorkbook(); // create a blank workbook object
         HSSFSheet sheet = new_workbook.createSheet(sheetName); // create a worksheet with caption score_details
+         
         /* Define the SQL query */
         ResultSet query_set = stmt.executeQuery(selectQuery);
         /* Create Map for Excel Data */
         Map<String, Object[]> excel_data = new HashMap<String, Object[]>(); // create a map and define data
         int row_counter = 0;
 
-        ResultSetMetaData metadata = this.rs.getMetaData();
+        ResultSetMetaData metadata = query_set.getMetaData();
         int columnCount = metadata.getColumnCount();
         String[] columnNames = new String[columnCount];
         for (int i = 1; i <= columnCount; i++) {

@@ -2,6 +2,13 @@ import sys
 import os
 import argparse
 import csv
+# <<<<<<< HEAD
+# import os 
+# #windows make sure you use c:\\xxx\\file.jar
+# jarpath=os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar")
+# #JAVA ITEMS
+# sys.path.append(jarpath)
+# =======
 import importlib
 
 #JAVA ITEMS
@@ -13,6 +20,7 @@ sys.path.append(
         "{0}{1}{2}".format(os.path.abspath(os.path.dirname(__file__)), os.sep, os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar"))
     )
 )
+ 
 import YamlParser
 import DbConn
 import DataUtils
@@ -85,7 +93,7 @@ def task_execution(databases_connections, task_config):
 
                         module = importlib.import_module("logic.migration")
                         class_ = getattr(module, task.key)
-                        instance = class_(connection, *task.parameters[con_key])
+                        instance = class_(connection, **task.parameters[con_key])
 
                     except Exception as e:
                         print("Task {0} caused an exception:\n\t{1}".format(task.key, e))

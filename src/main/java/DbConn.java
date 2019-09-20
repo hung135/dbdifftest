@@ -1,27 +1,40 @@
 
-
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.Charsets;
 
 //import org.apache.log4j.Logger;
 
 import oracle.net.aso.i;
 
 import java.beans.PropertyVetoException;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.sql.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import dataobjs.*;
 
 public class DbConn {
     private Connection conn;
-   // final static Logger logger = Logger.getLogger(DbConn.class);
+    // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
+    public DbType dbType;
 
     public enum DbType {
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
@@ -35,11 +48,11 @@ public class DbConn {
         DbType(String driver, String url) {
             this.driver = driver;
             this.url = url;
-            System.out.println(url);
+            // System.out.println(url);
         }
 
         public String driver() {
-            System.out.println(driver);
+            // System.out.println(driver);
             return driver;
         }
 
@@ -58,14 +71,12 @@ public class DbConn {
     }
 
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
-            throws SQLException {
+            throws SQLException, PropertyVetoException {
+        this.dbType = dbtype;
         ComboPooledDataSource cpds = new ComboPooledDataSource();
-        try {
-            cpds.setDriverClass(dbtype.driver());
-            System.out.println("driver loaded");
-        } catch (PropertyVetoException e) {
-            System.out.println(e);
-        }
+
+        cpds.setDriverClass(dbtype.driver());
+
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
 
         cpds.setJdbcUrl(url);
@@ -81,17 +92,15 @@ public class DbConn {
         cpds.setTestConnectionOnCheckout(true);
 
         this.conn = cpds.getConnection();
-        System.out.println("Conn Completed");
+        // System.out.println("DB Connection Successful: " + dbtype);
     }
 
     public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
-            throws SQLException {
+            throws SQLException, PropertyVetoException {
 
         ComboPooledDataSource cpds = new ComboPooledDataSource();
-        try {
-            cpds.setDriverClass(driver);
-        } catch (PropertyVetoException e) {
-        }
+        cpds.setDriverClass(driver);
+
         cpds.setJdbcUrl(jdbcUrl);
         cpds.setUser(userName);
         cpds.setPassword(password);
@@ -221,44 +230,33 @@ public class DbConn {
     public Boolean query(String selectQuery) throws Exception {
         Boolean hasRecords = false;
 
-        try {
-
-            Statement stmt = this.conn.createStatement();
-            this.rs = stmt.executeQuery(selectQuery);
-            if (this.rs.next() == true) {
-                hasRecords = true;
-                this.rs.beforeFirst();
-            }
-
-        } catch (SQLException e) {
-            System.out.println(e);
-           // logger.error("Sql exception " + e.getMessage());
+        Statement stmt = this.conn.createStatement();
+        this.rs = stmt.executeQuery(selectQuery);
+        if (this.rs.next() == true) {
+            hasRecords = true;
+            this.rs.beforeFirst();
         }
+
         return hasRecords;
 
     }
-    public List<String []> queryToList(String selectQuery) throws Exception {
-        List<String [] > items = new ArrayList<>();
 
-        try {
+    public List<String[]> queryToList(String selectQuery) throws Exception {
+        List<String[]> items = new ArrayList<>();
 
-            Statement stmt = this.conn.createStatement();
-            this.rs = stmt.executeQuery(selectQuery);
-            ResultSetMetaData metadata = this.rs.getMetaData();
-            int columnCount = metadata.getColumnCount();
-            while(this.rs.next()){
-                String [] row = new String [columnCount];
-                for (int i = 1; i <= columnCount; i++) {
-                    /** Adding header row */
-                    row[i-1]=(this.rs.getString(i));
-                }
-                items.add(row);
+        Statement stmt = this.conn.createStatement();
+        this.rs = stmt.executeQuery(selectQuery);
+        ResultSetMetaData metadata = this.rs.getMetaData();
+        int columnCount = metadata.getColumnCount();
+        while (this.rs.next()) {
+            String[] row = new String[columnCount];
+            for (int i = 1; i <= columnCount; i++) {
+                /** Adding header row */
+                row[i - 1] = (this.rs.getString(i));
             }
-            
-        } catch (SQLException e) {
-            System.out.println(e);
-           // logger.error("Sql exception " + e.getMessage());
+            items.add(row);
         }
+
         return items;
 
     }
@@ -271,30 +269,67 @@ public class DbConn {
      * @throws Exception
      */
     public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
-        //System.out.println(selectQuery);
-        try {
-            System.out.println("Writing to file: " +fullFilePath);
-            Statement stmt = this.conn.createStatement();
-            ResultSet rs = stmt.executeQuery(selectQuery);
-            // int numCols = rs.getMetaData().getColumnCount();
-            //System.out.println(selectQuery);
+        // System.out.println(selectQuery);
 
-            
-            CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
-            Boolean includeHeaders = true;
+        // System.out.println("Writing to file: " + fullFilePath);
+        Statement stmt = this.conn.createStatement();
+        ResultSet rs = stmt.executeQuery(selectQuery);
+        // int numCols = rs.getMetaData().getColumnCount();
+        // System.out.println(selectQuery);
 
-            writer.writeAll(rs, includeHeaders);
+        CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+        Boolean includeHeaders = true;
 
-            writer.close();
+        writer.writeAll(rs, includeHeaders);
 
-        } catch (SQLException e) {
-            //logger.error("Sql exception " + e.getMessage());
-            System.out.println("Error: "+selectQuery+"\n"+e);
-        }
+        writer.close();
 
     }
+
     public void print_test(String selectQuery) {
         System.out.println(selectQuery);
+    }
+
+    /**
+     * still in progress
+     * 
+     * @param tableName
+     * @param filePath
+     * @throws IOException
+     * @throws SQLException
+     */
+    public void loadCSV(String tableName, String filePath) throws IOException, SQLException {
+        List<String> tableColumns;
+
+        PreparedStatement preparedStatement = null;
+
+        List<String> question = new ArrayList<>();
+        tableColumns = this.getColumn(tableName);
+        for (int i = 0; i < tableColumns.size(); i++) {
+            question.add("?");
+        }
+        String columns = String.join(",", question);
+        String sql = "Insert into " + tableName + " values(" + columns + ")";
+
+        preparedStatement = this.conn.prepareStatement(sql);
+
+        // CSVFormat fmt =
+        // CSVFormat.DEFAULT.withDelimiter(',').withQuote('"').withRecordSeparator("\r\n");
+
+        Reader file = new FileReader("path/to/file.csv");
+
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(file);
+        for (CSVRecord record : records) {
+            for (int i = 0; i < tableColumns.size(); i++) {
+                preparedStatement.setString(i, record.get(tableColumns.get(i)));
+            }
+            preparedStatement.addBatch();
+        }
+
+        int[] affectedRecords = preparedStatement.executeBatch();
+        System.out.println("Total rows Inserted: " + affectedRecords);
+        preparedStatement.close();
+
     }
 
 }

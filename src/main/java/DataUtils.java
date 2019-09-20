@@ -25,11 +25,7 @@ import java.util.Map;
  * Functions we need to write that process some data, put them here
  */
 public class DataUtils {
-    //final static Logger logger = Logger.getLogger(DataUtils.class);
-
-    public DataUtils() {
-        System.out.println("DataUtils Obj Init");
-    }
+    // final static Logger logger = Logger.getLogger(DataUtils.class);
 
     // Generic function to convert list to set
     public static <T> Set<T> convertListToSet(List<T> list) {
@@ -135,7 +131,7 @@ public class DataUtils {
 
     }
 
-    public void writeStringListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
+    public static void writeStringListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
 
         try {
 
@@ -147,24 +143,24 @@ public class DataUtils {
 
         } catch (Exception e) {
             System.out.println(e);
-            //logger.error("Exception " + e.getMessage());
+            // logger.error("Exception " + e.getMessage());
         }
 
     }
 
-    public void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
+    public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
 
         try {
-            
+
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
-            writer.writeAll(stringList,includeHeaders);
+            writer.writeAll(stringList, includeHeaders);
             writer.close();
 
         } catch (Exception e) {
             System.out.println(e);
-            //logger.error("Exception " + e.getMessage());
+            // logger.error("Exception " + e.getMessage());
         }
 
     }

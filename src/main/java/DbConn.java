@@ -26,7 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
- 
+
 import dataobjs.Table;
 
 import java.io.FileOutputStream;
@@ -35,7 +35,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.*;
 import java.util.*;
- 
 
 public class DbConn {
     private Connection conn;
@@ -304,13 +303,13 @@ public class DbConn {
         System.out.println(selectQuery);
     }
 
-    public void queryToExcel(String selectQuery, String sheetName,String fullFilePath) throws Exception {
+    public void queryToExcel(String selectQuery, String sheetName, String fullFilePath) throws Exception {
 
         Statement stmt = this.conn.createStatement();
         /* Create Workbook and Worksheet objects */
         HSSFWorkbook new_workbook = new HSSFWorkbook(); // create a blank workbook object
         HSSFSheet sheet = new_workbook.createSheet(sheetName); // create a worksheet with caption score_details
-         
+
         /* Define the SQL query */
         ResultSet query_set = stmt.executeQuery(selectQuery);
         /* Create Map for Excel Data */
@@ -319,21 +318,27 @@ public class DbConn {
 
         ResultSetMetaData metadata = query_set.getMetaData();
         int columnCount = metadata.getColumnCount();
-        String[] columnNames = new String[columnCount];
+        List<String> columnNames = new ArrayList<>();
+
         for (int i = 1; i <= columnCount; i++) {
-            columnNames[i - 1] = metadata.getColumnName(i);
+
+            columnNames.add(metadata.getColumnName(i));
+
+            // System.out.println(" " + metadata.getColumnName(i));
+
         }
+
         /* Populate data into the Map */
         while (query_set.next()) {
             row_counter = row_counter + 1;
 
-            Object[] row_data = new Object[columnCount];
-            for (int i = 1; i <= columnCount; i++) {
-                row_data[i - 1] = query_set.getString(columnNames[i - i]);
+            String[] row_data = new String[columnCount];
 
-                // excel_data.put(Integer.toString(row_counter), new Object[] {dept_id,
-                // dept_name});
+            // Data rows
+            for (int i = 1; i <= columnCount; i++) {
+                row_data[i - 1] = query_set.getString(columnNames.get(i - 1));
             }
+
             excel_data.put(Integer.toString(row_counter), row_data);
         }
         /* Close all DB related objects */
@@ -343,6 +348,14 @@ public class DbConn {
         /* Load data into logical worksheet */
         Set<String> keyset = excel_data.keySet();
         int rownum = 0;
+        // Header Row
+        Row r = sheet.createRow(rownum);
+        for (int i = 1; i <= columnCount; i++) {
+
+            r.createCell(i - 1).setCellValue(columnNames.get(i - 1));
+
+        }
+        rownum++;
         for (String key : keyset) { // loop through the data and add them to the cell
             Row row = sheet.createRow(rownum++);
             Object[] objArr = excel_data.get(key);

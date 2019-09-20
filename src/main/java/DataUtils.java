@@ -13,9 +13,12 @@ import org.yaml.snakeyaml.Yaml;
 import java.sql.Statement;
 
 import java.io.FileWriter;
-
+import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -161,6 +164,43 @@ public class DataUtils {
         } catch (Exception e) {
             System.out.println(e);
             // logger.error("Exception " + e.getMessage());
+        }
+
+    }
+
+    /**
+     * place holder logic to download image
+     * 
+     * @param conn
+     * @param primaryKey
+     * @throws IOException
+     * @throws SQLException
+     * @throws FileNotFoundException
+     */
+    public void downloadImage(Connection conn, String tableName, String columnName, int primaryKey, String filePath)
+            throws FileNotFoundException, SQLException, IOException {
+
+        Statement stmt = conn.createStatement();
+        String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE a_key = " + primaryKey;
+        ResultSet rs = stmt.executeQuery(query);
+
+        if (rs.next()) {
+            File blobFile = null;
+            blobFile = new File(rs.getString(filePath));
+
+            Blob blob = rs.getBlob(columnName);
+            InputStream in = blob.getBinaryStream();
+
+            int length = in.available();
+            byte[] blobBytes = new byte[length];
+            in.read(blobBytes);
+
+            FileOutputStream fos = new FileOutputStream(blobFile);
+            fos.write(blobBytes);
+            fos.close();
+            rs.close();
+            stmt.close();
+
         }
 
     }

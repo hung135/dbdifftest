@@ -14,6 +14,7 @@ import java.sql.Statement;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +26,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import ncsa.hdf.hdf5lib.H5;
+import ncsa.hdf.hdf5lib.HDF5Constants;
+import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
+import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 /**
  * Functions we need to write that process some data, put them here
@@ -238,4 +243,36 @@ public class DataUtils {
 
     }
 
+    /**
+     * Place holder for hdf5
+     * 
+     * @throws HDF5Exception
+     * @throws NullPointerException
+     * @throws HDF5LibraryException
+     * @throws IOException
+     */
+    public void hdf5load(String fileName)
+            throws HDF5LibraryException, NullPointerException, HDF5Exception, IOException {
+
+        DataOutputStream file = new DataOutputStream(new FileOutputStream("result.bin"));
+        int data[][], datasetID, dataspaceID, i, j, rows, fileID;
+        fileID = H5.H5Fopen(fileName, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+
+        datasetID = H5.H5Dopen(fileID, "my_dataset");
+        // we assume that the file was opened
+        // previously
+        dataspaceID = H5.H5Dget_space(datasetID);
+        rows = (int) (H5.H5Sget_simple_extent_npoints(dataspaceID) / 1024);
+        data = new int[rows][1024];
+        H5.H5Dread(datasetID, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                HDF5Constants.H5P_DEFAULT, data);
+        // fn_order(data); // call hypothetical function that orders "data" in an
+        // ascending way
+        for (i = 0; i < rows; i++)
+            for (j = 0; j < 1024; j++)
+                file.writeInt(data[i][j]);
+        file.close();
+        H5.H5Sclose(dataspaceID);
+        H5.H5Dclose(datasetID);
+    }
 }

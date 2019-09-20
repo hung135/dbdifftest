@@ -39,8 +39,8 @@ class TableRowCount(object):
                     for c in b:
                         tmp.append(c)
                 tableCount.append(tmp)
-            except Exception, e:
-                tableCount.append([a,'SQL Execute ERROR'])
+            except:
+                 tableCount.append([a,'SQL Execute Error'])
             
         dataUtil= DataUtils()
 
@@ -93,7 +93,7 @@ class TableSampleCheckSum(object):
                 outPutTable.writerow(header)
                 for row in table_row_hash:
                     outPutTable.writerow(row)
-            except Exception, e:
+            except:
                 table_row_hash.append([a,'SQL Execute ERROR'])
                  
 

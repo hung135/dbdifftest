@@ -10,10 +10,15 @@ CREATE TABLE bar (
 		PRIMARY KEY (c5) IN Dsp2) IN Dsp1
 		) ; 
 
-    CREATE TABLE tablename
-(NUM_PO NUMBER(19) DEFAULT AUTOINCREMENT,
-MNT NUMBER(9) NULL,
-QTY_PROD NUMBER(9) NULL,
-NUMERIC(14); NULL
-PRIMARY KEY (NUM_PO)
-);
+/* JDBC_EXCEL_POI_EXAMPLE.SQL */
+create table oracle_to_excel
+(
+DEPT_ID NUMBER,
+DEPT_NAME VARCHAR2(20)
+)
+
+insert into oracle_to_excel values(1,'Finance')
+insert into oracle_to_excel values(2,'Marketing')
+insert into oracle_to_excel values(3,'IT')
+
+commit

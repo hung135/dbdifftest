@@ -2,7 +2,7 @@ package dataobjs;
 
 import java.util.ArrayList;
 import java.util.List;
-
+ 
 public class Table {
     public String tableName;
     public List<String> columnNames;

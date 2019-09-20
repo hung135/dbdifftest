@@ -21,11 +21,6 @@ TableSampleCheckSum:
     schemaOrOwner: dbo
     writePath: ./md5/table_row_checksum2.csv
     sampleSize: 2
-QueryToExcel:
-  sys-dev:
-    writePath: ./reports/test1.xls
-    sql: select * from dbo.monBucketPool
-    sheetName: dbo.sheet1
 TableLoadCsv:
   sys-dev1:
     schemaOrOwner: dbo

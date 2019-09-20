@@ -1,0 +1,9 @@
+QueryToCSV:
+  sys-dev:
+    writePath: ./reports/test1.csv
+    sql: select * from dbo.monBucketPool
+QueryToExcel:
+  sys-dev:
+    writePath: ./reports/test1.xls
+    sql: select * from dbo.monBucketPool
+    sheetName: dbo.sheet1

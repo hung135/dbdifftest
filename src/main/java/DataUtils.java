@@ -15,11 +15,13 @@ import java.sql.Statement;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
@@ -202,6 +204,37 @@ public class DataUtils {
             stmt.close();
 
         }
+
+    }
+
+    /**
+     * place hold to upload images
+     * 
+     * @param conn
+     * @param file
+     * @param uniqueid
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void uploadImage(Connection conn, File file, int uniqueid) throws SQLException, IOException {
+
+        String filename = file.getName();
+        int length = (int) file.length();
+
+        FileInputStream filestream = null;
+
+        filestream = new FileInputStream(file);
+
+        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        String query = "UPDATE assignment SET instructions_file = ?, instructions_filename = ? WHERE a_key = "
+                + uniqueid;
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setBinaryStream(1, filestream, length);
+        ps.setString(2, filename);
+        int rows = ps.executeUpdate();
+        ps.close();
+        stmt.close();
+        filestream.close();
 
     }
 

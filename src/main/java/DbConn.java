@@ -48,11 +48,11 @@ public class DbConn {
         DbType(String driver, String url) {
             this.driver = driver;
             this.url = url;
-            System.out.println(url);
+            // System.out.println(url);
         }
 
         public String driver() {
-            System.out.println(driver);
+            // System.out.println(driver);
             return driver;
         }
 
@@ -92,7 +92,7 @@ public class DbConn {
         cpds.setTestConnectionOnCheckout(true);
 
         this.conn = cpds.getConnection();
-        System.out.println("Conn Completed");
+        // System.out.println("DB Connection Successful: " + dbtype);
     }
 
     public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
@@ -271,7 +271,7 @@ public class DbConn {
     public void queryToCSV(String selectQuery, String fullFilePath) throws Exception {
         // System.out.println(selectQuery);
 
-        System.out.println("Writing to file: " + fullFilePath);
+        // System.out.println("Writing to file: " + fullFilePath);
         Statement stmt = this.conn.createStatement();
         ResultSet rs = stmt.executeQuery(selectQuery);
         // int numCols = rs.getMetaData().getColumnCount();

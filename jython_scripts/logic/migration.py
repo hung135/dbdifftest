@@ -14,12 +14,13 @@ class TableDump(object):
         if not os.path.exists(path):
             os.makedirs(path)
         
-        print("All the tables in this DB")
         x=(dbConn.getTableNames(schemaOrOwner))
         for a in x:
             fqn=os.path.join(path,a+'.csv')
-            dbConn.queryToCSV('select * from {0}.{1}'.format(schemaOrOwner,a),fqn)
-
+            try:
+                dbConn.queryToCSV('select * from {0}.{1}'.format(schemaOrOwner,a),fqn)
+            except:
+                pass
     def __repr__(self):
         return str(self.__dict__)
 
@@ -42,9 +43,9 @@ class TableRowCount(object):
             except:
                  tableCount.append([a,'SQL Execute Error'])
             
-        dataUtil= DataUtils()
+       
 
-        print("writing table count: ",path)
+         
         header=["TableName","RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
                          quotechar='|')
@@ -63,8 +64,7 @@ class TableSampleCheckSum(object):
         directory=os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
-         
-        print("All the tables in this DB")
+
         x=(dbConn.getTableNames(schemaOrOwner))
         table_row_hash = []
         sql='select * from {0}.{1} limit {2}'

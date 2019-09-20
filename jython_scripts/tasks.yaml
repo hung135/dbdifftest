@@ -1,10 +1,10 @@
-# TableDump:
-#   sys-dev:
-#     schemaOrOwner: dbo
-#     writePath: ./
-#   sys-dev1:
-#     schemaOrOwner: dbo
-#     writePath: ./
+TableDump:
+  sys-dev:
+    schemaOrOwner: dbo
+    writePath: ./tabledump/
+  sys-dev1:
+    schemaOrOwner: dbo
+    writePath: ./tabledump2/
 TableRowCount:
   sys-dev:
     schemaOrOwner: dbo

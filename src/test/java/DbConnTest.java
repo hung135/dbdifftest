@@ -25,7 +25,7 @@ public class DbConnTest extends TestCase {
     public Map<String, String> env = System.getenv();
 
     @Test
-    public void testReadFileExecuteSQL() throws SQLException, IOException {
+    public void testReadFileExecuteSQL() throws Exception {
 
         String password = env.get("SYBASE_PASSWORD");
 
@@ -46,7 +46,7 @@ public class DbConnTest extends TestCase {
     }
 
     @Test
-    public void testQueryToCSV() throws SQLException, IOException {
+    public void testQueryToCSV() throws Exception {
         String selectQuery = "select * from dbo.titles";
         String csvFilePath = "/workspace/test.csv";
         String password = env.get("SYBASE_PASSWORD");
@@ -60,7 +60,7 @@ public class DbConnTest extends TestCase {
     }
 
     @Test
-    public void testQueryToStoredProc() throws SQLException, IOException {
+    public void testQueryToStoredProc() throws Exception {
         String selectQuery = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
                 + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid";
         String csvFilePath = "/workspace/test.csv";
@@ -80,7 +80,7 @@ public class DbConnTest extends TestCase {
      * @throws IOException
      */
     @Test
-    public void testWriteListStringToCSV() throws SQLException, IOException {
+    public void testWriteListStringToCSV() throws Exception {
         String selectQuery = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
                 + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid";
         String csvFilePath = "/workspace/testxxxx.csv";

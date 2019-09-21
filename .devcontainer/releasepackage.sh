@@ -7,4 +7,4 @@ cd /workspace/jython_scripts
 tar -cvf /workspace/dbdiff.tar . 
 cd /workspace/
 tar -rvf dbdiff.tar ${JAREXPORT}
-python3 ${GITHUBRELEASE} -k ${GITHUBKEY} -r ${REPO} -c ${GITB} -m ${DATE} -a /workspace/dbdiff.tar
+python3 ${GITHUBRELEASE} -v -k ${GITHUBKEY} -r ${REPO} -c ${GITB} -m ${DATE} -a /workspace/dbdiff.tar

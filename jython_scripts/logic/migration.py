@@ -2,6 +2,7 @@ import os
 import DataUtils
 
 import java.lang.Object
+from java.util import HashMap
 
 import csv
 import md5
@@ -129,3 +130,12 @@ class QueryToExcel(object):
         fqn = os.path.abspath(writePath)
          
         dbConn.queryToExcel(sql,  sheetName,fqn)
+
+class CompareCsv(object):
+    def __init__(self, csv1, csv2, outfile, columns):
+        # convert columns and validate
+        primary_columns = {}
+        for col in columns:
+            for k in dict(col):
+                primary_columns[k] = col[k].split(",")
+        DataUtils.compareCSV(csv1, csv2, outfile, HashMap(primary_columns))

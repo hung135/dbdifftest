@@ -20,23 +20,36 @@ def _get_release_based_tag(releases, tag):
     return release
 
 def create_release(repository, releases, name, message, tag=None):
+    base_version = "v0.0.1"
     if not tag:
         try:
             tag = re.findall(".\d", releases[0].tag_name)
-            tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
-            tag = "".join(tag)
+            if "".join(tag) == base_version:
+                tag = "v0.1.0"
+            else:
+                tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
+                tag = "".join(tag)
         except IndexError:
-            tag = "v0.0.1"
+            tag = base_version
 
+    print(tag)
     release = repository.create_git_release(tag, name, message, prerelease=True)
-    return release
+    return (release, tag)
 
-def upload_asset(filep, tag=None, release=None, releases=None):
+def upload_asset(filep, tag=None, release=None, releases=None, version=None):
     if not _file_exist(filep):
         print(filep)
         _error_out("File not found")
     if not release:
         release = _get_release_based_tag(releases, tag)
+    if version:
+        path, file_type = os.path.splitext(filep)
+        file_name = os.path.basename(path)
+        file_name = "{0}_{1}{2}".format(file_name, version, file_type)
+        new_path = os.path.abspath(os.path.join(os.path.dirname(path), file_name))
+        os.rename(filep, new_path)
+        filep = new_path
+
     filep = os.path.abspath(filep)
     release.upload_asset(filep)
 
@@ -88,6 +101,7 @@ def parse_cli():
    extras_group.add_argument("-e", "--enterprise", help="Using enterprise Github account enter the address needed to connect to; provide a url like so: https://github.com/")
    extras_group.add_argument("-t", "--tag", required="-u" in sys.argv, help="Target tag")
    extras_group.add_argument("-gl", "--get_latest", help="Get latest tag", action="store_true")
+   extras_group.add_argument("-v", help="Enable Versionings", action="store_true")
 
    args = parser.parse_args()
    return args 
@@ -115,11 +129,14 @@ def run(args):
         print("Download complete")
 
     if args.create:
-        release = create_release(repository, releases, args.create, args.message, args.tag)
+        release, tag= create_release(repository, releases, args.create, args.message, args.tag)
         print("Created release: %s" % args.create)
+        version = None
         if args.asset:
-            upload_asset(args.asset, release=release)
-            print("Added asset to release")
+            if args.v:
+                version = tag
+        upload_asset(args.asset, release=release, version=version)
+        print("Added asset to release")
 
     if args.update:
         upload_asset(args.asset, tag=args.tag, releases=releases)

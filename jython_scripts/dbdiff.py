@@ -97,6 +97,10 @@ def task_execution(databases_connections, task_config):
 
                     except Exception as e:
                         print("Task {0} caused an exception:\n\t{1}".format(task.key, e))
+                elif task.key == "CompareCsv":
+                        module = importlib.import_module("logic.migration")
+                        class_ = getattr(module, task.key)
+                        instance = class_(**task.parameters[con_key])
                 else:
                     print("Task {0} with key {1} not found".format(task.key, con_key))
 

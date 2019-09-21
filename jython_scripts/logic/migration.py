@@ -132,10 +132,10 @@ class QueryToExcel(object):
         dbConn.queryToExcel(sql,  sheetName,fqn)
 
 class CompareCsv(object):
-    def __init__(self, csv1, csv2, outfile, columns):
+    def __init__(self, csv1, csv2, outfile, key_columns):
         # convert columns and validate
-        primary_columns = {}
-        for col in columns:
-            for k in dict(col):
-                primary_columns[k] = col[k].split(",")
-        DataUtils.compareCSV(csv1, csv2, outfile, HashMap(primary_columns))
+        # primary_columns = {}
+        # for col in columns:
+        #     for k in dict(col):
+        #         primary_columns[k] = col[k].split(",")
+        DataUtils.compareCSV(csv1, csv2, outfile, List(key_columns))

@@ -82,12 +82,13 @@ RUN wget http://search.maven.org/remotecontent?filepath=org/python/jython-standa
 
 RUN echo 'alias java="/usr/local/openjdk-11/bin/java"' >> ~/.bashrc
 RUN echo 'alias jython="/usr/local/openjdk-11/bin/java -jar /opt/jython27.jar"' >> ~/.bashrc
-RUN echo 'alias buildjar="mvn compile assembly:single -f /workspace/pom.xml"' >>~/.bashrc
+RUN echo 'alias buildjar="mvn compile assembly:single -f /workspace/pom.xml && cp /workspace/target/DbTest-jar-with-dependencies.jar /workspace/jython_scripts/DbTest-jar-with-dependencies.jar"' >>~/.bashrc
 RUN echo 'alias buildjarclean="mvn clean compile assembly:single -f /workspace/pom.xml"' >>~/.bashrc
 RUN echo 'alias runjar="java -jar ${JAREXPORT}"' >>~/.bashrc
 RUN echo 'alias jartest="mvn clean test"' >> ~/.bashrc
 RUN echo 'alias buildrunjython="mvn compile assembly:single && /usr/local/openjdk-11/bin/java -jar /opt/jython27.jar"' >>~/.bashrc 
-
+RUN echo 'alias runreports="cd /workspace/jython_scripts/ && jython dbdiff.py -y conn.yaml -t reports.yaml"'
+RUN echo 'alias runtasks="cd /workspace/jython_scripts/ && jython dbdiff.py -y conn.yaml -t tasks.yaml"'
 # Release manager
 # RUN echo 'alias release="python3 /workspace/release-manager/pyGithubManager.py ${GITHUBRELEASE} -k ${GITHUBKEY} -r {REPO}"' >>~/.bashrc
 # RUN echo 'alias releaseparm="release -c \"${git symbolic-ref --short HEAD}\" -m \"${date -I}\" -a ${JAREXPORT}"' >> ~/.bashrc

@@ -306,10 +306,7 @@ public class DbConn {
     public void queryToExcel(String selectQuery, String sheetName, String fullFilePath) throws Exception {
 
         Statement stmt = this.conn.createStatement();
-        /* Create Workbook and Worksheet objects */
-        HSSFWorkbook new_workbook = new HSSFWorkbook(); // create a blank workbook object
-        HSSFSheet sheet = new_workbook.createSheet(sheetName); // create a worksheet with caption score_details
-
+       
         /* Define the SQL query */
         ResultSet query_set = stmt.executeQuery(selectQuery);
         /* Create Map for Excel Data */
@@ -344,35 +341,7 @@ public class DbConn {
         /* Close all DB related objects */
         query_set.close();
         stmt.close();
-
-        /* Load data into logical worksheet */
-        Set<String> keyset = excel_data.keySet();
-        int rownum = 0;
-        // Header Row
-        Row r = sheet.createRow(rownum);
-        for (int i = 1; i <= columnCount; i++) {
-
-            r.createCell(i - 1).setCellValue(columnNames.get(i - 1));
-
-        }
-        rownum++;
-        for (String key : keyset) { // loop through the data and add them to the cell
-            Row row = sheet.createRow(rownum++);
-            Object[] objArr = excel_data.get(key);
-            int cellnum = 0;
-            for (Object obj : objArr) {
-                Cell cell = row.createCell(cellnum++);
-                if (obj instanceof Double)
-                    cell.setCellValue((Double) obj);
-                else
-                    cell.setCellValue((String) obj);
-            }
-        }
-
-        FileOutputStream output_file = new FileOutputStream(new File(fullFilePath)); // create XLS file
-        new_workbook.write(output_file);// write excel document to output stream
-        output_file.close(); // close the file
-        new_workbook.close();
+        DataUtils.writeToExcel(columnNames, excel_data, sheetName, fullFilePath);
     }
 
     /**

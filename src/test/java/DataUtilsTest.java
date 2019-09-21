@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class DataUtilsTest extends TestCase {
@@ -176,4 +178,14 @@ public class DataUtilsTest extends TestCase {
         System.out.println(db.getTableColumns("dbo"));
     }
 
+    @Test
+    public void testCompareCSV() throws Exception {
+        String firstCSV = "/workspace/jython_scripts/table_rowcount.csv";
+        String secondCSV = "/workspace/jython_scripts/table_rowcount2.csv";
+        String outFile = "/workspace/jython_scripts/reports/output.csv";
+        List<String> primaryColumn = new ArrayList<>();
+        primaryColumn.add("TableName");
+
+        DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn);
+    }
 }

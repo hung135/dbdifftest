@@ -3,3 +3,4 @@
 "yyy","33","Values mismatch on column: col3","Id"
 "yyyy","444","Values mismatch on column: col3","Id"
 "Missing in header ","Missing in header ","Missing in header ","Id2"
+"Missing in header ","Missing in header ","Missing in header ","COL2"

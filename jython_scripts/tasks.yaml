@@ -32,9 +32,15 @@
 #       - tableName: test3
 #         filePath: ./md5/table_row_checksum3.csv
 CompareCsv:
+    #header rows have to be the same...(case insensitive is ok)
+    #Concat the data of all the key_columns together to make a string to be the hash key
+    #don't need to print out the excat difference just identify the keys that don't match or missing
     first-compare:
       csv1: /workspace/samples/sample1.csv
       csv2: /workspace/samples/sample2.csv
       outfile: /workspace/samples/output.csv
-      columns: # Columns MUST be exactly spelt
-        - Id: 0,1,2
+      key_columns: # 
+        - Id
+          #column3
+          #column4
+          #column5.......only 1 column is key in this case

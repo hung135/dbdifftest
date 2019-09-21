@@ -135,8 +135,7 @@ class CompareCsv(object):
     def __init__(self, csv1, csv2, outfile, columns):
         # convert columns and validate
         primary_columns = {}
-        for x in columns:
-            col = dict(x)
-            for k in col:
+        for col in columns:
+            for k in dict(col):
                 primary_columns[k] = col[k].split(",")
         DataUtils.compareCSV(csv1, csv2, outfile, HashMap(primary_columns))

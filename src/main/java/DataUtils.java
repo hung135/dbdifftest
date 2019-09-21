@@ -180,8 +180,13 @@ public class DataUtils {
 
     public static String[] getValueFromStringArray(List<String[]> csv, String key, int index){
         for (String[] value : csv) {
-            if(value[index].equals(key.toLowerCase())){
-                return value;
+            try {
+                if(value[index].equals(key.toLowerCase())){
+                    return value;
+                }
+            } catch(NullPointerException ex){
+                // Tells us it isn't in the CSV
+                return null;
             }
         }
         return null;
@@ -214,7 +219,7 @@ public class DataUtils {
                     boolean isEmpty = true;
                     String[] csv1Value = getValueFromStringArray(csv1, key, index);
                     String[] csv2Value = getValueFromStringArray(csv2, key, index);
-                    
+
                     if(csv1Value == null && csv2Value == null){
                         toAdd = new String[]{"missing", "missing", keyPair.getKey(), key};
                     } else if((csv1Value != null || csv2Value != null) && !compareRow(csv1Value, csv2Value)){

@@ -37,4 +37,4 @@ CompareCsv:
       csv2: /workspace/samples/sample2.csv
       outfile: /workspace/samples/output.csv
       columns: # Columns MUST be exactly spelt
-        - Id: 0,1
+        - Id: 0,1,2

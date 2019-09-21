@@ -1,7 +1,9 @@
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -19,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.yaml.snakeyaml.Yaml;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.sql.Statement;
 
@@ -31,12 +34,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.FileReader;
 import java.sql.Blob;
  
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.security.KeyPair;
  
 import java.sql.Connection;
@@ -198,21 +198,7 @@ public class DataUtils {
         return results;
     }
 
-    public static String[] getValueFromStringArray(List<String[]> csv, String key, int index){
-        for (String[] value : csv) {
-            try {
-                if(value[index].equals(key.toLowerCase())){
-                    return value;
-                }
-            } catch(NullPointerException ex){
-                // Tells us it isn't in the CSV
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /**
+     /**
      * place holder logic to download image
      * 
      * @param conn
@@ -355,64 +341,49 @@ public class DataUtils {
         new_workbook.close();
     }
 
-    /**
-     * 
-     */
+    public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn) throws Exception {
+        String[] outputHeaders, headersCSV1, headersCSV2;
+        List<String[]> csv1, csv2, results;
 
-
-    public static void compareCSV(String firstCSV, String secondCSV, String outFile, HashMap<String,List<String>> primaryColumn) throws Exception {
-        String[] headers = new String[]{"File1", "File2", "Column", "Key"};
-        List<String[]> results = new ArrayList<String[]>(){{add(headers);}};
-        List<String[]> csv1 = readCSV(firstCSV);
-        List<String[]> csv2 = readCSV(secondCSV);
-        String[] headerCSV1 = csv1.get(0);
-        String[] headerCSV2 = csv2.get(0);
+        outputHeaders = new String[]{"File1", "File2", "Reason", "Primary Column"};
+        results = new ArrayList<String[]>(){{add(outputHeaders);}};
+        csv1 = readCSV(firstCSV);
+        csv2 = readCSV(secondCSV);
+        headersCSV1 = csv1.get(0);
+        headersCSV2 = csv2.get(0);
         csv1.remove(0);
         csv2.remove(0);
 
-        if(!compareRow(headerCSV1, headerCSV2)){
+        if(!compareRow(headersCSV1, headersCSV2)){
             throw new Exception("Headers do not match");
         }
-        for (Map.Entry<String, List<String>> keyPair : primaryColumn.entrySet()) {
-            String[] toAdd;
-            int index = Arrays.asList(headerCSV1).indexOf(keyPair.getKey());
-            if(index == -1){
+        List<String> headers = Arrays.asList(headersCSV1).stream().map(s -> s.toLowerCase()).collect(Collectors.toList());
+        for (String column : primaryColumn){
+            int index = headers.indexOf(column.toLowerCase());
+            if(index == -1) {
                 String missing = "Missing in header ";
-                toAdd = new String[]{missing, missing, keyPair.getKey()};
-                results.add(toAdd);
-                System.out.println(missing + keyPair.getKey());
+                results.add(new String[] {missing, missing, missing, column});
             } else {
-                for (String key : keyPair.getValue()) {
-                    toAdd = new String[3];
-                    boolean isEmpty = true;
-                    String[] csv1Value = getValueFromStringArray(csv1, key, index);
-                    String[] csv2Value = getValueFromStringArray(csv2, key, index);
-
-                    if(csv1Value == null && csv2Value == null){
-                        toAdd = new String[]{"missing", "missing", keyPair.getKey(), key};
-                    } else if((csv1Value != null || csv2Value != null) && !compareRow(csv1Value, csv2Value)){
-                        // Data didn't match or something is null
-                        if(csv1Value == null){ // doesn't have value
-                            toAdd = new String[]{"missing", csv2Value[index], keyPair.getKey(), key};
-                            System.out.println("CSV1 missing value for key: " + key);
-                            isEmpty = false;
-                        } else if (csv2Value == null){
-                            toAdd = new String[]{csv1Value[index], "missing", keyPair.getKey(), key};
-                            System.out.println("CSV2 missing value for key: " + key);
-                            isEmpty = false;
-                        } else {
-                            for(int i=0; i < csv1Value.length; i++){
-                                if(!csv1Value[i].toString().toLowerCase().equals(csv2Value[i].toString().toLowerCase())){
-                                    toAdd = new String[]{csv1Value[i], csv2Value[i], keyPair.getKey(), key};
-                                    System.out.println("Values didn't match for key: " + key);
-                                    isEmpty = false;
-                                    break;
+                for(String[] row1 : csv1){
+                    boolean found = false;
+                    for(String[] row2 : csv2){
+                        if(row1[index].equals(row2[index])){
+                            if(!compareRow(row1, row2)){
+                                for(int i=0; i < row1.length; i++){
+                                    if(!row1[i].toLowerCase().equals(row2[i].toLowerCase())){
+                                        results.add(new String[]{row1[i], row2[i], "Values mismatch on column:" + headers.get(i), column});
+                                        System.out.println("Values didn't match for key: " + column);
+                                    }
                                 }
                             }
+                            found = true;
+                            csv2.remove(row2);
+                            break;
                         }
                     }
-                    if(!isEmpty){
-                        results.add(toAdd);
+                    if(!found){
+                        results.add(new String[]{row1[index], "missing", "Values missing", column});
+                        csv1.remove(row1);
                     }
                 }
             }

@@ -1,3 +1,5 @@
-"File1","File2","Column","Key"
-"Christian1","Christian","Id","0"
-"missing","2","Id","2"
+"File1","File2","Reason","Primary Column"
+"Christian1","Christian","Values mismatch on column: name","Id"
+"yyy","33","Values mismatch on column: col3","Id"
+"yyyy","444","Values mismatch on column: col3","Id"
+"Missing in header ","Missing in header ","Missing in header ","Id2"

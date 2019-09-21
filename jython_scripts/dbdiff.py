@@ -3,23 +3,23 @@ import os
 import argparse
 import csv
 # <<<<<<< HEAD
-import os 
-#windows make sure you use c:\\xxx\\file.jar
-jarpath=os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar")
-#JAVA ITEMS
-sys.path.append(jarpath)
-# =======
+# import os 
+# #windows make sure you use c:\\xxx\\file.jar
+# jarpath=os.path.abspath("./DbTest-jar-with-dependencies.jar")
+# #JAVA ITEMS
+# sys.path.append(jarpath)
+# # =======
 import importlib
 
-# #JAVA ITEMS
-# sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
-# # Jtyhon needs to be implicit. os.path.sep is broken; hence why we do it like so:
-# # This is only for the packaged scripts
-# sys.path.append(
-#     os.path.abspath(
-#         "{0}{1}{2}".format(os.path.abspath(os.path.dirname(__file__)), os.sep, os.path.abspath("/workspace/target/DbTest-jar-with-dependencies.jar"))
-#     )
-# )
+#JAVA ITEMS
+sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
+# Jtyhon needs to be implicit. os.path.sep is broken; hence why we do it like so:
+# This is only for the packaged scripts
+sys.path.append(
+    os.path.abspath(
+        "{0}{1}{2}".format(os.path.abspath(os.path.dirname(__file__)), os.sep, os.path.abspath("./DbTest-jar-with-dependencies.jar"))
+    )
+)
  
 import YamlParser
 import DbConn

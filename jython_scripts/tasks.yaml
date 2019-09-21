@@ -41,6 +41,8 @@ CompareCsv:
       outfile: /workspace/samples/output.csv
       key_columns: # 
         - Id
+        - Id2
+        - COL2
           #column3
           #column4
           #column5.......only 1 column is key in this case

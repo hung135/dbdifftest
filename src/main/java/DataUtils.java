@@ -4,6 +4,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+
 import com.opencsv.CSVWriter;
 
 import java.util.List;
@@ -275,4 +280,51 @@ public class DataUtils {
         H5.H5Sclose(dataspaceID);
         H5.H5Dclose(datasetID);
     }
+
+    /**
+     * 
+     */
+
+    public static void writeToExcel(List<String> columnNames, Map<String, Object[]> excel_data, String sheetName,
+            String fullFilePath) throws Exception {
+
+        /* Create Workbook and Worksheet objects */
+        HSSFWorkbook new_workbook = new HSSFWorkbook(); // create a blank workbook object
+        HSSFSheet sheet = new_workbook.createSheet(sheetName); // create a worksheet with caption score_details
+        int columnCount = columnNames.size();
+
+        /* Load data into logical worksheet */
+        Set<String> keyset = excel_data.keySet();
+        int rownum = 0;
+        // Header Row
+        Row r = sheet.createRow(rownum);
+        for (int i = 1; i <= columnCount; i++) {
+
+            r.createCell(i - 1).setCellValue(columnNames.get(i - 1));
+
+        }
+        rownum++;
+        for (String key : keyset) { // loop through the data and add them to the cell
+            Row row = sheet.createRow(rownum++);
+            Object[] objArr = excel_data.get(key);
+            int cellnum = 0;
+            for (Object obj : objArr) {
+                Cell cell = row.createCell(cellnum++);
+                if (obj instanceof Double)
+                    cell.setCellValue((Double) obj);
+                else
+                    cell.setCellValue((String) obj);
+            }
+        }
+
+        FileOutputStream output_file = new FileOutputStream(new File(fullFilePath)); // create XLS file
+        new_workbook.write(output_file);// write excel document to output stream
+        output_file.close(); // close the file
+        new_workbook.close();
+    }
+
+    /**
+     * 
+     */
+
 }

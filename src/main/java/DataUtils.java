@@ -359,7 +359,7 @@ public class DataUtils {
      * 
      */
 
-}
+
     public static void compareCSV(String firstCSV, String secondCSV, String outFile, HashMap<String,List<String>> primaryColumn) throws Exception {
         String[] headers = new String[]{"File1", "File2", "Column", "Key"};
         List<String[]> results = new ArrayList<String[]>(){{add(headers);}};

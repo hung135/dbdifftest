@@ -403,24 +403,22 @@ public class DataUtils {
     }
 
     public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn,
-            String algorithm) throws Exception {
-        String[] outputHeaders, headersCSV1, headersCSV2;
+    String reportHeader,String algorithm) throws Exception {
+        String[]  headersCSV1, headersCSV2;
         List<String[]> csv1, csv2, results;
-        System.out.println(primaryColumn);
-        outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column" };
-        results = new ArrayList<String[]>() {
-            {
-                add(outputHeaders);
-            }
-        };
+        // System.out.println(primaryColumn);
+        // outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column" };
+        // results = new ArrayList<String[]>() {
+        //     {
+        //         add(outputHeaders);
+        //     }
+        // };
         csv1 = readCSV(firstCSV);
-        csv2 = readCSV(secondCSV);
-        System.out.println(firstCSV);
+        csv2 = readCSV(secondCSV); 
 
         headersCSV1 = csv1.get(0);
         headersCSV2 = csv2.get(0);
-
-        System.out.println("here2");
+ 
         csv1.remove(0);
         csv2.remove(0);
 
@@ -435,7 +433,7 @@ public class DataUtils {
 
         HashMap<String, String> mapCSVdata1 = fillHashMap(headerIndex1, csv1, algorithm);
         HashMap<String, String> mapCSVdata2 = fillHashMap(headerIndex2, csv2, algorithm);
-        HashMap<String, String> descrpencyMap = new HashMap<>();
+        HashMap<String, String[]> descrpencyMap = new HashMap<>();
 
         for (Map.Entry<String, String> entry : mapCSVdata1.entrySet()) {
             String keyCSV1 = entry.getKey();
@@ -443,7 +441,8 @@ public class DataUtils {
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
-                descrpencyMap.put(keyCSV1, valCSV1 + valCSV2);
+                String [] xxx = {valCSV1,valCSV2};
+                descrpencyMap.put(keyCSV1, xxx);
             }
 
         }
@@ -453,18 +452,20 @@ public class DataUtils {
             String valCSV2 = entry.getValue();
             String valCSV1 = mapCSVdata1.get(keyCSV2);
             if (!valCSV2.equals(valCSV1)) {
-                descrpencyMap.put(keyCSV2, valCSV2 + valCSV1);
+                String []xxx = {valCSV1,valCSV2};
+                descrpencyMap.put(keyCSV2, xxx);
             }
 
         }
-        List<String[]> result = new ArrayList<>();
-        for (Map.Entry<String, String> row : descrpencyMap.entrySet()) {
+        results = new ArrayList<>();
+         
+        results.add(reportHeader.split(","));
+        for (Map.Entry<String, String[]> row : descrpencyMap.entrySet()) {
             String key = row.getKey();
-            String val = row.getValue();
-            String xx[] = new String[2];
-            xx[0] = key;
-            xx[1] = val;
-            result.add(xx);
+            String [] val = row.getValue();
+             
+            String [] xxx={key,val[0],val[1]};
+            results.add(xxx);
 
         }
 
@@ -516,6 +517,6 @@ public class DataUtils {
         // }
         // }
         // }
-        writeListToCSV(result, outFile);
+        writeListToCSV(results, outFile);
     }
 }

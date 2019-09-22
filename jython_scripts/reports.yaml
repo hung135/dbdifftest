@@ -16,6 +16,7 @@ CompareCsv:
       csv2: ./table_rowcount2.csv
       outfile: ./reports/output.csv
       algorithm: hash
+      reportHeader: TableName,Dev,Test
       key_columns: # 
         - TableName
         # - Id2

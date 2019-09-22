@@ -21,13 +21,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.yaml.snakeyaml.Yaml;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.sql.Statement;
 
 import java.io.FileWriter;
 import java.io.IOException;
- 
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,9 +37,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.FileReader;
 import java.sql.Blob;
- 
+
 import java.security.KeyPair;
- 
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -161,7 +162,7 @@ public class DataUtils {
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-
+            System.out.println("here------------");
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -174,31 +175,30 @@ public class DataUtils {
         }
     }
 
-    
-   private static boolean compareRow(String[] row1, String[] row2) {
-       if(row1 == null || row2 == null){
-           return false;
-       }
-       if(row1.length == row2.length){
-            for(int i=0; i < row1.length; i++){
-                if(!row1[i].toLowerCase().toString().equals(row2[i].toString().toLowerCase())){
+    private static boolean compareRow(String[] row1, String[] row2) {
+        if (row1 == null || row2 == null) {
+            return false;
+        }
+        if (row1.length == row2.length) {
+            for (int i = 0; i < row1.length; i++) {
+                if (!row1[i].toLowerCase().toString().equals(row2[i].toString().toLowerCase())) {
                     return false;
                 }
             }
         } else {
             return false;
         }
-       return true;
-   }
+        return true;
+    }
 
-    private static List<String[]> readCSV(String csvPath) throws IOException{
+    private static List<String[]> readCSV(String csvPath) throws IOException {
         CSVReader reader = new CSVReader(new FileReader(csvPath));
         List<String[]> results = reader.readAll();
         reader.close();
         return results;
     }
 
-     /**
+    /**
      * place holder logic to download image
      * 
      * @param conn
@@ -341,53 +341,181 @@ public class DataUtils {
         new_workbook.close();
     }
 
-    public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn) throws Exception {
-        String[] outputHeaders, headersCSV1, headersCSV2;
-        List<String[]> csv1, csv2, results;
+    /**
+     * Given list of columns , findex the index location of it in the header row
+     * 
+     * @param keyColumns
+     * @param headerRow
+     * @return
+     */
+    public static List<Integer> findColumnIndex(List<String> keyColumns, String[] headerRow) {
 
-        outputHeaders = new String[]{"File1", "File2", "Reason", "Primary Column"};
-        results = new ArrayList<String[]>(){{add(outputHeaders);}};
-        csv1 = readCSV(firstCSV);
-        csv2 = readCSV(secondCSV);
-        headersCSV1 = csv1.get(0);
-        headersCSV2 = csv2.get(0);
-        csv1.remove(0);
-        csv2.remove(0);
+        List<Integer> headerIndex = new ArrayList<>();
+        int ii = 0;
+        for (String col : keyColumns) {
 
-        if(!compareRow(headersCSV1, headersCSV2)){
-            throw new Exception("Headers do not match");
+            int jj = 0;
+            for (String headerCol : headerRow) {
+                ii++;
+                if (col.toLowerCase().equals(headerCol.toLowerCase())) {
+                    headerIndex.add(jj);
+                }
+            }
+            ii++;
         }
-        List<String> headers = Arrays.asList(headersCSV1).stream().map(s -> s.toLowerCase()).collect(Collectors.toList());
-        for (String column : primaryColumn){
-            int index = headers.indexOf(column.toLowerCase());
-            if(index == -1) {
-                String missing = "Missing in header ";
-                results.add(new String[] {missing, missing, missing, column});
-            } else {
-                for(String[] row1 : csv1){
-                    boolean found = false;
-                    for(String[] row2 : csv2){
-                        if(row1[index].equals(row2[index])){
-                            if(!compareRow(row1, row2)){
-                                for(int i=0; i < row1.length; i++){
-                                    if(!row1[i].toLowerCase().equals(row2[i].toLowerCase())){
-                                        results.add(new String[]{row1[i], row2[i], "Values mismatch on column:" + headers.get(i), column});
-                                        System.out.println("Values didn't match for key: " + column);
-                                    }
-                                }
-                            }
-                            found = true;
-                            csv2.remove(row2);
-                            break;
-                        }
+        return headerIndex;
+
+    }
+
+    /**
+     * Extract each keycolumn and makeit key, and the rest of the columns data
+     * 
+     * @param headerIndex
+     * @param headerRow
+     * @return
+     */
+    public static HashMap<String, String> fillHashMap(List<Integer> headerIndex, List<String[]> csv, String algorithm) {
+        HashMap<String, String> mapCSVdata = new HashMap<>();
+        for (String[] row : csv) {
+            String hashKey = "";
+            String data = "";
+            for (Integer keyColIndex : headerIndex) {
+                hashKey = hashKey + row[keyColIndex];
+                for (int i = 0; i < row.length; i++) {
+                    Integer iii = i;
+                    if (!Arrays.asList(headerIndex).contains(iii)) {
+                        data = data + row[i];
                     }
-                    if(!found){
-                        results.add(new String[]{row1[index], "missing", "Values missing", column});
-                        csv1.remove(row1);
-                    }
+
+                }
+                String md5Hex = DigestUtils.md5Hex(data).toUpperCase();
+                if (algorithm.toLowerCase().equals("hash")) {
+
+                    mapCSVdata.put(hashKey, md5Hex);
+
+                } else {
+                    mapCSVdata.put(hashKey, data);
                 }
             }
         }
-        writeListToCSV(results, outFile);
+
+        return mapCSVdata;
+    }
+
+    public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn,
+            String algorithm) throws Exception {
+        String[] outputHeaders, headersCSV1, headersCSV2;
+        List<String[]> csv1, csv2, results;
+        System.out.println(primaryColumn);
+        outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column" };
+        results = new ArrayList<String[]>() {
+            {
+                add(outputHeaders);
+            }
+        };
+        csv1 = readCSV(firstCSV);
+        csv2 = readCSV(secondCSV);
+        System.out.println(firstCSV);
+
+        headersCSV1 = csv1.get(0);
+        headersCSV2 = csv2.get(0);
+
+        System.out.println("here2");
+        csv1.remove(0);
+        csv2.remove(0);
+
+        List<Integer> headerIndex1 = findColumnIndex(primaryColumn, headersCSV1);
+        List<Integer> headerIndex2 = findColumnIndex(primaryColumn, headersCSV2);
+
+        // Build array of primarykey column index locations
+
+        if (!compareRow(headersCSV1, headersCSV2)) {
+            throw new Exception("Headers do not match");
+        }
+
+        HashMap<String, String> mapCSVdata1 = fillHashMap(headerIndex1, csv1, algorithm);
+        HashMap<String, String> mapCSVdata2 = fillHashMap(headerIndex2, csv2, algorithm);
+        HashMap<String, String> descrpencyMap = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : mapCSVdata1.entrySet()) {
+            String keyCSV1 = entry.getKey();
+            String valCSV1 = entry.getValue();
+            String valCSV2 = mapCSVdata2.get(keyCSV1);
+            if (!valCSV1.equals(valCSV2)) {
+                // add to final table
+                descrpencyMap.put(keyCSV1, valCSV1 + valCSV2);
+            }
+
+        }
+
+        for (Map.Entry<String, String> entry : mapCSVdata2.entrySet()) {
+            String keyCSV2 = entry.getKey();
+            String valCSV2 = entry.getValue();
+            String valCSV1 = mapCSVdata1.get(keyCSV2);
+            if (!valCSV2.equals(valCSV1)) {
+                descrpencyMap.put(keyCSV2, valCSV2 + valCSV1);
+            }
+
+        }
+        List<String[]> result = new ArrayList<>();
+        for (Map.Entry<String, String> row : descrpencyMap.entrySet()) {
+            String key = row.getKey();
+            String val = row.getValue();
+            String xx[] = new String[2];
+            xx[0] = key;
+            xx[1] = val;
+            result.add(xx);
+
+        }
+
+        // System.out.println(primaryColumn + "--------xxx------------");
+        // List<String> headers = Arrays.asList(headersCSV1).stream().map(s ->
+        // s.toLowerCase())
+        // .collect(Collectors.toList());
+        // System.out.println(headers + "--------------------");
+        // for (String column : primaryColumn) {
+        // int index = headers.indexOf(column.toLowerCase());
+        // if (index == -1) {
+        // String missing = "Missing in header ";
+        // results.add(new String[] { missing, missing, missing, column });
+        // } else {
+        // int xx = 0;
+        // /** Fore each Row in Csv1 */
+        // for (String[] row1 : csv1) {
+        // boolean found = false;
+        // /** For Each Row in Csv2 */
+        // int ii = 0;
+        // String[] xxx = null;
+        // for (String[] row2 : csv2) {
+        // ii++;
+        // xx = csv2.size();
+        // if (row1[index].equals(row2[index])) {
+        // if (!compareRow(row1, row2)) {
+        // for (int i = 0; i < row1.length; i++) {
+        // if (!row1[i].toLowerCase().equals(row2[i].toLowerCase())) {
+        // results.add(new String[] { row1[i], row2[i],
+        // "Values mismatch on column:" + headers.get(i), column });
+        // System.out.println("Values didn't match for key: " + column);
+        // }
+        // }
+        // }
+        // found = true;
+        // /** Race condition caused by this removed withe for each above... */
+        // // csv2.remove(row2);
+        // xxx = row2;
+        // break;
+        // }
+        // }
+        // if (!found) {
+        // results.add(new String[] { row1[index], "missing", "Values missing", column
+        // });
+        // csv1.remove(row1);
+        // } else {
+        // csv2.remove(xxx);
+        // }
+        // }
+        // }
+        // }
+        writeListToCSV(result, outFile);
     }
 }

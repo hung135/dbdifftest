@@ -7,3 +7,19 @@ QueryToExcel:
     writePath: ./reports/test1.xls
     sql: select * from dbo.monBucketPool
     sheetName: dbo.sheet1
+CompareCsv:
+    #header rows have to be the same...(case insensitive is ok)
+    #Concat the data of all the key_columns together to make a string to be the hash key
+    #don't need to print out the excat difference just identify the keys that don't match or missing
+    first-compare:
+      csv1: ./table_rowcount.csv
+      csv2: ./table_rowcount2.csv
+      outfile: ./reports/output.csv
+      algorithm: hash
+      key_columns: # 
+        - TableName
+        # - Id2
+        # - COL2
+          #column3
+          #column4
+          #column5.......only 1 column is key in this case

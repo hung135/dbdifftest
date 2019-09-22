@@ -12,7 +12,7 @@ import csv
 import importlib
 
 #JAVA ITEMS
-sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
+sys.path.append("./DbTest-jar-with-dependencies.jar")
 # Jtyhon needs to be implicit. os.path.sep is broken; hence why we do it like so:
 # This is only for the packaged scripts
 sys.path.append(
@@ -106,7 +106,7 @@ def task_execution(databases_connections, task_config):
 
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:
-        writer = csv.writer(csvfile, delimiter=",")
+        writer = csv.writer(csvfile, delimiter=",",lineterminator='\n')
         writer.writerows(rows)
 
 def execute(args):

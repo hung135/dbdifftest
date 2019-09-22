@@ -50,7 +50,7 @@ class TableRowCount(object):
 
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
-                                 quotechar='|')
+                                 quotechar='|',lineterminator='\n')
         outPutTable.writerow(header)
         for row in tableCount:
             outPutTable.writerow(row)
@@ -90,7 +90,7 @@ class TableSampleCheckSum(object):
                 header = ["TableName", "SampleDataHash"]
 
                 outPutTable = csv.writer(open(writePath, 'w'), delimiter=',',
-                                         quotechar='|')
+                                         quotechar='|',lineterminator='\n')
                 outPutTable.writerow(header)
                 for row in table_row_hash:
                     outPutTable.writerow(row)
@@ -123,7 +123,7 @@ class QueryToCSV(object):
         return str(self.__dict__)
 #todo..multiple sheets would be nice
 class QueryToExcel(object):
-    def __init__(self, dbConn, sql,  writePath,sheetName="Sheet1"):
+    def __init__(self, dbConn, sql,  writePath, sheetName="Sheet1"):
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -132,8 +132,8 @@ class QueryToExcel(object):
         dbConn.queryToExcel(sql,  sheetName,fqn)
 
 class CompareCsv(object):
-    def __init__(self, csv1, csv2, outfile, key_columns,algorithm="hash"):
+    def __init__(self, csv1, csv2, outfile, key_columns,reportHeader,algorithm="hash"):
         csv1=os.path.abspath(csv1)
         csv2=os.path.abspath(csv2)
          
-        DataUtils.compareCSV(csv1, csv2, outfile, key_columns,algorithm)
+        DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)

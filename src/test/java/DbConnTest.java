@@ -195,4 +195,15 @@ public class DbConnTest {
         }
     }
 
+    @Test
+    public void testProcNames() throws Exception {
+        String password = env.get("SYBASE_PASSWORD");
+        DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
+        List<String> items = db.getProcNames("dbo");
+
+        for (String item : items) {
+            System.out.println(item);
+            System.out.println(db.getSybaseProcDDL(item));
+        }
+    }
 }

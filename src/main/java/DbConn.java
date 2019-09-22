@@ -200,6 +200,22 @@ public class DbConn {
         return items;
     }
 
+    public List<String> getProcNames(String schemaName) throws SQLException {
+        String TABLE_NAME = "TABLE_NAME";
+        String TABLE_SCHEMA = "TABLE_SCHEM";
+        String[] TYPES = { "TABLE" };
+        List<String> items = new ArrayList<>();
+        DatabaseMetaData databaseMetaData = conn.getMetaData();
+        // Print TABLE_TYPE "TABLE"
+        ResultSet rs = databaseMetaData.getProcedures(null, schemaName, "%");
+
+        while (rs.next()) {
+
+            items.add(rs.getString(3));
+        }
+        return items;
+    }
+
     /**
      * 
      * 
@@ -429,4 +445,22 @@ public class DbConn {
         return currDDL;
     }
 
+    public String getSybaseProcDDL(String name) throws SQLException {
+
+        Statement stmt = null;
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscolumns col on col.id = obj.id join dbo.syscomments c on obj.id=c.id"
+                + " join dbo.systypes tp on col.usertype = tp.usertype  where obj.type = 'P'  and obj.name='" + name
+                + "' order by 1";
+        stmt = this.conn.createStatement();
+        // Let us check if it returns a true Result Set or not.
+        ResultSet rs = stmt.executeQuery(sql);
+        String currDDL = null;
+        while (rs.next()) {
+            String snippetDDL = rs.getString(2);
+            currDDL = currDDL + snippetDDL;
+        }
+        stmt.close();
+
+        return currDDL;
+    }
 }

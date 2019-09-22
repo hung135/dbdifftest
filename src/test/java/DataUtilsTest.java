@@ -195,6 +195,6 @@ public class DataUtilsTest extends TestCase {
         List<String> primaryColumn = new ArrayList<>();
         primaryColumn.add("TableName");
 
-        DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "data");
+        DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "TableName,Dev,Test", "data");
     }
 }

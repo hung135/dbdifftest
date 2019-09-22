@@ -18,3 +18,9 @@ create schema  authorization dbo
         newtitleauthors.title_id =
              newtitles.title_id
     grant select on tit_auth_view to public 
+
+    /* Adaptive Server has expanded all '*' elements in the following statement */ create view guest.testview as 
+SELECT dbo.spt_values.name, dbo.spt_values.number, dbo.spt_values.[type], dbo.spt_values.ansi_w, 
+dbo.spt_values.low, dbo.spt_values.high, dbo.spt_values.msgnum
+FROM
+	dbo.spt_values

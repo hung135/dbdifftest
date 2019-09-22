@@ -37,7 +37,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.util.*;
 
 public class DbConn {
-    private Connection conn;
+    public Connection conn;
     // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
@@ -254,11 +254,13 @@ public class DbConn {
         this.rs = stmt.executeQuery(selectQuery);
         ResultSetMetaData metadata = this.rs.getMetaData();
         int columnCount = metadata.getColumnCount();
-        /*for (int i = 1; i <= columnCount; i++) {
-            System.out.println(metadata.getTableName(i) + " senstive: " + metadata.isCaseSensitive(i) + " name: "
-                    + metadata.getCatalogName(i) + " type: " + metadata.getColumnTypeName(i) + " schema: "
-                    + metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i));
-        } */
+        /*
+         * for (int i = 1; i <= columnCount; i++) {
+         * System.out.println(metadata.getTableName(i) + " senstive: " +
+         * metadata.isCaseSensitive(i) + " name: " + metadata.getCatalogName(i) +
+         * " type: " + metadata.getColumnTypeName(i) + " schema: " +
+         * metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i)); }
+         */
         while (this.rs.next()) {
             String[] row = new String[columnCount];
             for (int i = 1; i <= columnCount; i++) {
@@ -306,7 +308,7 @@ public class DbConn {
     public void queryToExcel(String selectQuery, String sheetName, String fullFilePath) throws Exception {
 
         Statement stmt = this.conn.createStatement();
-       
+
         /* Define the SQL query */
         ResultSet query_set = stmt.executeQuery(selectQuery);
         /* Create Map for Excel Data */

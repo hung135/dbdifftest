@@ -44,19 +44,33 @@ def get_sybase_select(dataString):
 
 x = DbConn.DbType.SYBASE
 
+selectQuery = """
+SELECT DISTINCT 
+  sysobjects.name, 
+  syscomments.text
+, case 
+ WHEN sysobjects.type = 'T' THEN 'TRIGGER'
+ WHEN sysobjects.type = 'P' THEN 'PROCEDURE' 
+ WHEN sysobjects.type = 'V' THEN 'VIEW' 
+ ELSE 'UNKNOWN' END TYPE
+FROM sysobjects INNER JOIN syscomments
+  ON sysobjects.id = syscomments.id
+WHERE sysobjects.type = 'P'
+"""
 
-selectQuery = """SELECT distinct u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o 
-                 WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid""";
-db =   DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master");
+db =   DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master")
 
+select = db.queryToList(selectQuery)
+name_proc = {}
+for sproc in select:
+  try:
+    if sproc:
+      if sproc[0] in name_proc.keys():
+        name_proc[sproc[0]] = name_proc[sproc[0]].append(sproc[1])
+      else:
+        name_proc[sproc[0]] = [sproc[1]]
+  except AttributeError:
+    print("Not found: {0}".format(sproc[0]))
 
-x = db.queryToList(selectQuery);
-
-for a,b,c in x:
-    tables=get_sybase_insert(c)
-    queries=get_sybase_select(c)
-    if (len(tables)>0 or len(queries)>0):
-        print(a,b,tables,queries)
-
-
-      
+print(len(name_proc.keys()))
+# print("".join(txt))

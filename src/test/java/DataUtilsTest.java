@@ -20,18 +20,23 @@ import java.util.Map;
 public class DataUtilsTest extends TestCase {
     public Map<String, String> env = System.getenv();
 
-    @Test
-    public void testFunctions() {
+    // @Test
+    // public void testFunctions() {
 
-        System.out
-                .println(DataUtils.RegexExtract("\\w*.\\.\\.", " from db1..table1,  db2..table2, db3..table3 'b' 'c'"));
-        System.out.println(DataUtils.FindSybaseDatabase(
-                " from db1..table1, db2..table2, db3..table3, db3.dbo.table4 where something  = something '"));
-        System.out.println(DataUtils.findTablesFromQuery(
-                " dsfasdfa tdhei screasdf; asdfasdf before select select col1, (select 1 from   xxx.xx) as z, aa,(select 1 from xxx.xx) from schema.table join x.table2 where  x=(select abc from test.table1) as y "));
-        System.out.println(DataUtils.findTablesFromInsert(
-                " insert into xx.table1 (col1,col2) values (1,2),(2,3); insert into yy.table2 as select * from test.table1"));
-    }
+    // System.out
+    // .println(DataUtils.RegexExtract("\\w*.\\.\\.", " from db1..table1,
+    // db2..table2, db3..table3 'b' 'c'"));
+    // System.out.println(DataUtils.FindSybaseDatabase(
+    // " from db1..table1, db2..table2, db3..table3, db3.dbo.table4 where something
+    // = something '"));
+    // System.out.println(DataUtils.findTablesFromQuery(
+    // " dsfasdfa tdhei screasdf; asdfasdf before select select col1, (select 1 from
+    // xxx.xx) as z, aa,(select 1 from xxx.xx) from schema.table join x.table2 where
+    // x=(select abc from test.table1) as y "));
+    // System.out.println(DataUtils.findTablesFromInsert(
+    // " insert into xx.table1 (col1,col2) values (1,2),(2,3); insert into yy.table2
+    // as select * from test.table1"));
+    // }
 
     // @Test
     // public void testPostgres() throws SQLException {
@@ -78,15 +83,16 @@ public class DataUtilsTest extends TestCase {
 
     // }
 
-    @Test
-    public void testSybaseObj() throws SQLException {
+    // @Test
+    // public void testSybaseObj() throws SQLException {
 
-        String password = env.get("SYBASE_PASSWORD");
-        DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
-        // Connection conn = db.getSybaseConn("sa", password, "dbsybase", "master",
-        // "5000");
+    // String password = env.get("SYBASE_PASSWORD");
+    // DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password,
+    // "dbsybase", "5000", "master");
+    // // Connection conn = db.getSybaseConn("sa", password, "dbsybase", "master",
+    // // "5000");
 
-    }
+    // }
 
     // @Test
     // public void testSybaseConnPooling() throws SQLException {
@@ -147,36 +153,39 @@ public class DataUtilsTest extends TestCase {
 
     // }
 
-    @Test
-    public void testReadFileExecuteSQL() throws SQLException, IOException {
+    // @Test
+    // public void testReadFileExecuteSQL() throws SQLException, IOException {
 
-        String password = env.get("SYBASE_PASSWORD");
+    // String password = env.get("SYBASE_PASSWORD");
 
-        DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
-        File file = new File(getClass().getClassLoader().getResource("create_sybase.sql").getFile());
+    // DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password,
+    // "dbsybase", "5000", "master");
+    // File file = new
+    // File(getClass().getClassLoader().getResource("create_sybase.sql").getFile());
 
-        // System.out.println(file.toString());
+    // // System.out.println(file.toString());
 
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String sqlText = "";
-        String st;
-        while ((st = br.readLine()) != null)
-            sqlText = sqlText + " " + st;
-        br.close();
-        // System.out.println(sqlText);
-        sybaseDBConn.executeSql(sqlText);
+    // BufferedReader br = new BufferedReader(new FileReader(file));
+    // String sqlText = "";
+    // String st;
+    // while ((st = br.readLine()) != null)
+    // sqlText = sqlText + " " + st;
+    // br.close();
+    // // System.out.println(sqlText);
+    // sybaseDBConn.executeSql(sqlText);
 
-    }
+    // }
 
-    @Test
-    public void testGetTableNames() throws SQLException, IOException {
+    // @Test
+    // public void testGetTableNames() throws SQLException, IOException {
 
-        String password = env.get("SYBASE_PASSWORD");
-        DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
-        // db.getTableNames("dbo");
-        // db.getColumn("titles1");
-        System.out.println(db.getTableColumns("dbo"));
-    }
+    // String password = env.get("SYBASE_PASSWORD");
+    // DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase",
+    // "5000", "master");
+    // // db.getTableNames("dbo");
+    // // db.getColumn("titles1");
+    // System.out.println(db.getTableColumns("dbo"));
+    // }
 
     @Test
     public void testCompareCSV() throws Exception {
@@ -186,6 +195,6 @@ public class DataUtilsTest extends TestCase {
         List<String> primaryColumn = new ArrayList<>();
         primaryColumn.add("TableName");
 
-        DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn);
+        DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "data");
     }
 }

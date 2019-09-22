@@ -39,6 +39,7 @@ CompareCsv:
       csv1: ./table_rowcount.csv
       csv2: ./table_rowcount2.csv
       outfile: ./reports/output.csv
+      #alogrithm: hash
       key_columns: # 
         - TableName
         # - Id2

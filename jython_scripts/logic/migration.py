@@ -134,6 +134,6 @@ class QueryToExcel(object):
 class CompareCsv(object):
     def __init__(self, csv1, csv2, outfile, key_columns):
         csv1=os.path.abspath(csv1)
-        csv2=os.path.abspath(csv1)
-        
-        DataUtils.compareCSV(csv1, csv2, outfile, list(key_columns))
+        csv2=os.path.abspath(csv2)
+        print(csv1)
+        DataUtils.compareCSV(csv1, csv2, outfile, key_columns,algorithm="hash")

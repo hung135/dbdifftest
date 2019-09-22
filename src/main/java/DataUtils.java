@@ -162,7 +162,7 @@ public class DataUtils {
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-
+            System.out.println("here------------");
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -374,33 +374,39 @@ public class DataUtils {
      * @param headerRow
      * @return
      */
-    public static HashMap<String, String> fillMap(List<Integer> headerIndex, List<String[]> csv) {
+    public static HashMap<String, String> fillHashMap(List<Integer> headerIndex, List<String[]> csv, String algorithm) {
         HashMap<String, String> mapCSVdata = new HashMap<>();
         for (String[] row : csv) {
             String hashKey = "";
-            String md5Data = "";
+            String data = "";
             for (Integer keyColIndex : headerIndex) {
                 hashKey = hashKey + row[keyColIndex];
-                for (int i = 0; i <= row.length; i++) {
-                    if (!Arrays.asList(headerIndex).contains(i)) {
-                        md5Data = md5Data + row[i];
+                for (int i = 0; i < row.length; i++) {
+                    Integer iii = i;
+                    if (!Arrays.asList(headerIndex).contains(iii)) {
+                        data = data + row[i];
                     }
 
                 }
-                String md5Hex = DigestUtils.md5Hex(md5Data).toUpperCase();
-                mapCSVdata.put(hashKey, md5Hex);
+                String md5Hex = DigestUtils.md5Hex(data).toUpperCase();
+                if (algorithm.toLowerCase().equals("hash")) {
 
+                    mapCSVdata.put(hashKey, md5Hex);
+
+                } else {
+                    mapCSVdata.put(hashKey, data);
+                }
             }
         }
 
         return mapCSVdata;
     }
 
-    public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn)
-            throws Exception {
+    public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn,
+            String algorithm) throws Exception {
         String[] outputHeaders, headersCSV1, headersCSV2;
         List<String[]> csv1, csv2, results;
-
+        System.out.println(primaryColumn);
         outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column" };
         results = new ArrayList<String[]>() {
             {
@@ -409,8 +415,12 @@ public class DataUtils {
         };
         csv1 = readCSV(firstCSV);
         csv2 = readCSV(secondCSV);
+        System.out.println(firstCSV);
+
         headersCSV1 = csv1.get(0);
         headersCSV2 = csv2.get(0);
+
+        System.out.println("here2");
         csv1.remove(0);
         csv2.remove(0);
 
@@ -423,13 +433,13 @@ public class DataUtils {
             throw new Exception("Headers do not match");
         }
 
-        HashMap<String, String> mapCSVdata1 = fillMap(headerIndex1, csv1);
-        HashMap<String, String> mapCSVdata2 = fillMap(headerIndex2, csv2);
+        HashMap<String, String> mapCSVdata1 = fillHashMap(headerIndex1, csv1, algorithm);
+        HashMap<String, String> mapCSVdata2 = fillHashMap(headerIndex2, csv2, algorithm);
         HashMap<String, String> descrpencyMap = new HashMap<>();
 
-        for (Map.Entry<String, String> rowCSV1 : mapCSVdata1.entrySet()) {
-            String keyCSV1 = rowCSV1.getKey();
-            String valCSV1 = rowCSV1.getValue();
+        for (Map.Entry<String, String> entry : mapCSVdata1.entrySet()) {
+            String keyCSV1 = entry.getKey();
+            String valCSV1 = entry.getValue();
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
@@ -438,23 +448,23 @@ public class DataUtils {
 
         }
 
-        for (Map.Entry<String, String> rowCSV2 : mapCSVdata2.entrySet()) {
-            String keyCSV2 = rowCSV2.getKey();
-            String valCSV2 = rowCSV2.getValue();
+        for (Map.Entry<String, String> entry : mapCSVdata2.entrySet()) {
+            String keyCSV2 = entry.getKey();
+            String valCSV2 = entry.getValue();
             String valCSV1 = mapCSVdata1.get(keyCSV2);
             if (!valCSV2.equals(valCSV1)) {
                 descrpencyMap.put(keyCSV2, valCSV2 + valCSV1);
             }
 
         }
-        List<String[]> result2 = new ArrayList<>();
+        List<String[]> result = new ArrayList<>();
         for (Map.Entry<String, String> row : descrpencyMap.entrySet()) {
             String key = row.getKey();
             String val = row.getValue();
             String xx[] = new String[2];
             xx[0] = key;
             xx[1] = val;
-            result2.add(xx);
+            result.add(xx);
 
         }
 
@@ -506,6 +516,6 @@ public class DataUtils {
         // }
         // }
         // }
-        writeListToCSV(result2, outFile);
+        writeListToCSV(result, outFile);
     }
 }

@@ -164,16 +164,38 @@ public class DbConn {
         return items;
     }
 
+    public List<String> getViewNames(String schemaName) throws SQLException {
+
+        String TABLE_NAME = "TABLE_NAME";
+        String TABLE_SCHEMA = "TABLE_SCHEM";
+        String[] VIEW_TYPES = { "VIEW" };
+        DatabaseMetaData dbmd = conn.getMetaData();
+
+        ResultSet rs = dbmd.getTables(null, null, null, VIEW_TYPES);
+        List<String> items = new ArrayList<>();
+        while (rs.next()) {
+
+            if (schemaName.toLowerCase().equals(rs.getString(TABLE_SCHEMA).toLowerCase())) {
+                items.add(rs.getString(TABLE_NAME));
+            }
+        }
+        return items;
+    }
+
     public List<String> getTableNames(String schemaName) throws SQLException {
+        String TABLE_NAME = "TABLE_NAME";
+        String TABLE_SCHEMA = "TABLE_SCHEM";
+        String[] TYPES = { "TABLE" };
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
-        ResultSet resultSet = databaseMetaData.getTables(null, null, null, new String[] { "TABLE" });
+        ResultSet rs = databaseMetaData.getTables(null, null, null, TYPES);
 
-        while (resultSet.next()) {
-            // Print
-            // System.out.println(resultSet.getString("TABLE_NAME"));
-            items.add(resultSet.getString("TABLE_NAME"));
+        while (rs.next()) {
+
+            if (schemaName.toLowerCase().equals(rs.getString(TABLE_SCHEMA).toLowerCase())) {
+                items.add(rs.getString(TABLE_NAME));
+            }
         }
         return items;
     }
@@ -386,6 +408,25 @@ public class DbConn {
         System.out.println("Total rows Inserted: " + affectedRecords);
         preparedStatement.close();
 
+    }
+
+    public String getSybaseViewDDL(String viewName) throws SQLException {
+
+        Statement stmt = null;
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscolumns col on col.id = obj.id join dbo.syscomments c on obj.id=c.id"
+                + " join dbo.systypes tp on col.usertype = tp.usertype  where obj.type = 'V'  and obj.name='" + viewName
+                + "' order by 1";
+        stmt = this.conn.createStatement();
+        // Let us check if it returns a true Result Set or not.
+        ResultSet rs = stmt.executeQuery(sql);
+        String currDDL = null;
+        while (rs.next()) {
+            String snippetDDL = rs.getString(2);
+            currDDL = currDDL + snippetDDL;
+        }
+        stmt.close();
+
+        return currDDL;
     }
 
 }

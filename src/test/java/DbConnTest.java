@@ -12,72 +12,69 @@ import java.util.Properties;
 
 import com.opencsv.CSVWriter;
 
-import org.junit.Test;
-
-import junit.framework.TestCase;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DbConnTest extends TestCase {
+public class DbConnTest {
     public Map<String, String> env = System.getenv();
 
-    // @Test
-    // public void testReadFileExecuteSQL() throws Exception {
+    @Test
+    @Disabled
+    public void testReadFileExecuteSQL() throws Exception {
 
-    // String password = env.get("SYBASE_PASSWORD");
+        String password = env.get("SYBASE_PASSWORD");
 
-    // DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password,
-    // "dbsybase", "5000", "master");
-    // File file = new
-    // File(getClass().getClassLoader().getResource("create_sybase.sql").getFile());
+        DbConn sybaseDBConn = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
+        File file = new File(getClass().getClassLoader().getResource("create_sybase.sql").getFile());
 
-    // // System.out.println(file.toString());
+        // System.out.println(file.toString());
 
-    // BufferedReader br = new BufferedReader(new FileReader(file));
-    // String sqlText = "";
-    // String st;
-    // while ((st = br.readLine()) != null)
-    // sqlText = sqlText + " " + st;
-    // br.close();
-    // // System.out.println(sqlText);
-    // sybaseDBConn.executeSql(sqlText);
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String sqlText = "";
+        String st;
+        while ((st = br.readLine()) != null)
+            sqlText = sqlText + " " + st;
+        br.close();
+        // System.out.println(sqlText);
+        sybaseDBConn.executeSql(sqlText);
 
-    // }
+    }
 
-    // @Test
-    // public void testQueryToCSV() throws Exception {
-    // String selectQuery = "select * from dbo.titles";
-    // String csvFilePath = "/workspace/test.csv";
-    // String password = env.get("SYBASE_PASSWORD");
-    // DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase",
-    // "5000", "master");
-    // try {
-    // db.queryToCSV(selectQuery, csvFilePath);
-    // } catch (Exception e) {
-    // System.out.println(e);
-    // }
+    @Test
+    public void testQueryToCSV() throws Exception {
+        String selectQuery = "select * from dbo.titles";
+        String csvFilePath = "/workspace/test.csv";
+        String password = env.get("SYBASE_PASSWORD");
+        DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
+        try {
+            db.queryToCSV(selectQuery, csvFilePath);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
-    // }
+    }
 
-    // @Test
-    // public void testQueryToStoredProc() throws Exception {
-    // String selectQuery = "SELECT u.name as name1, o.name, c.text FROM sysusers u,
-    // syscomments c, sysobjects o "
-    // + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid ORDER BY o.id,
-    // c.colid";
-    // String csvFilePath = "/workspace/test.csv";
-    // String password = env.get("SYBASE_PASSWORD");
-    // DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase",
-    // "5000", "master");
-    // try {
-    // db.queryToCSV(selectQuery, csvFilePath);
-    // } catch (Exception e) {
-    // System.out.println(e);
-    // }
-    // }
+    @Test
+    @Disabled
+    public void testQueryToStoredProc() throws Exception {
+        String selectQuery = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
+                + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid ORDER BY o.id,    c.colid";
+        String csvFilePath = "/workspace/test.csv";
+        String password = env.get("SYBASE_PASSWORD");
+        DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
+        try {
+            db.queryToCSV(selectQuery, csvFilePath);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
     /**
      * this test is hear cause the code is very similar to code above
@@ -145,6 +142,7 @@ public class DbConnTest extends TestCase {
     }
 
     @Test
+    @Disabled
     public void testCallStmnt() throws Exception {
         String password = env.get("SYBASE_PASSWORD");
         DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
@@ -159,13 +157,17 @@ public class DbConnTest extends TestCase {
         String lastTableName = "";
         String currTableName = "";
         String currDDL = "";
-
+        Map<String, String> viewDDLHashMap = new HashMap<String, String>();
         while (rs.next()) {
             currTableName = rs.getString(1);
             String snippetDDL = rs.getString(2);
             if (!lastTableName.contentEquals(currTableName)) {
+                if (!lastTableName.equals("")) {
+                    viewDDLHashMap.put(lastTableName, currDDL);
+                }
                 lastTableName = currTableName;
                 System.out.println(currDDL);
+
                 currDDL = snippetDDL;
 
             } else {
@@ -173,9 +175,24 @@ public class DbConnTest extends TestCase {
             }
 
         }
-        System.out.println(currDDL);
+
+        if (!currTableName.equals("")) {
+            viewDDLHashMap.put(lastTableName, currDDL);
+        }
         stmt.close();
         db.conn.close();
+        System.out.println(viewDDLHashMap.size());
+    }
+
+    @Test
+    @Disabled
+    public void testGetViewDDL() throws Exception {
+        String password = env.get("SYBASE_PASSWORD");
+        DbConn db = new DbConn(DbConn.DbType.SYBASE, "sa", password, "dbsybase", "5000", "master");
+        List<String> views = db.getViewNames("dbo");
+        for (String view : views) {
+            System.out.println(db.getSybaseViewDDL(view));
+        }
     }
 
 }

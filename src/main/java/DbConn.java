@@ -150,7 +150,7 @@ public class DbConn {
      * @return
      * @throws SQLException
      */
-    public List<Table> getTableColumns(String schemaName) throws SQLException {
+    public List<Table> getAllTableColumns(String schemaName) throws SQLException {
         List<String> tables = this.getTableNames(schemaName);
         List<Table> items = new ArrayList<>();
 
@@ -158,7 +158,7 @@ public class DbConn {
         for (int i = 0; i < tables.size(); i++) {
             String tableName = tables.get(i);
             Table tbl = new Table(tableName);
-            tbl.columnNames = this.getColumn(tableName);
+            tbl.columnNames = this.getColumns(tableName);
             items.add(tbl);
         }
         return items;
@@ -213,6 +213,14 @@ public class DbConn {
 
             items.add(rs.getString(3));
         }
+        rs.close();
+        // ResultSet rs2 = databaseMetaData.getFunctions(null, schemaName, "%");
+
+        // while (rs2.next()) {
+
+        // items.add(rs2.getString(3));
+        // }
+        // rs2.close();
         return items;
     }
 
@@ -227,7 +235,7 @@ public class DbConn {
      * @return
      * @throws SQLException
      */
-    public List<String> getColumn(String tabeName) throws SQLException {
+    public List<String> getColumns(String tabeName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         ResultSet resultSet = databaseMetaData.getColumns(null, null, tabeName, null);
@@ -398,7 +406,7 @@ public class DbConn {
         PreparedStatement preparedStatement = null;
 
         List<String> question = new ArrayList<>();
-        tableColumns = this.getColumn(tableName);
+        tableColumns = this.getColumns(tableName);
         for (int i = 0; i < tableColumns.size(); i++) {
             question.add("?");
         }
@@ -463,4 +471,5 @@ public class DbConn {
 
         return currDDL;
     }
+
 }

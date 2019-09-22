@@ -6,7 +6,7 @@ from java.util import HashMap
 
 import csv
 import md5
-
+from  .parse_proc import *
 
 class TableDump(object):
 
@@ -137,3 +137,31 @@ class CompareCsv(object):
         csv2=os.path.abspath(csv2)
          
         DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)
+
+class ParseProcs(object):
+    def __init__(self,dbConn,schemaOrOwner,writePath):
+        
+        
+ 
+
+        x=dbConn.getProcNames(schemaOrOwner)
+        for proc in x:
+            ddl=dbConn.getSybaseProcDDL(proc) 
+             
+            
+            x = remove_comments(ddl)
+            print(x)
+
+            tmp = re.findall(" from \w+.*?where", x)
+            #if len(tmp)>0: 
+            #   total.append(filter_junk(tmp))
+            #   tmp = re.findall(" insert into \w+", x)
+            #   if len(tmp)>0: 
+            #     total.append(tmp)
+             
+        # for a,b,c in x:
+        #     tables=get_sybase_insert(c)
+        #     queries=get_sybase_select(c)
+        #     if (len(tables)>0 or len(queries)>0):
+        #         print(a,b,tables,queries)
+

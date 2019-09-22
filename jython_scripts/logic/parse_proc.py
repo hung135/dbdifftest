@@ -54,25 +54,7 @@ def get_updates(dataString):
         product.append(["Update",total])
         return ','.join(total)
         #x = re.sub("\/\*.*?\*\/", " ", x)
-def filter_junk(dataString):
-    filter_list=[
-        ' insert into',
-        ' insert in'
-    ]
-    total = []
-    for a in dataString:
-        if a not in filter_list:
-            total.append(a)
-    return total
-def get_sybase_insert(dataString):
-    total=[]
-    x = remove_comments(dataString).lower()
-    tmp = re.findall(" insert \w+", x)
-    if len(tmp)>0: 
-        total.append(tmp)
-    #   tmp = re.findall(" insert into \w+", x)
-    #   if len(tmp)>0: 
-    #     total.append(tmp)
-    return total
+ 
+ 
 
       

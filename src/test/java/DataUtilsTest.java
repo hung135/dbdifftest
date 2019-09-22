@@ -189,11 +189,11 @@ public class DataUtilsTest {
 
     @Test
     @Disabled
-    public void SkipMe(){
+    public void SkipMe() {
         assertTrue(false);
     }
 
-    public void RunMe(){
+    public void RunMe() {
         assertTrue(true);
     }
 
@@ -206,6 +206,6 @@ public class DataUtilsTest {
         List<String> primaryColumn = new ArrayList<>();
         primaryColumn.add("TableName");
 
-        //DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "data");
+        DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "TableName,Dev,Test", "data");
     }
 }

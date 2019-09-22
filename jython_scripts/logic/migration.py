@@ -132,8 +132,8 @@ class QueryToExcel(object):
         dbConn.queryToExcel(sql,  sheetName,fqn)
 
 class CompareCsv(object):
-    def __init__(self, csv1, csv2, outfile, key_columns):
+    def __init__(self, csv1, csv2, outfile, key_columns,algorithm="hash"):
         csv1=os.path.abspath(csv1)
         csv2=os.path.abspath(csv2)
-        print(csv1)
-        DataUtils.compareCSV(csv1, csv2, outfile, key_columns,algorithm="hash")
+         
+        DataUtils.compareCSV(csv1, csv2, outfile, key_columns,algorithm)

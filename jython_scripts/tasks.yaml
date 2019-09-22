@@ -5,13 +5,13 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
-# TableRowCount:
-#   sys-dev:
-#     schemaOrOwner: dbo
-#     fileName: ./table_rowcount.csv
-#   sys-dev1:
-#     schemaOrOwner: dbo
-#     fileName: ./table_rowcount2.csv
+TableRowCount:
+  sys-dev:
+    schemaOrOwner: dbo
+    fileName: ./table_rowcount.csv
+  sys-dev1:
+    schemaOrOwner: dbo
+    fileName: ./table_rowcount2.csv
 # TableSampleCheckSum:
 #   sys-dev:
 #     schemaOrOwner: dbo
@@ -31,19 +31,3 @@
 #         filePath: ./md5/table_row_checksum2.csv
 #       - tableName: test3
 #         filePath: ./md5/table_row_checksum3.csv
-CompareCsv:
-    #header rows have to be the same...(case insensitive is ok)
-    #Concat the data of all the key_columns together to make a string to be the hash key
-    #don't need to print out the excat difference just identify the keys that don't match or missing
-    first-compare:
-      csv1: ./table_rowcount.csv
-      csv2: ./table_rowcount2.csv
-      outfile: ./reports/output.csv
-      #alogrithm: hash
-      key_columns: # 
-        - TableName
-        # - Id2
-        # - COL2
-          #column3
-          #column4
-          #column5.......only 1 column is key in this case

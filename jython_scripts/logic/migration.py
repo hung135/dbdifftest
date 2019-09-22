@@ -140,19 +140,28 @@ class CompareCsv(object):
 
 class ParseProcs(object):
     def __init__(self,dbConn,schemaOrOwner,writePath):
-        
+        directory = os.path.dirname(writePath)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        fqn = os.path.abspath(writePath)
         
  
 
         x=dbConn.getProcNames(schemaOrOwner)
+        total=[]
         for proc in x:
             ddl=dbConn.getSybaseProcDDL(proc) 
              
             
             x = remove_comments(ddl)
-            print(x)
-
-            tmp = re.findall(" from \w+.*?where", x)
+            total.append([proc,get_querys(x),get_updates(x)])
+        header = ["ProcName", "Query","Update"]
+        outPutTable = csv.writer(open(fqn, 'w'), delimiter=',',
+                                quotechar='|',lineterminator='\n')
+        outPutTable.writerow(header)
+        for row in total:
+            outPutTable.writerow(row)
+            #tmp = re.findall(" from \w+.*?where", x)
             #if len(tmp)>0: 
             #   total.append(filter_junk(tmp))
             #   tmp = re.findall(" insert into \w+", x)

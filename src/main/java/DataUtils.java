@@ -162,7 +162,7 @@ public class DataUtils {
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-            System.out.println("here------------");
+             
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -383,7 +383,8 @@ public class DataUtils {
                 hashKey = hashKey + row[keyColIndex];
                 for (int i = 0; i < row.length; i++) {
                     Integer iii = i;
-                    if (!Arrays.asList(headerIndex).contains(iii)) {
+                    
+                    if (!headerIndex.contains(iii)) {
                         data = data + row[i];
                     }
 

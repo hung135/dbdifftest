@@ -254,11 +254,11 @@ public class DbConn {
         this.rs = stmt.executeQuery(selectQuery);
         ResultSetMetaData metadata = this.rs.getMetaData();
         int columnCount = metadata.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
+        /*for (int i = 1; i <= columnCount; i++) {
             System.out.println(metadata.getTableName(i) + " senstive: " + metadata.isCaseSensitive(i) + " name: "
                     + metadata.getCatalogName(i) + " type: " + metadata.getColumnTypeName(i) + " schema: "
                     + metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i));
-        }
+        } */
         while (this.rs.next()) {
             String[] row = new String[columnCount];
             for (int i = 1; i <= columnCount; i++) {

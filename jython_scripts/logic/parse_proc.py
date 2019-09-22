@@ -37,7 +37,7 @@ def get_querys(dataString):
                 total.append(  m.group(1))
         
         
-        return total
+        return ','.join(total)
 def get_updates(dataString):
         x=dataString
         #for debugging
@@ -52,7 +52,7 @@ def get_updates(dataString):
 
          
         product.append(["Update",total])
-        return total
+        return ','.join(total)
         #x = re.sub("\/\*.*?\*\/", " ", x)
 def filter_junk(dataString):
     filter_list=[

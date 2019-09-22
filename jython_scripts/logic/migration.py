@@ -50,7 +50,7 @@ class TableRowCount(object):
 
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
-                                 quotechar='|',lineterminator='\n')
+                                 quotechar='"',lineterminator='\n')
         outPutTable.writerow(header)
         for row in tableCount:
             outPutTable.writerow(row)
@@ -90,7 +90,7 @@ class TableSampleCheckSum(object):
                 header = ["TableName", "SampleDataHash"]
 
                 outPutTable = csv.writer(open(writePath, 'w'), delimiter=',',
-                                         quotechar='|',lineterminator='\n')
+                                         quotechar='"',lineterminator='\n')
                 outPutTable.writerow(header)
                 for row in table_row_hash:
                     outPutTable.writerow(row)
@@ -157,7 +157,7 @@ class ParseProcs(object):
             total.append([proc,get_querys(x),get_updates(x)])
         header = ["ProcName", "Query","Update"]
         outPutTable = csv.writer(open(fqn, 'w'), delimiter=',',
-                                quotechar='|',lineterminator='\n')
+                                quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
         outPutTable.writerow(header)
         for row in total:
             outPutTable.writerow(row)

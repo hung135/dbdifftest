@@ -9,15 +9,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.junit.Test;
-
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DataUtilsTest extends TestCase {
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class DataUtilsTest {
     public Map<String, String> env = System.getenv();
 
     // @Test
@@ -188,6 +188,17 @@ public class DataUtilsTest extends TestCase {
     // }
 
     @Test
+    @Disabled
+    public void SkipMe() {
+        assertTrue(false);
+    }
+
+    public void RunMe() {
+        assertTrue(true);
+    }
+
+    @Test
+    @Disabled
     public void testCompareCSV() throws Exception {
         String firstCSV = "/workspace/jython_scripts/table_rowcount.csv";
         String secondCSV = "/workspace/jython_scripts/table_rowcount2.csv";

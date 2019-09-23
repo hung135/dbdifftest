@@ -46,8 +46,8 @@ public class DbConn {
 
     public enum DbType {
         // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
-        // ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
-        ORACLE("oracle.jdbc.OracleDriver",
+        ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
+        ORACLESID("oracle.jdbc.OracleDriver",
                 "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))(CONNECT_DATA=(SERVICE_NAME={2})))"),
         SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}:{2}"),
         POSTGRES("org.postgresql.Driver", "jdbc:postgresql://{0}:{1}:{2}"),
@@ -73,6 +73,8 @@ public class DbConn {
         }
 
         public static DbType getMyEnumIfExists(String value) {
+
+            System.out.println(value+"  -------------------");
             for (DbType db : DbType.values()) {
                 if (db.name().equalsIgnoreCase(value))
                     return db;

@@ -42,6 +42,7 @@ public class DbConn {
     private Statement stmt; // tbd
     public ResultSet rs;
     public DbType dbType;
+    public String databaseName;
 
     public enum DbType {
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
@@ -80,6 +81,8 @@ public class DbConn {
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException {
         this.dbType = dbtype;
+        this.databaseName = databaseName;
+        System.out.println("----------------------"+databaseName);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         // props.put("JAVA_CHARSET_MAPPING", "UTF8");
         cpds.setDriverClass(dbtype.driver());
@@ -171,7 +174,7 @@ public class DbConn {
         String[] VIEW_TYPES = { "VIEW" };
         DatabaseMetaData dbmd = conn.getMetaData();
 
-        ResultSet rs = dbmd.getTables(null, null, null, VIEW_TYPES);
+        ResultSet rs = dbmd.getTables(this.databaseName, schemaName, null, VIEW_TYPES);
         List<String> items = new ArrayList<>();
         while (rs.next()) {
 
@@ -189,7 +192,7 @@ public class DbConn {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
-        ResultSet rs = databaseMetaData.getTables(null, null, null, TYPES);
+        ResultSet rs = databaseMetaData.getTables(this.databaseName, schemaName, null, TYPES);
 
         while (rs.next()) {
 
@@ -207,10 +210,10 @@ public class DbConn {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
-        ResultSet rs = databaseMetaData.getProcedures(null, schemaName, "%");
+        ResultSet rs = databaseMetaData.getProcedures(this.databaseName, schemaName, "%");
 
         while (rs.next()) {
-
+            System.out.println( rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
             items.add(rs.getString(3));
         }
         rs.close();
@@ -221,6 +224,7 @@ public class DbConn {
         // items.add(rs2.getString(3));
         // }
         // rs2.close();
+        System.out.println("----in Dbconn: " + this.databaseName);
         return items;
     }
 
@@ -238,7 +242,7 @@ public class DbConn {
     public List<String> getColumns(String tabeName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
-        ResultSet resultSet = databaseMetaData.getColumns(null, null, tabeName, null);
+        ResultSet resultSet = databaseMetaData.getColumns(this.databaseName, null, tabeName, null);
         while (resultSet.next()) {
             // Print
             // System.out.println(resultSet.getString("COLUMN_NAME"));
@@ -247,11 +251,11 @@ public class DbConn {
         return items;
     }
 
-    public List<String> getTriggers(String tabeName) throws SQLException {
+    public List<String> getTriggers(String tableName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
 
-        ResultSet result = databaseMetaData.getTables("%", null, "%", new String[] { "TRIGGER" });
+        ResultSet result = databaseMetaData.getTables(this.databaseName, null, tableName, new String[] { "TRIGGER" });
         while (result.next()) {
             items.add(result.getString("TABLE_NAME"));
         }
@@ -437,16 +441,15 @@ public class DbConn {
     public String getSybaseViewDDL(String viewName) throws SQLException {
 
         Statement stmt = null;
-        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscolumns col on col.id = obj.id join dbo.syscomments c on obj.id=c.id"
-                + " join dbo.systypes tp on col.usertype = tp.usertype  where obj.type = 'V'  and obj.name='" + viewName
-                + "' order by 1";
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
+                + "   where obj.type = 'V'  and obj.name='" + viewName + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);
         String currDDL = null;
         while (rs.next()) {
             String snippetDDL = rs.getString(2);
-            currDDL = currDDL + snippetDDL;
+            currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
         stmt.close();
 
@@ -456,16 +459,15 @@ public class DbConn {
     public String getSybaseProcDDL(String name) throws SQLException {
 
         Statement stmt = null;
-        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscolumns col on col.id = obj.id join dbo.syscomments c on obj.id=c.id"
-                + " join dbo.systypes tp on col.usertype = tp.usertype  where obj.type = 'P'  and obj.name='" + name
-                + "' order by 1";
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscomments c on obj.id=c.id"
+                + "  where obj.type = 'P'  and obj.name='" + name + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);
         String currDDL = null;
         while (rs.next()) {
             String snippetDDL = rs.getString(2);
-            currDDL = currDDL + snippetDDL;
+            currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
         stmt.close();
 

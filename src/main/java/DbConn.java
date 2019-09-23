@@ -82,6 +82,7 @@ public class DbConn {
             throws SQLException, PropertyVetoException {
         this.dbType = dbtype;
         this.databaseName = databaseName;
+        System.out.println("----------------------"+databaseName);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         // props.put("JAVA_CHARSET_MAPPING", "UTF8");
         cpds.setDriverClass(dbtype.driver());
@@ -173,7 +174,7 @@ public class DbConn {
         String[] VIEW_TYPES = { "VIEW" };
         DatabaseMetaData dbmd = conn.getMetaData();
 
-        ResultSet rs = dbmd.getTables(null, null, null, VIEW_TYPES);
+        ResultSet rs = dbmd.getTables(this.databaseName, schemaName, null, VIEW_TYPES);
         List<String> items = new ArrayList<>();
         while (rs.next()) {
 
@@ -191,7 +192,7 @@ public class DbConn {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
-        ResultSet rs = databaseMetaData.getTables(null, null, null, TYPES);
+        ResultSet rs = databaseMetaData.getTables(this.databaseName, schemaName, null, TYPES);
 
         while (rs.next()) {
 
@@ -209,10 +210,10 @@ public class DbConn {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
-        ResultSet rs = databaseMetaData.getProcedures(null, schemaName, "%");
+        ResultSet rs = databaseMetaData.getProcedures(this.databaseName, schemaName, "%");
 
         while (rs.next()) {
-
+            System.out.println(rs.getString("PROCEDURE_CAT"));
             items.add(rs.getString(3));
         }
         rs.close();
@@ -241,7 +242,7 @@ public class DbConn {
     public List<String> getColumns(String tabeName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
-        ResultSet resultSet = databaseMetaData.getColumns(null, null, tabeName, null);
+        ResultSet resultSet = databaseMetaData.getColumns(this.databaseName, null, tabeName, null);
         while (resultSet.next()) {
             // Print
             // System.out.println(resultSet.getString("COLUMN_NAME"));
@@ -250,11 +251,11 @@ public class DbConn {
         return items;
     }
 
-    public List<String> getTriggers(String tabeName) throws SQLException {
+    public List<String> getTriggers(String tableName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
 
-        ResultSet result = databaseMetaData.getTables("%", null, "%", new String[] { "TRIGGER" });
+        ResultSet result = databaseMetaData.getTables(this.databaseName, null, tableName, new String[] { "TRIGGER" });
         while (result.next()) {
             items.add(result.getString("TABLE_NAME"));
         }

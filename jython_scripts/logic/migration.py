@@ -183,5 +183,5 @@ class ParseProcs(object):
         #     queries=get_sybase_select(c)
         #     if (len(tables)>0 or len(queries)>0):
         #         print(a,b,tables,queries)
-        print("Used Datbase: ",dbConn.dataBaseName)
+        print("Used Datbase: ",dbConn.databaseName)
 

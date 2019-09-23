@@ -5,6 +5,7 @@ RunTime Installation:
 -- create a batch file with:
 -- java -jar jython.jar and make sure the batch file is in your path
 -- clone this project
+
 Description:
 - Generic Maven Project to Connect to 2 different Database via JDBC.
 - Queryes Tables, Views, Fucntions and reports differences found

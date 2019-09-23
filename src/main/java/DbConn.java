@@ -294,7 +294,6 @@ public class DbConn {
         }
 
         return hasRecords;
-
     }
 
     public List<String[]> queryToList(String selectQuery) throws Exception {
@@ -323,7 +322,6 @@ public class DbConn {
         }
 
         return items;
-
     }
 
     /**

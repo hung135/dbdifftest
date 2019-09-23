@@ -28,7 +28,7 @@ def create_release(repository, releases, name, message, tag=None):
                 tag[indx] = ".11"
                 tag = "".join(tag)
             else:
-                if len(x[-1]) >= 3:
+                if len(tag[-1]) >= 3:
                     tag[-1] = str("%.1f" % (float(tag[-1]) + .01))[1:]
                 else:
                     tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]

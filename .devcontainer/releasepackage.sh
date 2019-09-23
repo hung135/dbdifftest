@@ -2,9 +2,9 @@ DATE=$(eval date -I)
 GITB=$(git symbolic-ref --short HEAD)
 # Instructions
 cd /workspace/
-rm -f dbdiff.tar
+rm -f dbdiff.zip
 cd /workspace/jython_scripts
-tar -cvf /workspace/dbdiff.tar . 
+zip -r /workspace/dbdiff.zip .
 cd /workspace/
-tar -rvf dbdiff.tar ${JAREXPORT}
-python3 ${GITHUBRELEASE} -v -k ${GITHUBKEY} -r ${REPO} -c ${GITB} -m ${DATE} -a /workspace/dbdiff.tar
+zip -ur dbdiff.zip ${JAREXPORT}
+python3 ${GITHUBRELEASE} -v -k ${GITHUBKEY} -r ${REPO} -c ${GITB} -m ${DATE} -a /workspace/dbdiff.zip

@@ -2,8 +2,8 @@ import sys
 import re
 #paternns
 
-querypatterns = ["from (\w+.*?) where"
- 
+querypatterns = [" from (\w+.*?) where"
+,"from (\w+)\)?"
 ,"exec (\w+) "
  ]
 updatepatterns =[
@@ -33,11 +33,13 @@ def get_querys(dataString):
         for reg in querypatterns:
             #x = re.sub(reg," MATCH ",x)
             m = re.search(reg, x)
-            if m:
+            #replace what we extracted so we don't do again
+             
+            if m: 
                 total.append(  m.group(1))
-        
-        
-        return total
+            x = re.sub(reg, " ", x)
+         
+        return ','.join(total)
 def get_updates(dataString):
         x=dataString
         #for debugging
@@ -52,27 +54,9 @@ def get_updates(dataString):
 
          
         product.append(["Update",total])
-        return total
+        return ','.join(total)
         #x = re.sub("\/\*.*?\*\/", " ", x)
-def filter_junk(dataString):
-    filter_list=[
-        ' insert into',
-        ' insert in'
-    ]
-    total = []
-    for a in dataString:
-        if a not in filter_list:
-            total.append(a)
-    return total
-def get_sybase_insert(dataString):
-    total=[]
-    x = remove_comments(dataString).lower()
-    tmp = re.findall(" insert \w+", x)
-    if len(tmp)>0: 
-        total.append(tmp)
-    #   tmp = re.findall(" insert into \w+", x)
-    #   if len(tmp)>0: 
-    #     total.append(tmp)
-    return total
+ 
+ 
 
       

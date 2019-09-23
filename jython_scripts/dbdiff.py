@@ -12,6 +12,7 @@ import csv
 import importlib
 
 #JAVA ITEMS
+sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
 sys.path.append("./DbTest-jar-with-dependencies.jar")
 # Jtyhon needs to be implicit. os.path.sep is broken; hence why we do it like so:
 # This is only for the packaged scripts

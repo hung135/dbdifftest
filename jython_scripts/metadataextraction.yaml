@@ -1,0 +1,4 @@
+quertyToCSVOutputBinary:
+  sys-dev:
+    writePath: /workspace/output/
+    sql: SELECT * FROM blobtest

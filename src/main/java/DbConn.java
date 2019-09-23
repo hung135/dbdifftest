@@ -346,7 +346,64 @@ public class DbConn {
         writer.writeAll(rs, includeHeaders);
 
         writer.close();
+    }
 
+    public void quertyToCSVOutputBinary(String query, String fullFilePath) throws Exception {
+        Statement stmt = this.conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        ResultSetMetaData metadata = rs.getMetaData();
+
+        int columnCount = metadata.getColumnCount();
+        List<Integer> columnTypeIndex = new ArrayList<Integer>();
+        String[] columnNames = new String[columnCount];
+        for(int i=1; i <= columnCount; i++){
+            String type = metadata.getColumnTypeName(i);
+            // For now; later create custom enum. "image" isn't supported by JAVA
+            if(type.equals("image")){columnTypeIndex.add(i);}
+
+            columnNames[i-1] = metadata.getColumnName(i);
+        }
+
+
+        CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath+"/index.csv"));
+        Boolean includeHeaders = true;
+
+        if(columnTypeIndex.size() != 0){
+            List<String[]> data = new ArrayList<String[]>();
+            columnNames = Arrays.copyOf(columnNames, columnNames.length + columnTypeIndex.size());
+            // get values up here
+            Map<Integer, Map<Integer, String>> output = new HashMap<Integer, Map<Integer, String>>();
+            String tblName = metadata.getTableName(1);
+            for(Integer i : columnTypeIndex){
+                columnNames[i] = metadata.getColumnName(i) + "_output";
+                output.put(
+                    columnCount+i, 
+                    DataUtils.outputBinary(
+                        this.conn, 
+                        fullFilePath,
+                        tblName, 
+                        metadata.getColumnName(i), 
+                        metadata.getColumnTypeName(i)));
+            }
+            while(rs.next()){
+                if(rs.getRow() != 0){
+                    String[] row = new String[columnCount + columnTypeIndex.size()];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getString(1);
+                    }
+                    for(Map.Entry<Integer, Map<Integer, String>> entry : output.entrySet()){
+                        row[entry.getKey() - 2] = entry.getValue().get(rs.getRow());
+                    }
+                    data.add(row);
+                }
+            }
+            data.add(0, columnNames);
+            writer.writeAll(data, includeHeaders);
+        } else {
+            writer.writeAll(rs, includeHeaders);
+        }
+        writer.close();
+        
     }
 
     public void print_test(String selectQuery) {

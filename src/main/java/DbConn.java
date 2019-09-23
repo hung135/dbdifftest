@@ -446,7 +446,7 @@ public class DbConn {
         String currDDL = null;
         while (rs.next()) {
             String snippetDDL = rs.getString(2);
-            currDDL = currDDL + snippetDDL;
+            currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
         stmt.close();
 
@@ -465,7 +465,7 @@ public class DbConn {
         String currDDL = null;
         while (rs.next()) {
             String snippetDDL = rs.getString(2);
-            currDDL = currDDL + snippetDDL;
+            currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
         stmt.close();
 

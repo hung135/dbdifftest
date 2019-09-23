@@ -153,7 +153,7 @@ class ParseProcs(object):
         for proc in x:
             ddl=dbConn.getSybaseProcDDL(proc) 
             x = remove_comments(ddl)
-            total.append([proc,"PROC",get_querys(x),get_updates(x)])
+            total.append([dbConn.databaseName,proc,"PROC",get_querys(x),get_updates(x)])
         v=dbConn.getViewNames(schemaOrOwner)
         
         for view in v:
@@ -162,10 +162,10 @@ class ParseProcs(object):
 
             queryfrom=get_querys(v)
             
-            total.append([view,"VIEW",queryfrom,""])
+            total.append([dbConn.databaseName,view,"VIEW",queryfrom,""])
              
 
-        header = ["Name","Type","Query","Update"]
+        header = ["Database","Name","Type","Query","Update"]
         outPutTable = csv.writer(open(fqn, 'w'), delimiter=',',
                                 quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
         outPutTable.writerow(header)

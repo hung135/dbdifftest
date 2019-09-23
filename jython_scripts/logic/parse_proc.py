@@ -2,8 +2,8 @@ import sys
 import re
 #paternns
 
-querypatterns = ["from (\w+.*?) where"
- 
+querypatterns = [" from (\w+.*?) where"
+,"from (\w+)\)?"
 ,"exec (\w+) "
  ]
 updatepatterns =[
@@ -33,10 +33,12 @@ def get_querys(dataString):
         for reg in querypatterns:
             #x = re.sub(reg," MATCH ",x)
             m = re.search(reg, x)
-            if m:
+            #replace what we extracted so we don't do again
+             
+            if m: 
                 total.append(  m.group(1))
-        
-        
+            x = re.sub(reg, " ", x)
+         
         return ','.join(total)
 def get_updates(dataString):
         x=dataString

@@ -437,9 +437,8 @@ public class DbConn {
     public String getSybaseViewDDL(String viewName) throws SQLException {
 
         Statement stmt = null;
-        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscolumns col on col.id = obj.id join dbo.syscomments c on obj.id=c.id"
-                + " join dbo.systypes tp on col.usertype = tp.usertype  where obj.type = 'V'  and obj.name='" + viewName
-                + "' order by 1";
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
+                + "   where obj.type = 'V'  and obj.name='" + viewName + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);
@@ -456,9 +455,8 @@ public class DbConn {
     public String getSybaseProcDDL(String name) throws SQLException {
 
         Statement stmt = null;
-        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscolumns col on col.id = obj.id join dbo.syscomments c on obj.id=c.id"
-                + " join dbo.systypes tp on col.usertype = tp.usertype  where obj.type = 'P'  and obj.name='" + name
-                + "' order by 1";
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscomments c on obj.id=c.id"
+                + "  where obj.type = 'P'  and obj.name='" + name + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);

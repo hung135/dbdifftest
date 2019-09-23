@@ -1,3 +1,12 @@
+
+RunTime Installation:
+- Download the jython 2.7 runtime:
+-- https://www.jython.org/jython-old-sites/downloads.html
+-- create a batch file with:
+-- java -jar jython.jar and make sure the batch file is in your path
+-- clone this project
+
+
 - Generic Maven Project to Connect to 2 different Database via JDBC.
 - Queryes Tables, Views, Fucntions and reports differences found
 - This Project w/ VSCODE + Docker will Spin Up Local Instances:

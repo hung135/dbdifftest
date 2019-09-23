@@ -16,12 +16,12 @@ sys-dev1:
   password_envar: "SYBASEPASSWORD"
   database_name: "tempdb"
 # oracle-dev:
-#   dbtype: ORACLE
-#   host: dboracle
-#   port: 1542
-#   user: system
-#   password_envar: ORACLEPASSWORD
-#   database_name: dev
+#   dbtype: "ORACLESID"
+#   host: "dboracle"
+#   port: "1521"
+#   user: "system"
+#   password_envar: "ORACLEPASSWORD"
+#   database_name: "dev"
  
  
 

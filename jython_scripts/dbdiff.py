@@ -107,7 +107,7 @@ def task_execution(databases_connections, task_config):
 
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:
-        writer = csv.writer(csvfile, delimiter=",",lineterminator='\n')
+        writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)
         writer.writerows(rows)
 
 def execute(args):

@@ -45,7 +45,10 @@ public class DbConn {
     public String databaseName;
 
     public enum DbType {
+        // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
+        ORACLESID("oracle.jdbc.OracleDriver",
+                "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))(CONNECT_DATA=(SERVICE_NAME={2})))"),
         SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}:{2}"),
         POSTGRES("org.postgresql.Driver", "jdbc:postgresql://{0}:{1}:{2}"),
         MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql://{0}:{1}/{2}");
@@ -70,6 +73,8 @@ public class DbConn {
         }
 
         public static DbType getMyEnumIfExists(String value) {
+
+            System.out.println(value+"  -------------------");
             for (DbType db : DbType.values()) {
                 if (db.name().equalsIgnoreCase(value))
                     return db;
@@ -82,7 +87,7 @@ public class DbConn {
             throws SQLException, PropertyVetoException {
         this.dbType = dbtype;
         this.databaseName = databaseName;
-        System.out.println("----------------------"+databaseName);
+        System.out.println("----------------------" + databaseName);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         // props.put("JAVA_CHARSET_MAPPING", "UTF8");
         cpds.setDriverClass(dbtype.driver());
@@ -213,7 +218,7 @@ public class DbConn {
         ResultSet rs = databaseMetaData.getProcedures(this.databaseName, schemaName, "%");
 
         while (rs.next()) {
-            System.out.println( rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
+            System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3));
             items.add(rs.getString(3));
         }
         rs.close();

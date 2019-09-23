@@ -140,6 +140,7 @@ class CompareCsv(object):
 
 class ParseProcs(object):
     def __init__(self,dbConn,schemaOrOwner,writePath):
+        
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -182,4 +183,5 @@ class ParseProcs(object):
         #     queries=get_sybase_select(c)
         #     if (len(tables)>0 or len(queries)>0):
         #         print(a,b,tables,queries)
+        print("Used Datbase: ",dbConn.dataBaseName)
 

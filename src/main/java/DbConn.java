@@ -42,6 +42,7 @@ public class DbConn {
     private Statement stmt; // tbd
     public ResultSet rs;
     public DbType dbType;
+    public String databaseName;
 
     public enum DbType {
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
@@ -80,6 +81,7 @@ public class DbConn {
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException {
         this.dbType = dbtype;
+        this.databaseName = databaseName;
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         // props.put("JAVA_CHARSET_MAPPING", "UTF8");
         cpds.setDriverClass(dbtype.driver());
@@ -221,6 +223,7 @@ public class DbConn {
         // items.add(rs2.getString(3));
         // }
         // rs2.close();
+        System.out.println("----in Dbconn: " + this.databaseName);
         return items;
     }
 

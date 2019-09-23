@@ -22,4 +22,8 @@ CompareCsv:
 ParseProcs:
   sys-dev:
     schemaOrOwner: dbo
-    writePath: ./reports/parsed_procs.csv
+    writePath: ./reports/parsed_procs_dev.csv
+  sys-dev1:
+    schemaOrOwner: dbo
+    writePath: ./reports/parsed_procs_dev1.csv
+  

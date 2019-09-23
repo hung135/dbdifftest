@@ -37,11 +37,12 @@ import org.apache.poi.ss.usermodel.*;
 import java.util.*;
 
 public class DbConn {
-    private Connection conn;
+    public Connection conn;
     // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
     public DbType dbType;
+    public String databaseName;
 
     public enum DbType {
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
@@ -80,6 +81,8 @@ public class DbConn {
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException {
         this.dbType = dbtype;
+        this.databaseName = databaseName;
+        System.out.println("----------------------"+databaseName);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         // props.put("JAVA_CHARSET_MAPPING", "UTF8");
         cpds.setDriverClass(dbtype.driver());
@@ -150,7 +153,7 @@ public class DbConn {
      * @return
      * @throws SQLException
      */
-    public List<Table> getTableColumns(String schemaName) throws SQLException {
+    public List<Table> getAllTableColumns(String schemaName) throws SQLException {
         List<String> tables = this.getTableNames(schemaName);
         List<Table> items = new ArrayList<>();
 
@@ -158,23 +161,70 @@ public class DbConn {
         for (int i = 0; i < tables.size(); i++) {
             String tableName = tables.get(i);
             Table tbl = new Table(tableName);
-            tbl.columnNames = this.getColumn(tableName);
+            tbl.columnNames = this.getColumns(tableName);
             items.add(tbl);
         }
         return items;
     }
 
+    public List<String> getViewNames(String schemaName) throws SQLException {
+
+        String TABLE_NAME = "TABLE_NAME";
+        String TABLE_SCHEMA = "TABLE_SCHEM";
+        String[] VIEW_TYPES = { "VIEW" };
+        DatabaseMetaData dbmd = conn.getMetaData();
+
+        ResultSet rs = dbmd.getTables(this.databaseName, schemaName, null, VIEW_TYPES);
+        List<String> items = new ArrayList<>();
+        while (rs.next()) {
+
+            if (schemaName.toLowerCase().equals(rs.getString(TABLE_SCHEMA).toLowerCase())) {
+                items.add(rs.getString(TABLE_NAME));
+            }
+        }
+        return items;
+    }
+
     public List<String> getTableNames(String schemaName) throws SQLException {
+        String TABLE_NAME = "TABLE_NAME";
+        String TABLE_SCHEMA = "TABLE_SCHEM";
+        String[] TYPES = { "TABLE" };
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         // Print TABLE_TYPE "TABLE"
-        ResultSet resultSet = databaseMetaData.getTables(null, null, null, new String[] { "TABLE" });
+        ResultSet rs = databaseMetaData.getTables(this.databaseName, schemaName, null, TYPES);
 
-        while (resultSet.next()) {
-            // Print
-            // System.out.println(resultSet.getString("TABLE_NAME"));
-            items.add(resultSet.getString("TABLE_NAME"));
+        while (rs.next()) {
+
+            if (schemaName.toLowerCase().equals(rs.getString(TABLE_SCHEMA).toLowerCase())) {
+                items.add(rs.getString(TABLE_NAME));
+            }
         }
+        return items;
+    }
+
+    public List<String> getProcNames(String schemaName) throws SQLException {
+        String TABLE_NAME = "TABLE_NAME";
+        String TABLE_SCHEMA = "TABLE_SCHEM";
+        String[] TYPES = { "TABLE" };
+        List<String> items = new ArrayList<>();
+        DatabaseMetaData databaseMetaData = conn.getMetaData();
+        // Print TABLE_TYPE "TABLE"
+        ResultSet rs = databaseMetaData.getProcedures(this.databaseName, schemaName, "%");
+
+        while (rs.next()) {
+            System.out.println( rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
+            items.add(rs.getString(3));
+        }
+        rs.close();
+        // ResultSet rs2 = databaseMetaData.getFunctions(null, schemaName, "%");
+
+        // while (rs2.next()) {
+
+        // items.add(rs2.getString(3));
+        // }
+        // rs2.close();
+        System.out.println("----in Dbconn: " + this.databaseName);
         return items;
     }
 
@@ -189,10 +239,10 @@ public class DbConn {
      * @return
      * @throws SQLException
      */
-    public List<String> getColumn(String tabeName) throws SQLException {
+    public List<String> getColumns(String tabeName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
-        ResultSet resultSet = databaseMetaData.getColumns(null, null, tabeName, null);
+        ResultSet resultSet = databaseMetaData.getColumns(this.databaseName, null, tabeName, null);
         while (resultSet.next()) {
             // Print
             // System.out.println(resultSet.getString("COLUMN_NAME"));
@@ -201,11 +251,11 @@ public class DbConn {
         return items;
     }
 
-    public List<String> getTriggers(String tabeName) throws SQLException {
+    public List<String> getTriggers(String tableName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
 
-        ResultSet result = databaseMetaData.getTables("%", null, "%", new String[] { "TRIGGER" });
+        ResultSet result = databaseMetaData.getTables(this.databaseName, null, tableName, new String[] { "TRIGGER" });
         while (result.next()) {
             items.add(result.getString("TABLE_NAME"));
         }
@@ -253,11 +303,13 @@ public class DbConn {
         this.rs = stmt.executeQuery(selectQuery);
         ResultSetMetaData metadata = this.rs.getMetaData();
         int columnCount = metadata.getColumnCount();
-        /*for (int i = 1; i <= columnCount; i++) {
-            System.out.println(metadata.getTableName(i) + " senstive: " + metadata.isCaseSensitive(i) + " name: "
-                    + metadata.getCatalogName(i) + " type: " + metadata.getColumnTypeName(i) + " schema: "
-                    + metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i));
-        } */
+        /*
+         * for (int i = 1; i <= columnCount; i++) {
+         * System.out.println(metadata.getTableName(i) + " senstive: " +
+         * metadata.isCaseSensitive(i) + " name: " + metadata.getCatalogName(i) +
+         * " type: " + metadata.getColumnTypeName(i) + " schema: " +
+         * metadata.getSchemaName(i) + " col: " + metadata.getColumnName(i)); }
+         */
         while (this.rs.next()) {
             String[] row = new String[columnCount];
             for (int i = 1; i <= columnCount; i++) {
@@ -304,7 +356,7 @@ public class DbConn {
     public void queryToExcel(String selectQuery, String sheetName, String fullFilePath) throws Exception {
 
         Statement stmt = this.conn.createStatement();
-       
+
         /* Define the SQL query */
         ResultSet query_set = stmt.executeQuery(selectQuery);
         /* Create Map for Excel Data */
@@ -356,7 +408,7 @@ public class DbConn {
         PreparedStatement preparedStatement = null;
 
         List<String> question = new ArrayList<>();
-        tableColumns = this.getColumn(tableName);
+        tableColumns = this.getColumns(tableName);
         for (int i = 0; i < tableColumns.size(); i++) {
             question.add("?");
         }
@@ -382,6 +434,42 @@ public class DbConn {
         System.out.println("Total rows Inserted: " + affectedRecords);
         preparedStatement.close();
 
+    }
+
+    public String getSybaseViewDDL(String viewName) throws SQLException {
+
+        Statement stmt = null;
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
+                + "   where obj.type = 'V'  and obj.name='" + viewName + "' order by 1";
+        stmt = this.conn.createStatement();
+        // Let us check if it returns a true Result Set or not.
+        ResultSet rs = stmt.executeQuery(sql);
+        String currDDL = null;
+        while (rs.next()) {
+            String snippetDDL = rs.getString(2);
+            currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
+        }
+        stmt.close();
+
+        return currDDL;
+    }
+
+    public String getSybaseProcDDL(String name) throws SQLException {
+
+        Statement stmt = null;
+        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscomments c on obj.id=c.id"
+                + "  where obj.type = 'P'  and obj.name='" + name + "' order by 1";
+        stmt = this.conn.createStatement();
+        // Let us check if it returns a true Result Set or not.
+        ResultSet rs = stmt.executeQuery(sql);
+        String currDDL = null;
+        while (rs.next()) {
+            String snippetDDL = rs.getString(2);
+            currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
+        }
+        stmt.close();
+
+        return currDDL;
     }
 
 }

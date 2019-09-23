@@ -19,8 +19,11 @@ CompareCsv:
       reportHeader: TableName,Dev,Test
       key_columns: # 
         - TableName
-        # - Id2
-        # - COL2
-          #column3
-          #column4
-          #column5.......only 1 column is key in this case
+ParseProcs:
+  sys-dev:
+    schemaOrOwner: dbo
+    writePath: ./reports/parsed_procs_dev.csv
+  sys-dev1:
+    schemaOrOwner: dbo
+    writePath: ./reports/parsed_procs_dev1.csv
+  

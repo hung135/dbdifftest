@@ -6,7 +6,7 @@ from java.util import HashMap
 
 import csv
 import md5
-
+from  .parse_proc import *
 
 class TableDump(object):
 
@@ -50,7 +50,7 @@ class TableRowCount(object):
 
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
-                                 quotechar='|',lineterminator='\n')
+                                 quotechar='"',lineterminator='\n')
         outPutTable.writerow(header)
         for row in tableCount:
             outPutTable.writerow(row)
@@ -90,7 +90,7 @@ class TableSampleCheckSum(object):
                 header = ["TableName", "SampleDataHash"]
 
                 outPutTable = csv.writer(open(writePath, 'w'), delimiter=',',
-                                         quotechar='|',lineterminator='\n')
+                                         quotechar='"',lineterminator='\n')
                 outPutTable.writerow(header)
                 for row in table_row_hash:
                     outPutTable.writerow(row)
@@ -137,3 +137,51 @@ class CompareCsv(object):
         csv2=os.path.abspath(csv2)
          
         DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)
+
+class ParseProcs(object):
+    def __init__(self,dbConn,schemaOrOwner,writePath):
+        
+        directory = os.path.dirname(writePath)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        fqn = os.path.abspath(writePath)
+        
+ 
+
+        x=dbConn.getProcNames(schemaOrOwner)
+        total=[]
+        for proc in x:
+            ddl=dbConn.getSybaseProcDDL(proc) 
+            x = remove_comments(ddl)
+            total.append([dbConn.databaseName,proc,"PROC",get_querys(x),get_updates(x)])
+        v=dbConn.getViewNames(schemaOrOwner)
+        
+        for view in v:
+            ddl=dbConn.getSybaseViewDDL(view) 
+            v = remove_comments(ddl)
+
+            queryfrom=get_querys(v)
+            
+            total.append([dbConn.databaseName,view,"VIEW",queryfrom,""])
+             
+
+        header = ["Database","Name","Type","Query","Update"]
+        outPutTable = csv.writer(open(fqn, 'w'), delimiter=',',
+                                quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
+        outPutTable.writerow(header)
+        for row in total:
+            outPutTable.writerow(row)
+            #tmp = re.findall(" from \w+.*?where", x)
+            #if len(tmp)>0: 
+            #   total.append(filter_junk(tmp))
+            #   tmp = re.findall(" insert into \w+", x)
+            #   if len(tmp)>0: 
+            #     total.append(tmp)
+             
+        # for a,b,c in x:
+        #     tables=get_sybase_insert(c)
+        #     queries=get_sybase_select(c)
+        #     if (len(tables)>0 or len(queries)>0):
+        #         print(a,b,tables,queries)
+        print("Used Datbase: ",dbConn.databaseName)
+

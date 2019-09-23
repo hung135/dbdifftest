@@ -2,6 +2,7 @@
 RunTime Installation:
 - Download the jython 2.7 runtime:
 - - https://www.jython.org/jython-old-sites/downloads.html
+- - Download the Standalone jar and save it to a convienent location
 - - create a batch file with:
 - - - java -jar jython.jar and make sure the batch file is in your path
 - - clone this project

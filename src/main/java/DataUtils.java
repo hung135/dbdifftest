@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.io.FileReader;
 import java.sql.Blob;
 
@@ -44,6 +45,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.ResultSetMetaData;
 import java.util.Map;
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
@@ -198,6 +200,42 @@ public class DataUtils {
         return results;
     }
 
+    public static Map<Integer, String> outputBinary(Connection conn, String path, String tableName, String columnName, String columnType)
+        throws FileNotFoundException, SQLException, IOException
+    {
+        Map<Integer, String> results = new HashMap<Integer, String>();
+        Statement stmt = conn.createStatement();
+        String query = "SELECT " + columnName + " FROM " + tableName;
+
+        ResultSet rs = stmt.executeQuery(query);
+        while(rs.next()){
+            Blob blob = rs.getBlob(columnName);
+            InputStream in = blob.getBinaryStream();
+
+            int length = in.available();
+            byte[] blobBytes = new byte[length];
+            in.read(blobBytes);
+
+            String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
+
+            // change name here
+            String dirPath = path + "/" + columnType + "/" + md5Hex;
+            File blobFile = new File(dirPath);
+            if(!blobFile.getParentFile().exists()){
+                blobFile.getParentFile().mkdirs();
+            }
+            FileOutputStream fos = new FileOutputStream(blobFile);
+
+            results.put(rs.getRow(), dirPath);
+            fos.write(blobBytes);
+            fos.close();
+        }
+
+        rs.close();
+        stmt.close();
+        return results;
+    }
+
     /**
      * place holder logic to download image
      * 
@@ -207,16 +245,17 @@ public class DataUtils {
      * @throws SQLException
      * @throws FileNotFoundException
      */
-    public void downloadImage(Connection conn, String tableName, String columnName, int primaryKey, String filePath)
+    public static void downloadImage(Connection conn, String tableName, String columnName, int primaryKey, String filePath)
             throws FileNotFoundException, SQLException, IOException {
 
         Statement stmt = conn.createStatement();
-        String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE a_key = " + primaryKey;
+        String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE pid = " + primaryKey;
+        System.out.println(query);
         ResultSet rs = stmt.executeQuery(query);
 
         if (rs.next()) {
             File blobFile = null;
-            blobFile = new File(rs.getString(filePath));
+            blobFile = new File(filePath);
 
             Blob blob = rs.getBlob(columnName);
             InputStream in = blob.getBinaryStream();
@@ -244,7 +283,8 @@ public class DataUtils {
      * @throws SQLException
      * @throws IOException
      */
-    public void uploadImage(Connection conn, File file, int uniqueid) throws SQLException, IOException {
+    public static void uploadImage(Connection conn, String filep, int uniqueid) throws SQLException, IOException {
+        File file = new File(filep);
 
         String filename = file.getName();
         int length = (int) file.length();
@@ -254,16 +294,15 @@ public class DataUtils {
         filestream = new FileInputStream(file);
 
         Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        String query = "UPDATE assignment SET instructions_file = ?, instructions_filename = ? WHERE a_key = "
-                + uniqueid;
+        // String query = "UPDATE assignment SET instructions_file = ?, instructions_filename = ? WHERE a_key = " + uniqueid;
+        String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setBinaryStream(1, filestream, length);
-        ps.setString(2, filename);
-        int rows = ps.executeUpdate();
+        //ps.setString(2, filename);
+        ps.execute();
         ps.close();
         stmt.close();
         filestream.close();
-
     }
 
     /**

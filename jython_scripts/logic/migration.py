@@ -110,7 +110,6 @@ class TableLoadCsv(object):
             print("Mocking Loading csv: ", tableName, filePath)
 
 class QueryToCSV(object):
-     
     def __init__(self, dbConn, sql,  writePath):
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
@@ -118,9 +117,21 @@ class QueryToCSV(object):
         fqn = os.path.abspath(writePath)
         dbConn.queryToCSV(sql, fqn)
             
-
     def __repr__(self):
         return str(self.__dict__)
+
+class quertyToCSVOutputBinary(object):
+    def __init__(self, dbConn, sql,  writePath):
+        directory = os.path.dirname(writePath)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        fqn = os.path.abspath(writePath)
+        print(fqn)
+        dbConn.quertyToCSVOutputBinary(sql, fqn)
+            
+    def __repr__(self):
+        return str(self.__dict__)
+
 #todo..multiple sheets would be nice
 class QueryToExcel(object):
     def __init__(self, dbConn, sql,  writePath, sheetName="Sheet1"):

@@ -42,7 +42,6 @@ def get_sybase_select(dataString):
 #     total.append(tmp)
   return total
 
-x = DbConn.DbType.SYBASE
 
 selectQuery = """
 SELECT DISTINCT 
@@ -58,19 +57,38 @@ FROM sysobjects INNER JOIN syscomments
 WHERE sysobjects.type = 'P'
 """
 
-db =   DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master")
+# db =   DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master")
 
-select = db.queryToList(selectQuery)
-name_proc = {}
-for sproc in select:
-  try:
-    if sproc:
-      if sproc[0] in name_proc.keys():
-        name_proc[sproc[0]] = name_proc[sproc[0]].append(sproc[1])
-      else:
-        name_proc[sproc[0]] = [sproc[1]]
-  except AttributeError:
-    print("Not found: {0}".format(sproc[0]))
+# select = db.queryToList(selectQuery)
+# name_proc = {}
+# for sproc in select:
+#   try:
+#     if sproc:
+#       if sproc[0] in name_proc.keys():
+#         name_proc[sproc[0]] = name_proc[sproc[0]].append(sproc[1])
+#       else:
+#         name_proc[sproc[0]] = [sproc[1]]
+#   except AttributeError:
+#     print("Not found: {0}".format(sproc[0]))
 
-print(len(name_proc.keys()))
+# print(len(name_proc.keys()))
 # print("".join(txt))
+
+x = DbConn.DbType.SYBASE
+db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "Master")
+# statement = """
+# CREATE TABLE blobtest(
+#   pid int not null,
+#   img image
+# )
+# """
+# DataUtils.uploadImage(db.conn, "/workspace/samples/img.png", 
+statement = """
+SELECT * FROM blobtest
+"""
+# queryList = db.queryToList(statement)
+# for y in queryList:
+#   print(y)
+
+#x = DataUtils.downloadImage(db.conn, "blobtest", "img", 2, "/workspace/out.png")
+db.queryToCSVWithBinary(statement, "/workspace/output/")

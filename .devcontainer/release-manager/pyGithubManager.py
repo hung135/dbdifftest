@@ -20,14 +20,18 @@ def _get_release_based_tag(releases, tag):
     return release
 
 def create_release(repository, releases, name, message, tag=None):
-    base_version = "v0.0.1"
     if not tag:
         try:
             tag = re.findall(".\d", releases[0].tag_name)
-            if "".join(tag) == base_version:
-                tag = "v0.1.0"
+            if ".9" in tag:
+                indx = tag.index(".9")
+                tag[indx] = ".11"
+                tag = "".join(tag)
             else:
-                tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
+                if len(x[-1]) >= 3:
+                    tag[-1] = str("%.1f" % (float(tag[-1]) + .01))[1:]
+                else:
+                    tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
                 tag = "".join(tag)
         except IndexError:
             tag = base_version

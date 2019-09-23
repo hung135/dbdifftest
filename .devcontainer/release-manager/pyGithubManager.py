@@ -28,15 +28,11 @@ def create_release(repository, releases, name, message, tag=None):
                 tag[indx] = ".11"
                 tag = "".join(tag)
             else:
-                if len(tag[-1]) >= 3:
-                    tag[-1] = str("%.1f" % (float(tag[-1]) + .01))[1:]
-                else:
-                    tag[-1] = str("%.1f" % (float(tag[-1]) + .1))[1:]
-                tag = "".join(tag)
+                tag[-1] = "." + str(int(tag[-1].split(".")[-1]) + 1)
+            tag = "".join(tag)
         except IndexError:
-            tag = base_version
+            tag = "v0.0.1"
 
-    print(tag)
     release = repository.create_git_release(tag, name, message, prerelease=True)
     return (release, tag)
 

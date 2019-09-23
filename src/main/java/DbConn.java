@@ -213,7 +213,7 @@ public class DbConn {
         ResultSet rs = databaseMetaData.getProcedures(this.databaseName, schemaName, "%");
 
         while (rs.next()) {
-            System.out.println(rs.getString("PROCEDURE_CAT"));
+            System.out.println( rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
             items.add(rs.getString(3));
         }
         rs.close();

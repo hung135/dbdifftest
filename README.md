@@ -14,6 +14,17 @@ RunTime Installation:
 - - - runreports.bat 
 - - - - jython dbdiff.py -y ../conn.yaml -t ../reports.yaml
 
+What Can I put in tasks & reports.yaml:
+- - Every Function in this file can be configured in your tasks.yaml & reports.yaml
+- - - https://github.com/hung135/dbdifftest/blob/master/jython_scripts/logic/migration.py
+- - Same Connection yaml (conn.yaml) file is here :
+- - - https://github.com/hung135/dbdifftest/blob/master/jython_scripts/conn.yaml
+
+Note:
+- You can call the yaml files and have as many as you. 
+- Understand one has your connection info and one has your execution parameters
+- This framework will look up the connection to run based on what parameters you configure in your task yaml file
+
 Description:
 - Generic Maven Project to Connect to 2 different Database via JDBC.
 - Queryes Tables, Views, Fucntions and reports differences found

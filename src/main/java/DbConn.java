@@ -73,8 +73,7 @@ public class DbConn {
         }
 
         public static DbType getMyEnumIfExists(String value) {
-
-            System.out.println(value+"  -------------------");
+ 
             for (DbType db : DbType.values()) {
                 if (db.name().equalsIgnoreCase(value))
                     return db;
@@ -85,28 +84,16 @@ public class DbConn {
 
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException {
+
         this.dbType = dbtype;
         this.databaseName = databaseName;
-        System.out.println("----------------------" + databaseName);
-        ComboPooledDataSource cpds = new ComboPooledDataSource();
-        // props.put("JAVA_CHARSET_MAPPING", "UTF8");
-        cpds.setDriverClass(dbtype.driver());
-
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
+        Properties props = new Properties();
+        props.setProperty("user", userName);
+        props.setProperty("password", password);
 
-        cpds.setJdbcUrl(url);
-        cpds.setUser(userName);
-        cpds.setPassword(password);
-        cpds.setMinPoolSize(5);
-        cpds.setAcquireIncrement(5);
-        cpds.setMaxPoolSize(20);
-        cpds.setMaxIdleTime(60);
-        cpds.setMaxStatements(100);
-        cpds.setPreferredTestQuery("SELECT 1");
-        cpds.setIdleConnectionTestPeriod(60);
-        cpds.setTestConnectionOnCheckout(true);
-
-        this.conn = cpds.getConnection();
+        this.conn = DriverManager.getConnection(url, props);
+        System.out.println("Connect to Oracle Successful");
         // System.out.println("DB Connection Successful: " + dbtype);
     }
 
@@ -361,42 +348,37 @@ public class DbConn {
         int columnCount = metadata.getColumnCount();
         List<Integer> columnTypeIndex = new ArrayList<Integer>();
         String[] columnNames = new String[columnCount];
-        for(int i=1; i <= columnCount; i++){
+        for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
             // For now; later create custom enum. "image" isn't supported by JAVA
-            if(type.equals("image")){columnTypeIndex.add(i);}
+            if (type.equals("image")) {
+                columnTypeIndex.add(i);
+            }
 
-            columnNames[i-1] = metadata.getColumnName(i);
+            columnNames[i - 1] = metadata.getColumnName(i);
         }
 
-
-        CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath+"/index.csv"));
+        CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath + "/index.csv"));
         Boolean includeHeaders = true;
 
-        if(columnTypeIndex.size() != 0){
+        if (columnTypeIndex.size() != 0) {
             List<String[]> data = new ArrayList<String[]>();
             columnNames = Arrays.copyOf(columnNames, columnNames.length + columnTypeIndex.size());
             // get values up here
             Map<Integer, Map<Integer, String>> output = new HashMap<Integer, Map<Integer, String>>();
             String tblName = metadata.getTableName(1);
-            for(Integer i : columnTypeIndex){
+            for (Integer i : columnTypeIndex) {
                 columnNames[i] = metadata.getColumnName(i) + "_output";
-                output.put(
-                    columnCount+i, 
-                    DataUtils.outputBinary(
-                        this.conn, 
-                        fullFilePath,
-                        tblName, 
-                        metadata.getColumnName(i), 
-                        metadata.getColumnTypeName(i)));
+                output.put(columnCount + i, DataUtils.outputBinary(this.conn, fullFilePath, tblName,
+                        metadata.getColumnName(i), metadata.getColumnTypeName(i)));
             }
-            while(rs.next()){
-                if(rs.getRow() != 0){
+            while (rs.next()) {
+                if (rs.getRow() != 0) {
                     String[] row = new String[columnCount + columnTypeIndex.size()];
                     for (int i = 1; i <= columnCount; i++) {
                         row[i - 1] = rs.getString(1);
                     }
-                    for(Map.Entry<Integer, Map<Integer, String>> entry : output.entrySet()){
+                    for (Map.Entry<Integer, Map<Integer, String>> entry : output.entrySet()) {
                         row[entry.getKey() - 2] = entry.getValue().get(rs.getRow());
                     }
                     data.add(row);
@@ -408,7 +390,7 @@ public class DbConn {
             writer.writeAll(rs, includeHeaders);
         }
         writer.close();
-        
+
     }
 
     public void print_test(String selectQuery) {

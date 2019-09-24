@@ -53,9 +53,9 @@ services:
   dboracle:
     image: oracle/database:12.2.0.1-ee
     restart: unless-stopped
-    # ports:
-    #   - 1521:1521
-    #   - 5500:5500 
+    ports:
+      - 1521:1521
+      - 5500:5500 
     environment:
       ORACLE_SID: dev
       ORACLE_PDB: ORCLPDB1

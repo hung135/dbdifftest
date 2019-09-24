@@ -52,3 +52,6 @@ Changelog (no order):
 - Added reflection to find the correct `logic` class instance
 - Updated `task` object to reflect the new changes
 - Added a `CSV` out
+- Added `deletereleases` alias
+- Updated `package` and `releasepackage` to support zip files
+- Added the ability to export the MD5 has in sybase

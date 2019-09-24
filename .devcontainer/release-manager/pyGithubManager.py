@@ -19,6 +19,18 @@ def _get_release_based_tag(releases, tag):
         _error_out("Release tag %s does not exists" % args.tag)
     return release
 
+def delete_all(releases):
+    last_release = releases[0]
+    print("Not deleting {0}".format(last_release.tag_name))
+    count = 0
+    for release in releases:
+        if last_release.tag_name != release.tag_name:
+            count+=1
+            release.delete_release()
+            print("\t\tDeleted {0}".format(release.tag_name))
+    print("Deleted {0}".format(count))
+    
+
 def create_release(repository, releases, name, message, tag=None):
      
     if not tag:
@@ -96,6 +108,7 @@ def parse_cli():
    # delete
    delete_group =parser.add_argument_group("Delete")
    delete_group.add_argument("-d", "--delete", help="Delete the following release name")
+   delete_group.add_argument("-da", "--delete_all", help="Deletes all but the last release", action="store_true")
 
    # create`
    create_group = parser.add_argument_group("Create")
@@ -157,6 +170,10 @@ def run(args):
     if args.delete:
         [x.delete_release() for x in releases if x.title == args.delete or x.tag_name == args.delete]
         print("Deleted release: {0}".format(args.delete))
+
+    if args.delete_all:
+        delete_all(releases)
+        print("Completed deleting releases")
 
     if args.print:
         [print("%s | %s" %(release.title, release.tag_name)) for release in releases]

@@ -4,3 +4,4 @@ target/*
 *.tar
 tmp/*
 jython_scripts/*.jar
+*.zip

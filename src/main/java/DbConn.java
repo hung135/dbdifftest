@@ -83,7 +83,7 @@ public class DbConn {
     }
 
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
-            throws SQLException, PropertyVetoException {
+            throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbtype;
         this.databaseName = databaseName;
@@ -91,7 +91,7 @@ public class DbConn {
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-
+        Class.forName(dbtype.driver);
         this.conn = DriverManager.getConnection(url, props);
         System.out.println("Connect to Oracle Successful");
         // System.out.println("DB Connection Successful: " + dbtype);

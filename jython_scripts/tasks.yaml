@@ -6,7 +6,7 @@
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
 TableRowCount:
-  sys-dev:
+  oracle-dev:
     schemaOrOwner: dbo
     fileName: ./table_rowcount.csv
   sys-dev1:

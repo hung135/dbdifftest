@@ -74,7 +74,7 @@ public class DbConn {
         }
 
         public static DbType getMyEnumIfExists(String value) {
- 
+
             for (DbType db : DbType.values()) {
                 if (db.name().equalsIgnoreCase(value))
                     return db;
@@ -82,15 +82,17 @@ public class DbConn {
             return null;
         }
     }
-    public String getUrl(){
+
+    public String getUrl() {
         return this.url;
     }
+
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbtype;
         this.databaseName = databaseName;
-        
+
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
         this.url = url;
         Properties props = new Properties();
@@ -200,27 +202,26 @@ public class DbConn {
         return items;
     }
 
-    public List<String> getProcNames(String schemaName) throws SQLException {
-        String TABLE_NAME = "TABLE_NAME";
-        String TABLE_SCHEMA = "TABLE_SCHEM";
-        String[] TYPES = { "TABLE" };
-        List<String> items = new ArrayList<>();
-        DatabaseMetaData databaseMetaData = conn.getMetaData();
+    public List<String> getSybaseObjNames(String schemaName, String objType) throws SQLException {
+        String sql="select distinct obj.name from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
+        + "   where obj.type = '" + objType + "'  and USER_NAME(uid)='"+schemaName+"' order by 1";
+        
+        List<String> items = new ArrayList<>(); 
         // Print TABLE_TYPE "TABLE"
-        ResultSet rs = databaseMetaData.getProcedures(this.databaseName, schemaName, "%");
-
+         
+        Statement stmt = null;
+             stmt = this.conn.createStatement();
+        // Let us check if it returns a true Result Set or not.
+        ResultSet rs = stmt.executeQuery(sql);
+        
         while (rs.next()) {
-            System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3));
-            items.add(rs.getString(3));
+             items.add(rs.getString(1));
+             
         }
+        stmt.close();
+
         rs.close();
-        // ResultSet rs2 = databaseMetaData.getFunctions(null, schemaName, "%");
-
-        // while (rs2.next()) {
-
-        // items.add(rs2.getString(3));
-        // }
-        // rs2.close();
+        
         return items;
     }
 
@@ -484,11 +485,11 @@ public class DbConn {
 
     }
 
-    public String getSybaseViewDDL(String viewName) throws SQLException {
+    public String getSybaseViewDDL(String schemaName, String viewName) throws SQLException {
 
         Statement stmt = null;
         String sql = "select distinct obj.name, c.text from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
-                + "   where obj.type = 'V'  and obj.name='" + viewName + "' order by 1";
+                + "   where obj.type = 'V'  and USER_NAME(uid)='"+schemaName+"' and obj.name='" + viewName + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);
@@ -502,19 +503,18 @@ public class DbConn {
         return currDDL;
     }
 
-    public String getSybaseProcDDL(String name) throws SQLException {
+    public String getSybaseCode(String name, String objType) throws SQLException {
 
         Statement stmt = null;
-        String sql = "select distinct obj.name, c.text from dbo.sysobjects obj join dbo.syscomments c on obj.id=c.id"
-                + "  where obj.type = 'P'  and obj.name='" + name + "' order by 1";
+        String sql = "select distinct obj.type, obj.name, c.text from dbo.sysobjects obj join dbo.syscomments c on obj.id=c.id"
+                + "  where obj.type in ('" + objType + "')  and obj.name='" + name + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
-      
-        
+
         ResultSet rs = stmt.executeQuery(sql);
         String currDDL = null;
         while (rs.next()) {
-            String snippetDDL = rs.getString(2);
+            String snippetDDL = rs.getString(3);
             currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
         stmt.close();

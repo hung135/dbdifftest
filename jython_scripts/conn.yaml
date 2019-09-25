@@ -7,21 +7,21 @@ sys-dev:
   port: "5000"
   user: "sa"
   password_envar: "SYBASEPASSWORD"
-  database_name: "master"
+  database_name: "tempdb"
 sys-dev1:
   dbtype: "SYBASE"
   host: "dbsybase"
   port: "5000"
   user: "sa"
   password_envar: "SYBASEPASSWORD"
-  database_name: "tempdb"
+  database_name: "master"
 # oracle-dev:
-#   dbtype: "ORACLESID"
+#   dbtype: "ORACLE"
 #   host: "dboracle"
 #   port: "1521"
 #   user: "system"
-#   password_envar: "ORACLEPASSWORD"
-#   database_name: "dev"
+#   password_envar: "ORACLE_PWD"
+#   database_name: "dockerdev"
  
  
 

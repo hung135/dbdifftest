@@ -1,4 +1,5 @@
 
+import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -51,6 +52,14 @@ public class DataUtilsTest {
     // Connection conn = DriverManager.getConnection(url, props);
 
     // }
+
+    @Test
+    public void testOracleDbConn() throws SQLException, PropertyVetoException {
+    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
+    List<String> x = db.getTableNames("dbo");
+    System.out.println("Connect to Oracle Successful" + x);
+
+    }
 
     // @Test
     // public void testOracle() throws SQLException {

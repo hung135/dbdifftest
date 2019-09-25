@@ -32,19 +32,30 @@ def delete_all(releases):
     
 
 def create_release(repository, releases, name, message, tag=None):
+     
     if not tag:
         try:
-            tag = re.findall(".\d", releases[0].tag_name)
-            if ".9" in tag:
-                indx = tag.index(".9")
-                tag[indx] = ".11"
-                tag = "".join(tag)
+  
+ 
+            #tag = re.findall(".\d", releases[0].tag_name)
+            major,minor,micro = releases[0].tag_name.split(".")
+            
+            if int(micro)==99:
+                micro = 0
+                minor = int(minor)+1
             else:
-                tag[-1] = "." + str(int(tag[-1].split(".")[-1]) + 1)
-            tag = "".join(tag)
+                micro = int(micro)+1
+            # if ".9" in tag:
+            #     indx = tag.index(".9")
+            #     tag[indx] = ".11"
+            #     tag = "".join(tag)
+            # else:
+            #     tag[-1] = "." + str(int(tag[-1].split(".")[-1]) + 1)
+            tag = "{0}.{1}.{2}".format(major,minor,micro)
         except IndexError:
             tag = "v0.0.1"
-
+     
+     
     release = repository.create_git_release(tag, name, message, prerelease=True)
     return (release, tag)
 

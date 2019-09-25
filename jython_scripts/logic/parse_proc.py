@@ -2,13 +2,18 @@ import sys
 import re
 #paternns
 
-querypatterns = [" from (\w+.*?) where"
-,"from (\w+)\)?"
-,"exec (\w+) "
+querypatterns = [
+# " from (\w+.*?) where"
+# ,"from (\w+)\)?"
+# ,"exec (\w+) "
+# ,"from (\w+\.\.\w+)",
+"(\w+\.\.\w+)"
  ]
 updatepatterns =[
-    "update (\w+).*? set"
-,"insert (\w+\.\.\w+) "
+     
+"(insert into \w+\.\.\w+)",
+"(update \w+\.\.\w+)",
+"(delete from \w+\.\.\w+)"
 ]
 def remove_comments(dataString):
         #this replace HAS TO IN THESE ORDER

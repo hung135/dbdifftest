@@ -43,13 +43,14 @@ public class DbConn {
     public ResultSet rs;
     public DbType dbType;
     public String databaseName;
+    public String url;
 
     public enum DbType {
         // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
         ORACLESID("oracle.jdbc.OracleDriver",
                 "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))(CONNECT_DATA=(SERVICE_NAME={2})))"),
-        SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}:{2}"),
+        SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}/{2}"),
         POSTGRES("org.postgresql.Driver", "jdbc:postgresql://{0}:{1}:{2}"),
         MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql://{0}:{1}/{2}");
 
@@ -81,13 +82,17 @@ public class DbConn {
             return null;
         }
     }
-
+    public String getUrl(){
+        return this.url;
+    }
     public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbtype;
         this.databaseName = databaseName;
+        
         String url = MessageFormat.format(dbtype.url, host, port, databaseName);
+        this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
@@ -216,7 +221,6 @@ public class DbConn {
         // items.add(rs2.getString(3));
         // }
         // rs2.close();
-        System.out.println("----in Dbconn: " + this.databaseName);
         return items;
     }
 
@@ -505,6 +509,8 @@ public class DbConn {
                 + "  where obj.type = 'P'  and obj.name='" + name + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
+      
+        
         ResultSet rs = stmt.executeQuery(sql);
         String currDDL = null;
         while (rs.next()) {

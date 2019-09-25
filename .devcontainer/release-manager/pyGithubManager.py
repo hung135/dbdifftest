@@ -35,9 +35,8 @@ def create_release(repository, releases, name, message, tag=None):
      
     if not tag:
         try:
-             
-                #print(dir(aa),"----releases")
-                
+  
+ 
             #tag = re.findall(".\d", releases[0].tag_name)
             major,minor,micro = releases[0].tag_name.split(".")
             

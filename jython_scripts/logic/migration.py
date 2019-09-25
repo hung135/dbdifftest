@@ -160,20 +160,39 @@ class ParseProcs(object):
  
 
         x=dbConn.getProcNames(schemaOrOwner)
+        print("----url ",dbConn.getUrl())
+        print(dbConn.url)
+        rs = dbConn.queryToList("select db_name()")
+        print("query-----",rs)
+        for a in rs:
+            print("-----aaa",a)
         total=[]
         for proc in x:
-            ddl=dbConn.getSybaseProcDDL(proc) 
-            x = remove_comments(ddl)
-            total.append([dbConn.databaseName,proc,"PROC",get_querys(x),get_updates(x)])
-        v=dbConn.getViewNames(schemaOrOwner)
-        
-        for view in v:
-            ddl=dbConn.getSybaseViewDDL(view) 
-            v = remove_comments(ddl)
-
-            queryfrom=get_querys(v)
             
-            total.append([dbConn.databaseName,view,"VIEW",queryfrom,""])
+            ddl=dbConn.getSybaseProcDDL(proc) 
+            queryfrom=""
+            updatefrom=""
+            if ddl is None:
+                queryfrom="error"
+                print("errror ",proc,ddl)
+            else:
+                x = remove_comments(ddl)
+                queryfrom=get_querys(x)
+                updatefrom=get_updates(x)
+            total.append([dbConn.databaseName,proc,"PROC",queryfrom,updatefrom])
+        v=dbConn.getViewNames(schemaOrOwner)
+        if v is not None:
+            for view in v:
+                ddl=dbConn.getSybaseViewDDL(view) 
+                queryfrom=""
+                if ddl is None:
+                    queryfrom="error"
+                else:
+                    v = remove_comments(ddl)
+
+                    queryfrom=get_querys(v)
+                    
+                    total.append([dbConn.databaseName,view,"VIEW",queryfrom,""])
              
 
         header = ["Database","Name","Type","Query","Update"]

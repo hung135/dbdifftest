@@ -42,7 +42,7 @@ public class DbDiff {
             System.out.println(e);
 
         }
-        System.out.println("---------");
+        ;
         // main.readyaml();
     }
 }

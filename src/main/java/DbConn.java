@@ -1,4 +1,5 @@
 
+import com.google.common.io.ByteSource;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -392,12 +393,12 @@ public class DbConn {
             }
             for (int imgIdx : imageColIndex) {
                 
-                InputStream in = rs.getBinaryStream(imgIdx);
-
-                int length = in.available();
-                
-                byte[] blobBytes = new byte[length];
-                in.read(blobBytes);
+//                InputStream in =  ByteSource.wrap().openStream();
+            
+  //              int length = in.available();
+                //get bytes faster than getinputstream but need enough memory to hold entire blob
+                byte[] blobBytes = rs.getBytes(imgIdx);
+                //in.read(blobBytes);
 
                 String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
 

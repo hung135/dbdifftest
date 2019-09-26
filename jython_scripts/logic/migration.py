@@ -10,7 +10,15 @@ from  .parse_proc import *
 
 class TableDump(object):
 
-    def __init__(self, dbConn, schemaOrOwner, writePath):
+    def __init__(self, dbConn, schemaOrOwner, writePath,rowlimit=0):
+        limit=""
+        top=""
+        if (str(dbConn.dbType) == 'SYBASE') and rowlimit>0:
+            top='TOP {}'.format(rowlimit)
+             
+        if (str(dbConn.dbType) != 'SYBASE') and rowlimit>0:
+            limit='LIMIT {}'.format(rowlimit)
+        
         path = os.path.abspath(writePath)
         if not os.path.exists(path):
             os.makedirs(path)
@@ -20,7 +28,7 @@ class TableDump(object):
             fqn = os.path.join(path, a+'.csv')
             try:
                 dbConn.queryToCSV(
-                    'select * from {0}.{1}'.format(schemaOrOwner, a), fqn)
+                    'select {2} * from {0}.{1} {3}'.format(schemaOrOwner, a, fqn,top,limit))
             except:
                 pass
 
@@ -121,12 +129,20 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class quertyToCSVOutputBinary(object):
-    def __init__(self, dbConn, sql,  writePath):
+    def __init__(self, dbConn, sql,  writePath,rowlimit=0):
+        limit=""
+        top=""
+        if str(dbConn.dbType) == 'SYBASE' and rowlimit>0:
+            top='TOP {}'.format(rowlimit)
+             
+        if str(dbConn.dbType) != 'SYBASE' and rowlimit>0:
+            limit='LIMIT {}'.format(rowlimit)
+            
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        print(fqn)
+        print(fqn,sql)
         dbConn.quertyToCSVOutputBinary(sql, fqn)
             
     def __repr__(self):
@@ -159,31 +175,35 @@ class ParseProcs(object):
         
  
 
-        x=dbConn.getProcNames(schemaOrOwner)
-        print("----url ",dbConn.getUrl())
-        print(dbConn.url)
-        rs = dbConn.queryToList("select db_name()")
-        print("query-----",rs)
-        for a in rs:
-            print("-----aaa",a)
+        
+         
         total=[]
-        for proc in x:
-            
-            ddl=dbConn.getSybaseProcDDL(proc) 
-            queryfrom=""
-            updatefrom=""
-            if ddl is None:
-                queryfrom="error"
-                print("errror ",proc,ddl)
-            else:
-                x = remove_comments(ddl)
-                queryfrom=get_querys(x)
-                updatefrom=get_updates(x)
-            total.append([dbConn.databaseName,proc,"PROC",queryfrom,updatefrom])
+        objType={"Func":"F","Proc":"P","Trigger":"TR"
+        
+        ,"ExtProc":"XP"
+        }
+        for key in objType:
+
+            oType=objType[key]
+            x=dbConn.getSybaseObjNames(schemaOrOwner,oType)
+            print("Parsing: ",key)
+            for proc in x:
+                
+                ddl=dbConn.getSybaseCode(proc,oType) 
+                queryfrom=""
+                updatefrom=""
+                if ddl is None:
+                    queryfrom="error"
+                    print("errror ",proc,ddl)
+                else:
+                    x = remove_comments(ddl)
+                    queryfrom=get_querys(x)
+                    updatefrom=get_updates(x)
+                total.append([dbConn.databaseName,proc,key,queryfrom,updatefrom])
         v=dbConn.getViewNames(schemaOrOwner)
         if v is not None:
             for view in v:
-                ddl=dbConn.getSybaseViewDDL(view) 
+                ddl=dbConn.getSybaseViewDDL(schemaOrOwner,view) 
                 queryfrom=""
                 if ddl is None:
                     queryfrom="error"

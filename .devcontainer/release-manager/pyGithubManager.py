@@ -38,7 +38,11 @@ def create_release(repository, releases, name, message, tag=None):
   
  
             #tag = re.findall(".\d", releases[0].tag_name)
-            major,minor,micro = releases[0].tag_name.split(".")
+            print(releases[0].tag_name)
+            for rel in releases:
+                if re.match("v\d+\.\d+\.\d+",rel.tag_name):
+                    major,minor,micro = rel.tag_name.split(".")
+                    break
             
             if int(micro)==99:
                 micro = 0
@@ -160,7 +164,7 @@ def run(args):
             if args.v:
                 version = tag
         upload_asset(args.asset, release=release, version=version)
-        print("Added asset to release")
+        print("Added asset to release: {}".format(version))
 
     if args.update:
         upload_asset(args.asset, tag=args.tag, releases=releases)

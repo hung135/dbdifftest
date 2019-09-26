@@ -559,4 +559,100 @@ public class DataUtils {
         // }
         writeListToCSV(results, outFile);
     }
+
+        public static void freeWayMigrate(Connection srcDbConn,List<Connection> trgConns,List<String> tableNames) throws SQLException {
+    
+        Statement stmt =  srcDbConn.createStatement();
+
+        for (String tableName : tableNames){
+            String sql="select * from "+tableName;
+            
+
+        ResultSet rs = stmt.executeQuery(sql);
+        ResultSetMetaData metadata = rs.getMetaData();
+
+        int columnCount = metadata.getColumnCount();
+        List<Integer> imageColIndex = new ArrayList<Integer>();
+        List<Integer> stringColIndex = new ArrayList<Integer>();
+        String[] allColumnNames = new String[columnCount];
+        for (int i = 1; i <= columnCount; i++) {
+            String type = metadata.getColumnTypeName(i);
+            String columnName = metadata.getColumnName(i);
+          
+            // For now; later create custom enum. "image" isn't supported by JAVA
+            if (type.equals("image")) {
+                imageColIndex.add(i);
+            } else {
+                stringColIndex.add(i);
+            }
+            allColumnNames[i - 1] = columnName;
+        }
+
+        List<String[]> data = new ArrayList<String[]>();
+  /*************************************** */
+        //build the insert
+        String columnsComma = String.join(",", allColumnNames);
+        String columnsQuestion=  "?";
+        for (int jj=0;jj<columnCount;jj++){
+            if (jj>0)
+                columnsQuestion=  columnsQuestion + ",?";
+        }
+        String sqlInsert = "INSERT INTO "+tableName+" ("+allColumnNames+") VALUES ("+columnsQuestion+")";
+        List<Statement> trgStmnts = new ArrayList<>();
+        List<PreparedStatement> trgPrep = new ArrayList<>();
+        trgConns.forEach(conn->{
+            conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            trgPrep.add( conn.prepareStatement(sql));
+
+            });
+            
+/*************************************** */
+        int ii=0;
+        while (rs.next()) {
+            ii++;
+            String[] row = new String[columnCount];
+             
+            for (int stringIdx : stringColIndex) {
+                row[stringIdx - 1] = rs.getString(stringIdx);
+                for (PreparedStatement ps: trgPrep){
+                    ps.setString(stringIdx, row[stringIdx - 1]);
+                     
+                }
+            }
+            for (int imgIdx : imageColIndex) {
+                byte[] dataBytes = rs.getBytes(imgIdx);
+                for (PreparedStatement ps: trgPrep){
+                    ps.setBytes(imgIdx, dataBytes);
+                     
+                } 
+            } 
+
+            
+            for (PreparedStatement ps: trgPrep){
+                ps.addBatch();
+            } 
+
+
+            data.add(row);
+            if (Math.floorMod(ii, 1000)==0){
+                //Execute the batch every 1000 rows
+                for (PreparedStatement ps: trgPrep){
+                    ps.executeBatch();
+                    
+                } 
+                System.out.println("Records Dumped: "+ii);
+            }
+        
+        }
+        for (Statement trgStmnt: trgStmnts){
+            trgStmnt.executeBatch();
+            
+            trgStmnt.close();
+        }
+
+    }
+
+        }
+
+    }
 }

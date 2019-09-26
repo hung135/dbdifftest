@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.io.FileReader;
 import java.sql.Blob;
+import java.sql.Date;
 
 import java.security.KeyPair;
 
@@ -580,21 +581,26 @@ public class DataUtils {
         List<Integer> binaryColIndex = new ArrayList<Integer>();
         List<Integer> numberColIndex = new ArrayList<Integer>();
         List<Integer> stringColIndex = new ArrayList<Integer>();
+        List<Integer> timeColIndex = new ArrayList<Integer>();
+
         String[] allColumnNames = new String[columnCount];
         //System.out.println("before loop");
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
-            //System.out.println("------type: "+type);
+            
             String columnName = metadata.getColumnName(i);
-          
+            System.out.println(columnName+"------"+type);
             // For now; later create custom enum. "image" isn't supported by JAVA
             List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","IMAGE");
             List<String> numDataTypes=Arrays.asList("TINYINT","INT","SMALLINT");
+            List<String> timeDataTypes=Arrays.asList("DATE","TIMESTAMP","DATETIME");
             
             if (dataTypes.contains(type.toUpperCase())) {
                 binaryColIndex.add(i);
             } else if (numDataTypes.contains(type.toUpperCase())) {
                 numberColIndex.add(i);
+            } else if (timeDataTypes.contains(type.toUpperCase())) {
+                timeColIndex.add(i);
             } 
             
             else {
@@ -603,7 +609,7 @@ public class DataUtils {
             allColumnNames[i - 1] = columnName;
         }
 
-        List<String[]> data = new ArrayList<String[]>();
+        //List<String[]> data = new ArrayList<String[]>();
   /*************************************** */
         //build the insert
         String columnsComma = String.join(",", allColumnNames);
@@ -653,37 +659,43 @@ public class DataUtils {
                     //System.out.println(ii+"--setstring-------------------------");
                 }
             }
-            Integer[] rowInt = new Integer[columnCount];
             for (int numIdx : numberColIndex) {
                 //System.out.println(ii+"----------xxxx-----------------");
-                rowInt[numIdx - 1] = rs.getInt(numIdx);
+                String dataItem = rs.getString(numIdx);
                 for (PreparedStatement ps: trgPrep){
-                    //System.out.println(row[stringIdx - 1]+"---------------------------");
-                    ps.setInt(numIdx, rowInt[numIdx - 1]);
-                    
-                    //System.out.println(ii+"--setstring-------------------------");
+                    if (dataItem == null){
+                        ps.setNull(numIdx, java.sql.Types.INTEGER); 
+                        
+                    }else{
+                        ps.setInt(numIdx, Integer.valueOf(dataItem));
+                    }
                 }
             }
             for (int imgIdx : binaryColIndex) {
-                byte[] dataBytes = rs.getBytes(imgIdx);
+                byte[] dataItem = rs.getBytes(imgIdx);
                 for (PreparedStatement ps: trgPrep){
-                    ps.setBytes(imgIdx, dataBytes);
-                     
+                    ps.setBytes(imgIdx, dataItem);
                 } 
             } 
-
-            
+            for (int idx : timeColIndex) {
+                  java.sql.Date dataItem = rs.getDate(idx);
+                for (PreparedStatement ps: trgPrep){
+                    ps.setDate(idx, dataItem);
+                } 
+            } 
             for (PreparedStatement ps: trgPrep){
                 ps.addBatch();
             } 
 
 
-            data.add(row);
+            
             if (Math.floorMod(ii, 1000)==0){
                 //Execute the batch every 1000 rows
                 for (PreparedStatement ps: trgPrep){
-                    ps.executeBatch();            
+                    ps.executeBatch(); 
+                               
                   } 
+                System.gc();
                 System.out.println("Records Dumped: "+ii); }
         
         }

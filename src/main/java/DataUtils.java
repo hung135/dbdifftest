@@ -580,7 +580,9 @@ public class DataUtils {
             String columnName = metadata.getColumnName(i);
           
             // For now; later create custom enum. "image" isn't supported by JAVA
-            if (type.equals("image")) {
+            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","image");
+            
+            if (dataTypes.contains(type.toLowerCase())) {
                 imageColIndex.add(i);
             } else {
                 stringColIndex.add(i);

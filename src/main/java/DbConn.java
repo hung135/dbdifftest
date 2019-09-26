@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.stream.Stream;
 import java.sql.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -359,9 +360,11 @@ public class DbConn {
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
             String columnName = metadata.getColumnName(i);
-            //System.out.println(columnName + " -- " + type);
+            System.out.println(columnName + " -- " + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
-            if (type.equals("image")) {
+            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","image");
+            
+            if (dataTypes.contains(type.toLowerCase())) {
                 imageColIndex.add(i);
             } else {
                 stringColIndex.add(i);

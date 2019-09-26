@@ -92,6 +92,18 @@ def task_execution(databases_connections, task_config):
                     try:
                         connection = databases_connections[con_key]
 
+                        if "targetConnections" in task.parameters[con_key]:
+                            target_keys = task.parameters[con_key]["targetConnections"].replace(" ", "").split(",")
+                            targets = []
+                            for key in target_keys:
+                                if str(key) in databases_connections:
+                                    target_con = databases_connections[key]
+                                    targets.append(target_con)
+                                else:
+                                    raise Exception("{0} not in the connection list of: {1}".format(key, databases_connections))
+                            # end
+                            task.parameters[con_key]["targetConnections"] = targets # convert to list of target arrays
+
                         module = importlib.import_module("logic.migration")
                         class_ = getattr(module, task.key)
                         instance = class_(connection, **task.parameters[con_key])

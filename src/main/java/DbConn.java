@@ -103,7 +103,7 @@ public class DbConn {
         props.setProperty("password", password);
         Class.forName(dbtype.driver);
         this.conn = DriverManager.getConnection(url, props);
-        System.out.println("Connect to Oracle Successful");
+        System.out.println("Connect to Database: "+this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
 

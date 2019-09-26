@@ -564,31 +564,40 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
-        public static void freeWayMigrate(Connection srcDbConn,List<Connection> trgConns,List<String> tableNames) throws SQLException {
+        public static void freeWayMigrate(DbConn srcDbConn,List<DbConn> trgConns,List<String> tableNames) throws SQLException {
     
-        Statement stmt =  srcDbConn.createStatement();
-
+        Statement stmt =  srcDbConn.conn.createStatement();
+        
         for (String tableName : tableNames){
             String sql="select * from "+tableName;
+            System.out.println(sql);
             
 
         ResultSet rs = stmt.executeQuery(sql);
         ResultSetMetaData metadata = rs.getMetaData();
 
         int columnCount = metadata.getColumnCount();
-        List<Integer> imageColIndex = new ArrayList<Integer>();
+        List<Integer> binaryColIndex = new ArrayList<Integer>();
+        List<Integer> numberColIndex = new ArrayList<Integer>();
         List<Integer> stringColIndex = new ArrayList<Integer>();
         String[] allColumnNames = new String[columnCount];
+        System.out.println("before loop");
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
+            System.out.println("------type: "+type);
             String columnName = metadata.getColumnName(i);
           
             // For now; later create custom enum. "image" isn't supported by JAVA
             List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","image");
+            List<String> numDataTypes=Arrays.asList("tinyint","int");
             
             if (dataTypes.contains(type.toLowerCase())) {
-                imageColIndex.add(i);
-            } else {
+                binaryColIndex.add(i);
+            } else if (numDataTypes.contains(type.toLowerCase())) {
+                numberColIndex.add(i);
+            } 
+            
+            else {
                 stringColIndex.add(i);
             }
             allColumnNames[i - 1] = columnName;
@@ -603,18 +612,20 @@ public class DataUtils {
             if (jj>0)
                 columnsQuestion=  columnsQuestion + ",?";
         }
-        String sqlInsert = "INSERT INTO "+tableName+" ("+allColumnNames+") VALUES ("+columnsQuestion+")";
+        String sqlInsert = "INSERT INTO "+tableName+" ("+columnsComma+") VALUES ("+columnsQuestion+")";
         List<Statement> trgStmnts = new ArrayList<>();
         List<PreparedStatement> trgPrep = new ArrayList<>();
-        trgConns.forEach(  conn->{
+        trgConns.forEach(  dbconn->{
+            System.out.println(sqlInsert+"---------sql create stmnt");
                 try {
-                    conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                    dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 try {
-                    trgPrep.add(conn.prepareStatement(sql));
+                    trgPrep.add(dbconn.conn.prepareStatement(sqlInsert));
+                    System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -626,16 +637,34 @@ public class DataUtils {
         int ii=0;
         while (rs.next()) {
             ii++;
+            
             String[] row = new String[columnCount];
              
             for (int stringIdx : stringColIndex) {
+                //System.out.println(ii+"----------xxxx-----------------");
                 row[stringIdx - 1] = rs.getString(stringIdx);
                 for (PreparedStatement ps: trgPrep){
-                    ps.setString(stringIdx, row[stringIdx - 1]);
-                     
+                    System.out.println(row[stringIdx - 1]+"---------------------------");
+                    String xxx=row[stringIdx - 1];
+                    // if (xxx==null)
+                    // {xxx="";}
+                    ps.setString(stringIdx, xxx);
+                    
+                    //System.out.println(ii+"--setstring-------------------------");
                 }
             }
-            for (int imgIdx : imageColIndex) {
+            Integer[] rowInt = new Integer[columnCount];
+            for (int numIdx : numberColIndex) {
+                //System.out.println(ii+"----------xxxx-----------------");
+                rowInt[numIdx - 1] = rs.getInt(numIdx);
+                for (PreparedStatement ps: trgPrep){
+                    //System.out.println(row[stringIdx - 1]+"---------------------------");
+                    ps.setInt(numIdx, rowInt[numIdx - 1]);
+                    
+                    //System.out.println(ii+"--setstring-------------------------");
+                }
+            }
+            for (int imgIdx : binaryColIndex) {
                 byte[] dataBytes = rs.getBytes(imgIdx);
                 for (PreparedStatement ps: trgPrep){
                     ps.setBytes(imgIdx, dataBytes);

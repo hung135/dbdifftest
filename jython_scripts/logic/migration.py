@@ -13,10 +13,10 @@ class TableDump(object):
     def __init__(self, dbConn, schemaOrOwner, writePath,rowlimit=0):
         limit=""
         top=""
-        if if str(dbConn.dbType) == 'SYBASE': and rowlimit>0:
+        if (str(dbConn.dbType) == 'SYBASE') and rowlimit>0:
             top='TOP {}'.format(rowlimit)
              
-        if if str(dbConn.dbType) != 'SYBASE': and rowlimit>0:
+        if (str(dbConn.dbType) != 'SYBASE') and rowlimit>0:
             limit='LIMIT {}'.format(rowlimit)
         
         path = os.path.abspath(writePath)
@@ -28,7 +28,7 @@ class TableDump(object):
             fqn = os.path.join(path, a+'.csv')
             try:
                 dbConn.queryToCSV(
-                    'select {2} * from {0}.{1} {3}'.format(schemaOrOwner, a, fqn,top,limit)
+                    'select {2} * from {0}.{1} {3}'.format(schemaOrOwner, a, fqn,top,limit))
             except:
                 pass
 
@@ -132,17 +132,17 @@ class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):
         limit=""
         top=""
-        if if str(dbConn.dbType) == 'SYBASE': and rowlimit>0:
+        if str(dbConn.dbType) == 'SYBASE' and rowlimit>0:
             top='TOP {}'.format(rowlimit)
              
-        if if str(dbConn.dbType) != 'SYBASE': and rowlimit>0:
+        if str(dbConn.dbType) != 'SYBASE' and rowlimit>0:
             limit='LIMIT {}'.format(rowlimit)
             
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        print(fqn)
+        print(fqn,sql)
         dbConn.quertyToCSVOutputBinary(sql, fqn)
             
     def __repr__(self):

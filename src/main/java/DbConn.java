@@ -3,6 +3,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -203,25 +204,25 @@ public class DbConn {
     }
 
     public List<String> getSybaseObjNames(String schemaName, String objType) throws SQLException {
-        String sql="select distinct obj.name from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
-        + "   where obj.type = '" + objType + "'  and USER_NAME(uid)='"+schemaName+"' order by 1";
-        
-        List<String> items = new ArrayList<>(); 
+        String sql = "select distinct obj.name from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
+                + "   where obj.type = '" + objType + "'  and USER_NAME(uid)='" + schemaName + "' order by 1";
+
+        List<String> items = new ArrayList<>();
         // Print TABLE_TYPE "TABLE"
-         
+
         Statement stmt = null;
-             stmt = this.conn.createStatement();
+        stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);
-        
+
         while (rs.next()) {
-             items.add(rs.getString(1));
-             
+            items.add(rs.getString(1));
+
         }
         stmt.close();
 
         rs.close();
-        
+
         return items;
     }
 
@@ -351,49 +352,78 @@ public class DbConn {
         ResultSetMetaData metadata = rs.getMetaData();
 
         int columnCount = metadata.getColumnCount();
-        List<Integer> columnTypeIndex = new ArrayList<Integer>();
-        String[] columnNames = new String[columnCount];
+        List<Integer> imageColIndex = new ArrayList<Integer>();
+        List<Integer> stringColIndex = new ArrayList<Integer>();
+        String[] allColumnNames = new String[columnCount];
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
+            String columnName = metadata.getColumnName(i);
+            //System.out.println(columnName + " -- " + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
             if (type.equals("image")) {
-                columnTypeIndex.add(i);
+                imageColIndex.add(i);
+            } else {
+                stringColIndex.add(i);
             }
+            allColumnNames[i - 1] = columnName;
+        }
 
-            columnNames[i - 1] = metadata.getColumnName(i);
+        List<String[]> data = new ArrayList<String[]>();
+        allColumnNames = Arrays.copyOf(allColumnNames, allColumnNames.length + imageColIndex.size());
+        // get values up here
+        // Map<Integer, Map<Integer, String>> output = new HashMap<Integer, Map<Integer,
+        // String>>();
+        // String tblName = metadata.getTableName(1);
+        // for (Integer i : columnTypeIndex) {
+        // columnNames[i] = metadata.getColumnName(i) + "_output";
+        // output.put(columnCount + i, DataUtils.outputBinary(this.conn, fullFilePath,
+        // tblName,
+        // metadata.getColumnName(i), metadata.getColumnTypeName(i)));
+        // }
+         
+        // declare it once no for each row
+        
+        while (rs.next()) {
+            String[] row = new String[columnCount];
+             
+            for (int stringIdx : stringColIndex) {
+                row[stringIdx - 1] = rs.getString(stringIdx);
+            }
+            for (int imgIdx : imageColIndex) {
+                
+                InputStream in = rs.getBinaryStream(imgIdx);
+
+                int length = in.available();
+                
+                byte[] blobBytes = new byte[length];
+                in.read(blobBytes);
+
+                String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
+
+                // change name here
+                String dirPath = fullFilePath + "/image/" + md5Hex;
+                File blobFile = new File(dirPath);
+                if (!blobFile.getParentFile().exists()) {
+                    blobFile.getParentFile().mkdirs();
+                }
+                FileOutputStream fos = new FileOutputStream(blobFile);
+
+                fos.write(blobBytes);
+                fos.close();
+                //System.out.println("Image: "+ii+" "+length+" "+md5Hex);
+                row[imgIdx - 1] = dirPath;
+
+            }
+            data.add(row);
+
         }
 
         CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath + "/index.csv"));
         Boolean includeHeaders = true;
+        // this is the header
+        data.add(0, allColumnNames);
+        writer.writeAll(data, includeHeaders);
 
-        if (columnTypeIndex.size() != 0) {
-            List<String[]> data = new ArrayList<String[]>();
-            columnNames = Arrays.copyOf(columnNames, columnNames.length + columnTypeIndex.size());
-            // get values up here
-            Map<Integer, Map<Integer, String>> output = new HashMap<Integer, Map<Integer, String>>();
-            String tblName = metadata.getTableName(1);
-            for (Integer i : columnTypeIndex) {
-                columnNames[i] = metadata.getColumnName(i) + "_output";
-                output.put(columnCount + i, DataUtils.outputBinary(this.conn, fullFilePath, tblName,
-                        metadata.getColumnName(i), metadata.getColumnTypeName(i)));
-            }
-            while (rs.next()) {
-                if (rs.getRow() != 0) {
-                    String[] row = new String[columnCount + columnTypeIndex.size()];
-                    for (int i = 1; i <= columnCount; i++) {
-                        row[i - 1] = rs.getString(1);
-                    }
-                    for (Map.Entry<Integer, Map<Integer, String>> entry : output.entrySet()) {
-                        row[entry.getKey() - 2] = entry.getValue().get(rs.getRow());
-                    }
-                    data.add(row);
-                }
-            }
-            data.add(0, columnNames);
-            writer.writeAll(data, includeHeaders);
-        } else {
-            writer.writeAll(rs, includeHeaders);
-        }
         writer.close();
 
     }
@@ -489,7 +519,8 @@ public class DbConn {
 
         Statement stmt = null;
         String sql = "select distinct obj.name, c.text from dbo.sysobjects obj  join dbo.syscomments c on obj.id=c.id"
-                + "   where obj.type = 'V'  and USER_NAME(uid)='"+schemaName+"' and obj.name='" + viewName + "' order by 1";
+                + "   where obj.type = 'V'  and USER_NAME(uid)='" + schemaName + "' and obj.name='" + viewName
+                + "' order by 1";
         stmt = this.conn.createStatement();
         // Let us check if it returns a true Result Set or not.
         ResultSet rs = stmt.executeQuery(sql);

@@ -382,8 +382,9 @@ public class DbConn {
         // }
          
         // declare it once no for each row
-        
+        int ii=0;
         while (rs.next()) {
+            ii++;
             String[] row = new String[columnCount];
              
             for (int stringIdx : stringColIndex) {
@@ -412,7 +413,9 @@ public class DbConn {
                 fos.close();
                 //System.out.println("Image: "+ii+" "+length+" "+md5Hex);
                 row[imgIdx - 1] = dirPath;
-
+                if (Math.floorMod(ii, 1000)==0){
+                    System.out.println("Records Dumped: "+ii);
+                }
             }
             data.add(row);
 

@@ -34,6 +34,7 @@
 moveDataToDatabases:
   sys-dev:
     targetConnections: sys-dev1
+    batchSize: 500
     tableNames:
       - spt_values
       - spt_limit_types

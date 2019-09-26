@@ -104,7 +104,7 @@ def parse_cli():
 
    # Download
    download_group = parser.add_argument_group("Download")
-   download_group.add_argument("-dl", "--download", help="Download the non-source code tag", default=None)
+   download_group.add_argument("-dl", "--download", help="Download the non-source code tag", action="store_true")
    download_group.add_argument("-o", "--output", help="Output directory for the download")
 
     
@@ -153,7 +153,10 @@ def run(args):
     releases = repository.get_releases()
 
     if args.download:
-        download_asset(args.output, args.download, releases)
+        if args.tag:
+            download_asset(args.output, args.tag, releases)
+        else:
+            download_asset(args.output, releases[0].tag_name, releases)
         print("Download complete")
 
     if args.create:

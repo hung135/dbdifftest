@@ -104,7 +104,7 @@ def parse_cli():
 
    # Download
    download_group = parser.add_argument_group("Download")
-   download_group.add_argument("-dl", "--download", help="Download the non-source code tag")
+   download_group.add_argument("-dl", "--download", help="Download the non-source code tag", default=None)
    download_group.add_argument("-o", "--output", help="Output directory for the download")
 
     

@@ -602,9 +602,19 @@ public class DataUtils {
         String sqlInsert = "INSERT INTO "+tableName+" ("+allColumnNames+") VALUES ("+columnsQuestion+")";
         List<Statement> trgStmnts = new ArrayList<>();
         List<PreparedStatement> trgPrep = new ArrayList<>();
-        trgConns.forEach(conn->{
-            conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            trgPrep.add( conn.prepareStatement(sql));
+        trgConns.forEach(  conn->{
+                try {
+                    conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                try {
+                    trgPrep.add(conn.prepareStatement(sql));
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
             });
             
@@ -639,22 +649,24 @@ public class DataUtils {
             if (Math.floorMod(ii, 1000)==0){
                 //Execute the batch every 1000 rows
                 for (PreparedStatement ps: trgPrep){
-                    ps.executeBatch();
-                    
-                } 
-                System.out.println("Records Dumped: "+ii);
-            }
+                    ps.executeBatch();              } 
+                System.out.println("Records Dumped: "+ii); }
         
         }
         for (Statement trgStmnt: trgStmnts){
             trgStmnt.executeBatch();
-            
-            trgStmnt.close();
-        }
+            trgStmnt.close();}
 
     }
 
         }
 
-    }
+        /**
+     * call the proper get method
+     * 
+     * @throws SQLException
+     */
+    public static void resultSetGet(ResultSet rs, int colIdx, String colType) throws SQLException {
+            rs.getString(colIdx);
+        }
 }

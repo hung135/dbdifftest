@@ -5,13 +5,13 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
-TableRowCount:
-  oracle-dev:
-    schemaOrOwner: dbo
-    fileName: ./table_rowcount.csv
-  sys-dev1:
-    schemaOrOwner: dbo
-    fileName: ./table_rowcount2.csv
+# TableRowCount:
+#   oracle-dev:
+#     schemaOrOwner: dbo
+#     fileName: ./table_rowcount.csv
+#   sys-dev1:
+#     schemaOrOwner: dbo
+#     fileName: ./table_rowcount2.csv
 # TableSampleCheckSum:
 #   sys-dev:
 #     schemaOrOwner: dbo
@@ -31,4 +31,6 @@ TableRowCount:
 #         filePath: ./md5/table_row_checksum2.csv
 #       - tableName: test3
 #         filePath: ./md5/table_row_checksum3.csv
-
+TestClass:
+  sys-dev1:
+    targetConnections: sys-dev, sys-dev1

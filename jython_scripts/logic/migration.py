@@ -4,9 +4,16 @@ import DataUtils
 import java.lang.Object
 from java.util import HashMap
 
+import jarray
+import DbConn
+
 import csv
 import md5
 from  .parse_proc import *
+
+class TestClass(object):
+     def __init__(self, dbConn, targetConnections):
+        DataUtils.callTest(dbConn, targetConnections)
 
 class TableDump(object):
 
@@ -112,7 +119,6 @@ class TableSampleCheckSum(object):
 # ToDos this in the works
 class TableLoadCsv(object):
     def __init__(self, dbConn, schemaOrOwner, files_tables):
-
         for tableName, filePath in files_tables:
 
             print("Mocking Loading csv: ", tableName, filePath)

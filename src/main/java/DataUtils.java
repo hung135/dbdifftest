@@ -581,19 +581,19 @@ public class DataUtils {
         List<Integer> numberColIndex = new ArrayList<Integer>();
         List<Integer> stringColIndex = new ArrayList<Integer>();
         String[] allColumnNames = new String[columnCount];
-        System.out.println("before loop");
+        //System.out.println("before loop");
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
-            System.out.println("------type: "+type);
+            //System.out.println("------type: "+type);
             String columnName = metadata.getColumnName(i);
           
             // For now; later create custom enum. "image" isn't supported by JAVA
-            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","image");
-            List<String> numDataTypes=Arrays.asList("tinyint","int");
+            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","IMAGE");
+            List<String> numDataTypes=Arrays.asList("TINYINT","INT","SMALLINT");
             
-            if (dataTypes.contains(type.toLowerCase())) {
+            if (dataTypes.contains(type.toUpperCase())) {
                 binaryColIndex.add(i);
-            } else if (numDataTypes.contains(type.toLowerCase())) {
+            } else if (numDataTypes.contains(type.toUpperCase())) {
                 numberColIndex.add(i);
             } 
             
@@ -616,7 +616,7 @@ public class DataUtils {
         List<Statement> trgStmnts = new ArrayList<>();
         List<PreparedStatement> trgPrep = new ArrayList<>();
         trgConns.forEach(  dbconn->{
-            System.out.println(sqlInsert+"---------sql create stmnt");
+            //System.out.println(sqlInsert+"---------sql create stmnt");
                 try {
                     dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 } catch (SQLException e) {
@@ -625,7 +625,7 @@ public class DataUtils {
                 }
                 try {
                     trgPrep.add(dbconn.conn.prepareStatement(sqlInsert));
-                    System.out.println(sqlInsert+"---------sql create stmnt");
+                    //System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -644,7 +644,7 @@ public class DataUtils {
                 //System.out.println(ii+"----------xxxx-----------------");
                 row[stringIdx - 1] = rs.getString(stringIdx);
                 for (PreparedStatement ps: trgPrep){
-                    System.out.println(row[stringIdx - 1]+"---------------------------");
+                    //System.out.println(row[stringIdx - 1]+"---------------------------");
                     String xxx=row[stringIdx - 1];
                     // if (xxx==null)
                     // {xxx="";}
@@ -682,12 +682,17 @@ public class DataUtils {
             if (Math.floorMod(ii, 1000)==0){
                 //Execute the batch every 1000 rows
                 for (PreparedStatement ps: trgPrep){
-                    ps.executeBatch();              } 
+                    ps.executeBatch();            
+                  } 
                 System.out.println("Records Dumped: "+ii); }
         
         }
+        for (PreparedStatement ps: trgPrep){
+            ps.executeBatch();            
+          } 
+        System.out.println("Records Dumped: "+ii); 
         for (Statement trgStmnt: trgStmnts){
-            trgStmnt.executeBatch();
+             
             trgStmnt.close();}
 
     }

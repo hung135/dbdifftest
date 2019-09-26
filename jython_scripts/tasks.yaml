@@ -36,4 +36,4 @@ moveDataToDatabases:
     targetConnections: sys-dev1
     tableNames:
       - spt_values
- 
+      - spt_limit_types

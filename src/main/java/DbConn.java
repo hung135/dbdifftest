@@ -362,9 +362,9 @@ public class DbConn {
             String columnName = metadata.getColumnName(i);
             System.out.println(columnName + " -- " + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
-            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","image");
+            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","IMAGE");
             
-            if (dataTypes.contains(type.toLowerCase())) {
+            if (dataTypes.contains(type.toUpperCase())) {
                 imageColIndex.add(i);
             } else {
                 stringColIndex.add(i);

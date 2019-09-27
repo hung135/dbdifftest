@@ -698,11 +698,8 @@ public class DataUtils {
 
                     }
                     long endTime = System.nanoTime();
-                    long totalTime = endTime - startTime;
-                    
+                    long totalTime = endTime - startTime;8
                     totalTime = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
-                    System.out.println();
-
                     System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
                 }
 
@@ -713,16 +710,12 @@ public class DataUtils {
             long endTime = System.nanoTime();
             long totalTime = endTime - startTime;
             totalTime = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
-            System.out.println();
-
             System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
-       
-        for (Statement trgStmnt : trgStmnts) {
+            for (Statement trgStmnt : trgStmnts) {
+                trgStmnt.close();
+            }
 
-            trgStmnt.close();
         }
-
-    }
 
     }
 

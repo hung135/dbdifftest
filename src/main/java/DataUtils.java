@@ -712,7 +712,7 @@ public class DataUtils {
             System.out.println();
 
             System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
-        }
+       
         for (Statement trgStmnt : trgStmnts) {
 
             trgStmnt.close();

@@ -694,14 +694,24 @@ public class DataUtils {
                 if (Math.floorMod(ii, batchSize) == 0) {
                     // Execute the batch every 1000 rows
                     for (PreparedStatement ps : trgPrep) {
+                        long endTime = System.nanoTime();
+                        long totalTime = endTime - startTime;
+                        long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
+                        long totalTimeSec = TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS)
+                                - (60 * totalTimeMins);
+                        System.out.println(
+                                "Executing Batch" + "  LoadTime: " + totalTimeMins + " Mins " + totalTimeSec + " Secs");
+                         
                         ps.executeBatch();
 
                     }
                     long endTime = System.nanoTime();
                     long totalTime = endTime - startTime;
                     long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
-                    long totalTimeSec = (60*totalTimeMins)- TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS);
-                    System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime +" Mins "+ totalTimeSec+" Secs");
+                    long totalTimeSec = TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS)
+                            - (60 * totalTimeMins);
+                    System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTimeMins + " Mins "
+                            + totalTimeSec + " Secs");
                 }
 
             }
@@ -711,9 +721,10 @@ public class DataUtils {
             long endTime = System.nanoTime();
             long totalTime = endTime - startTime;
             long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
-            long totalTimeSec = (60*totalTimeMins)- TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS);
-            System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime +" Mins "+ totalTimeSec+" Secs");
-        
+            long totalTimeSec = TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS) - (60 * totalTimeMins);
+            System.out.println(
+                    "Records Loaded: " + ii + "  LoadTime: " + totalTimeMins + " Mins " + totalTimeSec + " Secs");
+
             for (Statement trgStmnt : trgStmnts) {
                 trgStmnt.close();
             }

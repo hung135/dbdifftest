@@ -1,6 +1,7 @@
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -698,6 +699,8 @@ public class DataUtils {
                     }
                     long endTime = System.nanoTime();
                     long totalTime = endTime - startTime;
+                    
+                    totalTime = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
                     System.out.println();
 
                     System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
@@ -709,6 +712,7 @@ public class DataUtils {
             }
             long endTime = System.nanoTime();
             long totalTime = endTime - startTime;
+            totalTime = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
             System.out.println();
 
             System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);

@@ -565,7 +565,7 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
-        public static void freeWayMigrate(DbConn srcDbConn,List<DbConn> trgConns,List<String> tableNames) throws SQLException {
+        public static void freeWayMigrate(DbConn srcDbConn,List<DbConn> trgConns,List<String> tableNames,int batchSize) throws SQLException {
     
         Statement stmt =  srcDbConn.conn.createStatement();
         
@@ -689,7 +689,7 @@ public class DataUtils {
 
 
             
-            if (Math.floorMod(ii, 1000)==0){
+            if (Math.floorMod(ii, batchSize)==0){
                 //Execute the batch every 1000 rows
                 for (PreparedStatement ps: trgPrep){
                     ps.executeBatch(); 

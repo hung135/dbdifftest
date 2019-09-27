@@ -72,7 +72,7 @@ public class DataUtils {
         return set;
     }
 
-    public static void callTest(DbConn conn, List<DbConn> targetConnections){
+    public static void callTest(DbConn conn, List<DbConn> targetConnections) {
         System.out.println(targetConnections.size());
     }
 
@@ -169,7 +169,7 @@ public class DataUtils {
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-             
+
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -205,15 +205,14 @@ public class DataUtils {
         return results;
     }
 
-    public static Map<Integer, String> outputBinary(Connection conn, String path, String tableName, String columnName, String columnType)
-        throws FileNotFoundException, SQLException, IOException
-    {
+    public static Map<Integer, String> outputBinary(Connection conn, String path, String tableName, String columnName,
+            String columnType) throws FileNotFoundException, SQLException, IOException {
         Map<Integer, String> results = new HashMap<Integer, String>();
         Statement stmt = conn.createStatement();
         String query = "SELECT " + columnName + " FROM " + tableName;
 
         ResultSet rs = stmt.executeQuery(query);
-        while(rs.next()){
+        while (rs.next()) {
             Blob blob = rs.getBlob(columnName);
             InputStream in = blob.getBinaryStream();
 
@@ -226,7 +225,7 @@ public class DataUtils {
             // change name here
             String dirPath = path + "/" + columnType + "/" + md5Hex;
             File blobFile = new File(dirPath);
-            if(!blobFile.getParentFile().exists()){
+            if (!blobFile.getParentFile().exists()) {
                 blobFile.getParentFile().mkdirs();
             }
             FileOutputStream fos = new FileOutputStream(blobFile);
@@ -250,8 +249,8 @@ public class DataUtils {
      * @throws SQLException
      * @throws FileNotFoundException
      */
-    public static void downloadImage(Connection conn, String tableName, String columnName, int primaryKey, String filePath)
-            throws FileNotFoundException, SQLException, IOException {
+    public static void downloadImage(Connection conn, String tableName, String columnName, int primaryKey,
+            String filePath) throws FileNotFoundException, SQLException, IOException {
 
         Statement stmt = conn.createStatement();
         String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE pid = " + primaryKey;
@@ -299,11 +298,12 @@ public class DataUtils {
         filestream = new FileInputStream(file);
 
         Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        // String query = "UPDATE assignment SET instructions_file = ?, instructions_filename = ? WHERE a_key = " + uniqueid;
+        // String query = "UPDATE assignment SET instructions_file = ?,
+        // instructions_filename = ? WHERE a_key = " + uniqueid;
         String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setBinaryStream(1, filestream, length);
-        //ps.setString(2, filename);
+        // ps.setString(2, filename);
         ps.execute();
         ps.close();
         stmt.close();
@@ -427,7 +427,7 @@ public class DataUtils {
                 hashKey = hashKey + row[keyColIndex];
                 for (int i = 0; i < row.length; i++) {
                     Integer iii = i;
-                    
+
                     if (!headerIndex.contains(iii)) {
                         data = data + row[i];
                     }
@@ -448,22 +448,23 @@ public class DataUtils {
     }
 
     public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn,
-    String reportHeader,String algorithm) throws Exception {
-        String[]  headersCSV1, headersCSV2;
+            String reportHeader, String algorithm) throws Exception {
+        String[] headersCSV1, headersCSV2;
         List<String[]> csv1, csv2, results;
         // System.out.println(primaryColumn);
-        // outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column" };
+        // outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column"
+        // };
         // results = new ArrayList<String[]>() {
-        //     {
-        //         add(outputHeaders);
-        //     }
+        // {
+        // add(outputHeaders);
+        // }
         // };
         csv1 = readCSV(firstCSV);
-        csv2 = readCSV(secondCSV); 
+        csv2 = readCSV(secondCSV);
 
         headersCSV1 = csv1.get(0);
         headersCSV2 = csv2.get(0);
- 
+
         csv1.remove(0);
         csv2.remove(0);
 
@@ -486,7 +487,7 @@ public class DataUtils {
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
-                String [] xxx = {valCSV1,valCSV2};
+                String[] xxx = { valCSV1, valCSV2 };
                 descrpencyMap.put(keyCSV1, xxx);
             }
 
@@ -497,19 +498,19 @@ public class DataUtils {
             String valCSV2 = entry.getValue();
             String valCSV1 = mapCSVdata1.get(keyCSV2);
             if (!valCSV2.equals(valCSV1)) {
-                String []xxx = {valCSV1,valCSV2};
+                String[] xxx = { valCSV1, valCSV2 };
                 descrpencyMap.put(keyCSV2, xxx);
             }
 
         }
         results = new ArrayList<>();
-         
+
         results.add(reportHeader.split(","));
         for (Map.Entry<String, String[]> row : descrpencyMap.entrySet()) {
             String key = row.getKey();
-            String [] val = row.getValue();
-             
-            String [] xxx={key,val[0],val[1]};
+            String[] val = row.getValue();
+
+            String[] xxx = { key, val[0], val[1] };
             results.add(xxx);
 
         }
@@ -565,64 +566,66 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
-        public static void freeWayMigrate(DbConn srcDbConn,List<DbConn> trgConns,List<String> tableNames,int batchSize) throws SQLException {
-    
-        Statement stmt =  srcDbConn.conn.createStatement();
-        
-        for (String tableName : tableNames){
-            String sql="select * from "+tableName;
+    public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize)
+            throws SQLException {
+
+        long startTime = System.nanoTime();
+
+        Statement stmt = srcDbConn.conn.createStatement();
+
+        for (String tableName : tableNames) {
+            String sql = "select * from " + tableName;
             System.out.println(sql);
-            
 
-        ResultSet rs = stmt.executeQuery(sql);
-        ResultSetMetaData metadata = rs.getMetaData();
+            ResultSet rs = stmt.executeQuery(sql);
+            ResultSetMetaData metadata = rs.getMetaData();
 
-        int columnCount = metadata.getColumnCount();
-        List<Integer> binaryColIndex = new ArrayList<Integer>();
-        List<Integer> numberColIndex = new ArrayList<Integer>();
-        List<Integer> stringColIndex = new ArrayList<Integer>();
-        List<Integer> timeColIndex = new ArrayList<Integer>();
+            int columnCount = metadata.getColumnCount();
+            List<Integer> binaryColIndex = new ArrayList<Integer>();
+            List<Integer> numberColIndex = new ArrayList<Integer>();
+            List<Integer> stringColIndex = new ArrayList<Integer>();
+            List<Integer> timeColIndex = new ArrayList<Integer>();
 
-        String[] allColumnNames = new String[columnCount];
-        //System.out.println("before loop");
-        for (int i = 1; i <= columnCount; i++) {
-            String type = metadata.getColumnTypeName(i);
-            
-            String columnName = metadata.getColumnName(i);
-            System.out.println(columnName+"------"+type);
-            // For now; later create custom enum. "image" isn't supported by JAVA
-            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","IMAGE");
-            List<String> numDataTypes=Arrays.asList("TINYINT","INT","SMALLINT");
-            List<String> timeDataTypes=Arrays.asList("DATE","TIMESTAMP","DATETIME");
-            
-            if (dataTypes.contains(type.toUpperCase())) {
-                binaryColIndex.add(i);
-            } else if (numDataTypes.contains(type.toUpperCase())) {
-                numberColIndex.add(i);
-            } else if (timeDataTypes.contains(type.toUpperCase())) {
-                timeColIndex.add(i);
-            } 
-            
-            else {
-                stringColIndex.add(i);
+            String[] allColumnNames = new String[columnCount];
+            // System.out.println("before loop");
+            for (int i = 1; i <= columnCount; i++) {
+                String type = metadata.getColumnTypeName(i);
+
+                String columnName = metadata.getColumnName(i);
+                System.out.println(columnName + "------" + type);
+                // For now; later create custom enum. "image" isn't supported by JAVA
+                List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
+                List<String> numDataTypes = Arrays.asList("TINYINT", "INT", "SMALLINT");
+                List<String> timeDataTypes = Arrays.asList("DATE", "TIMESTAMP", "DATETIME");
+
+                if (dataTypes.contains(type.toUpperCase())) {
+                    binaryColIndex.add(i);
+                } else if (numDataTypes.contains(type.toUpperCase())) {
+                    numberColIndex.add(i);
+                } else if (timeDataTypes.contains(type.toUpperCase())) {
+                    timeColIndex.add(i);
+                }
+
+                else {
+                    stringColIndex.add(i);
+                }
+                allColumnNames[i - 1] = columnName;
             }
-            allColumnNames[i - 1] = columnName;
-        }
 
-        //List<String[]> data = new ArrayList<String[]>();
-  /*************************************** */
-        //build the insert
-        String columnsComma = String.join(",", allColumnNames);
-        String columnsQuestion=  "?";
-        for (int jj=0;jj<columnCount;jj++){
-            if (jj>0)
-                columnsQuestion=  columnsQuestion + ",?";
-        }
-        String sqlInsert = "INSERT INTO "+tableName+" ("+columnsComma+") VALUES ("+columnsQuestion+")";
-        List<Statement> trgStmnts = new ArrayList<>();
-        List<PreparedStatement> trgPrep = new ArrayList<>();
-        trgConns.forEach(  dbconn->{
-            //System.out.println(sqlInsert+"---------sql create stmnt");
+            // List<String[]> data = new ArrayList<String[]>();
+            /*************************************** */
+            // build the insert
+            String columnsComma = String.join(",", allColumnNames);
+            String columnsQuestion = "?";
+            for (int jj = 0; jj < columnCount; jj++) {
+                if (jj > 0)
+                    columnsQuestion = columnsQuestion + ",?";
+            }
+            String sqlInsert = "INSERT INTO " + tableName + " (" + columnsComma + ") VALUES (" + columnsQuestion + ")";
+            List<Statement> trgStmnts = new ArrayList<>();
+            List<PreparedStatement> trgPrep = new ArrayList<>();
+            trgConns.forEach(dbconn -> {
+                // System.out.println(sqlInsert+"---------sql create stmnt");
                 try {
                     dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 } catch (SQLException e) {
@@ -631,92 +634,100 @@ public class DataUtils {
                 }
                 try {
                     trgPrep.add(dbconn.conn.prepareStatement(sqlInsert));
-                    //System.out.println(sqlInsert+"---------sql create stmnt");
+                    // System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
             });
-            
-/*************************************** */
-        int ii=0;
-        while (rs.next()) {
-            ii++;
-            
-            String[] row = new String[columnCount];
-             
-            for (int stringIdx : stringColIndex) {
-                //System.out.println(ii+"----------xxxx-----------------");
-                row[stringIdx - 1] = rs.getString(stringIdx);
-                for (PreparedStatement ps: trgPrep){
-                    //System.out.println(row[stringIdx - 1]+"---------------------------");
-                    String xxx=row[stringIdx - 1];
-                    // if (xxx==null)
-                    // {xxx="";}
-                    ps.setString(stringIdx, xxx);
-                    
-                    //System.out.println(ii+"--setstring-------------------------");
-                }
-            }
-            for (int numIdx : numberColIndex) {
-                //System.out.println(ii+"----------xxxx-----------------");
-                String dataItem = rs.getString(numIdx);
-                for (PreparedStatement ps: trgPrep){
-                    if (dataItem == null){
-                        ps.setNull(numIdx, java.sql.Types.INTEGER); 
-                        
-                    }else{
-                        ps.setInt(numIdx, Integer.valueOf(dataItem));
+
+            /*************************************** */
+            int ii = 0;
+            while (rs.next()) {
+                ii++;
+
+                String[] row = new String[columnCount];
+
+                for (int stringIdx : stringColIndex) {
+                    // System.out.println(ii+"----------xxxx-----------------");
+                    row[stringIdx - 1] = rs.getString(stringIdx);
+                    for (PreparedStatement ps : trgPrep) {
+                        // System.out.println(row[stringIdx - 1]+"---------------------------");
+                        String xxx = row[stringIdx - 1];
+                        // if (xxx==null)
+                        // {xxx="";}
+                        ps.setString(stringIdx, xxx);
+
+                        // System.out.println(ii+"--setstring-------------------------");
                     }
                 }
+                for (int numIdx : numberColIndex) {
+                    // System.out.println(ii+"----------xxxx-----------------");
+                    String dataItem = rs.getString(numIdx);
+                    for (PreparedStatement ps : trgPrep) {
+                        if (dataItem == null) {
+                            ps.setNull(numIdx, java.sql.Types.INTEGER);
+
+                        } else {
+                            ps.setInt(numIdx, Integer.valueOf(dataItem));
+                        }
+                    }
+                }
+                for (int imgIdx : binaryColIndex) {
+                    byte[] dataItem = rs.getBytes(imgIdx);
+                    for (PreparedStatement ps : trgPrep) {
+                        ps.setBytes(imgIdx, dataItem);
+                    }
+                }
+                for (int idx : timeColIndex) {
+                    java.sql.Date dataItem = rs.getDate(idx);
+                    for (PreparedStatement ps : trgPrep) {
+                        ps.setDate(idx, dataItem);
+                    }
+                }
+                for (PreparedStatement ps : trgPrep) {
+                    ps.addBatch();
+                }
+
+                if (Math.floorMod(ii, batchSize) == 0) {
+                    // Execute the batch every 1000 rows
+                    for (PreparedStatement ps : trgPrep) {
+                        ps.executeBatch();
+
+                    }
+                    long endTime = System.nanoTime();
+                    long totalTime = endTime - startTime;
+                    System.out.println();
+
+                    System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
+                }
+
             }
-            for (int imgIdx : binaryColIndex) {
-                byte[] dataItem = rs.getBytes(imgIdx);
-                for (PreparedStatement ps: trgPrep){
-                    ps.setBytes(imgIdx, dataItem);
-                } 
-            } 
-            for (int idx : timeColIndex) {
-                  java.sql.Date dataItem = rs.getDate(idx);
-                for (PreparedStatement ps: trgPrep){
-                    ps.setDate(idx, dataItem);
-                } 
-            } 
-            for (PreparedStatement ps: trgPrep){
-                ps.addBatch();
-            } 
+            for (PreparedStatement ps : trgPrep) {
+                ps.executeBatch();
+            }
+            long endTime = System.nanoTime();
+            long totalTime = endTime - startTime;
+            System.out.println();
 
-
-            
-            if (Math.floorMod(ii, batchSize)==0){
-                //Execute the batch every 1000 rows
-                for (PreparedStatement ps: trgPrep){
-                    ps.executeBatch(); 
-                               
-                  } 
-                System.gc();
-                System.out.println("Records Dumped: "+ii); }
-        
+            System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
         }
-        for (PreparedStatement ps: trgPrep){
-            ps.executeBatch();            
-          } 
-        System.out.println("Records Dumped: "+ii); 
-        for (Statement trgStmnt: trgStmnts){
-             
-            trgStmnt.close();}
+        for (Statement trgStmnt : trgStmnts) {
+
+            trgStmnt.close();
+        }
 
     }
 
-        }
+    }
 
-        /**
+    /**
      * call the proper get method
      * 
      * @throws SQLException
      */
     public static void resultSetGet(ResultSet rs, int colIdx, String colType) throws SQLException {
-            rs.getString(colIdx);
-        }
+        rs.getString(colIdx);
+    }
 }

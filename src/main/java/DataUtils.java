@@ -701,7 +701,21 @@ public class DataUtils {
                                 - (60 * totalTimeMins);
                         System.out.println(
                                 "Executing Batch" + "  LoadTime: " + totalTimeMins + " Mins " + totalTimeSec + " Secs");
-                         
+
+                        long heapSize = Runtime.getRuntime().totalMemory();
+
+                        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.//
+                        // Any attempt will result in an OutOfMemoryException.
+                        long heapMaxSize = Runtime.getRuntime().maxMemory();
+
+                        // Get amount of free memory within the heap in bytes. This size will increase
+                        // // after garbage collection and decrease as new objects are created.
+                        long heapFreeSize = Runtime.getRuntime().freeMemory();
+
+                        System.out.println("heapsize" + convertToStringRepresentation(heapSize));
+                        System.out.println("heapmaxsize" + convertToStringRepresentation(heapMaxSize));
+                        System.out.println("heapFreesize" + convertToStringRepresentation(heapFreeSize));
+
                         ps.executeBatch();
 
                     }
@@ -740,5 +754,32 @@ public class DataUtils {
      */
     public static void resultSetGet(ResultSet rs, int colIdx, String colType) throws SQLException {
         rs.getString(colIdx);
+    }
+
+    private static String format(final long value, final long divider, final String unit) {
+        final double result = divider > 1 ? (double) value / (double) divider : (double) value;
+        return String.format("%.1f %s", Double.valueOf(result), unit);
+    }
+
+    public static String convertToStringRepresentation(final long value) {
+
+        final long K = 1024;
+        final long M = K * K;
+        final long G = M * K;
+        final long T = G * K;
+
+        final long[] dividers = new long[] { T, G, M, K, 1 };
+        final String[] units = new String[] { "TB", "GB", "MB", "KB", "B" };
+        if (value < 1)
+            throw new IllegalArgumentException("Invalid file size: " + value);
+        String result = null;
+        for (int i = 0; i < dividers.length; i++) {
+            final long divider = dividers[i];
+            if (value >= divider) {
+                result = format(value, divider, units[i]);
+                break;
+            }
+        }
+        return result;
     }
 }

@@ -567,11 +567,11 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
-    public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize,Boolean truncate)
-            throws SQLException {
+    public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize,
+            Boolean truncate) throws SQLException {
 
         long startTime = System.nanoTime();
-        long runningBytes=0;
+        long runningBytes = 0;
         Statement stmt = srcDbConn.conn.createStatement();
 
         for (String tableName : tableNames) {
@@ -623,7 +623,7 @@ public class DataUtils {
                     columnsQuestion = columnsQuestion + ",?";
             }
             String sqlInsert = "INSERT INTO " + tableName + " (" + columnsComma + ") VALUES (" + columnsQuestion + ")";
-            String sqlTruncate =  "Truncate table " + tableName  ;
+            String sqlTruncate = "Truncate table " + tableName;
             List<Statement> trgStmnts = new ArrayList<>();
             List<PreparedStatement> trgPrep = new ArrayList<>();
             trgConns.forEach(dbconn -> {
@@ -635,10 +635,12 @@ public class DataUtils {
                     e.printStackTrace();
                 }
                 try {
-                    PreparedStatement truncStmnt = dbconn.conn.prepareStatement(sqlTruncate);
-                    System.out.println(sqlTruncate);
-                    truncStmnt.execute();
-                    truncStmnt.close();
+                    if (truncate) {
+                        PreparedStatement truncStmnt = dbconn.conn.prepareStatement(sqlTruncate);
+                        System.out.println(sqlTruncate);
+                        truncStmnt.execute();
+                        truncStmnt.close();
+                    }
                     trgPrep.add(dbconn.conn.prepareStatement(sqlInsert));
                     // System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
@@ -682,7 +684,7 @@ public class DataUtils {
                 }
                 for (int imgIdx : binaryColIndex) {
                     byte[] dataItem = rs.getBytes(imgIdx);
-                    runningBytes+=dataItem.length;
+                    runningBytes += dataItem.length;
                     for (PreparedStatement ps : trgPrep) {
                         ps.setBytes(imgIdx, dataItem);
                     }
@@ -721,10 +723,10 @@ public class DataUtils {
                         System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
-                        System.out.println("Batch Memory Size: "+ (runningBytes/1048576)+" MBs");
-                        System.out.println("AverageImage Size: "+((runningBytes/1048576)/batchSize) );
+                        System.out.println("Batch Memory Size: " + (runningBytes / 1048576) + " MBs");
+                        System.out.println("AverageImage Size: " + ((runningBytes / 1048576) / batchSize));
                         ps.executeBatch();
-                        runningBytes=0;
+                        runningBytes = 0;
 
                     }
                     long endTime = System.nanoTime();

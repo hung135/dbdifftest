@@ -135,8 +135,8 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
-     def __init__(self, dbConn, targetConnections,tableNames,batchSize):
-        DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize)
+     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate):
+        DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
 
 class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):

@@ -698,9 +698,10 @@ public class DataUtils {
 
                     }
                     long endTime = System.nanoTime();
-                    long totalTime = endTime - startTime;8
-                    totalTime = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
-                    System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
+                    long totalTime = endTime - startTime;
+                    long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
+                    long totalTimeSec = (60*totalTimeMins)- TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS);
+                    System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime +" Mins "+ totalTimeSec+" Secs");
                 }
 
             }
@@ -709,8 +710,10 @@ public class DataUtils {
             }
             long endTime = System.nanoTime();
             long totalTime = endTime - startTime;
-            totalTime = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
-            System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime);
+            long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
+            long totalTimeSec = (60*totalTimeMins)- TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS);
+            System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTime +" Mins "+ totalTimeSec+" Secs");
+        
             for (Statement trgStmnt : trgStmnts) {
                 trgStmnt.close();
             }

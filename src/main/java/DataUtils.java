@@ -572,7 +572,10 @@ public class DataUtils {
 
         long startTime = System.nanoTime();
         long runningBytes = 0;
-        Statement stmt = srcDbConn.conn.createStatement();
+        long largestBytes = 0;
+        Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+        java.sql.ResultSet.CONCUR_READ_ONLY);
+        stmt.setFetchSize(batchSize);
 
         for (String tableName : tableNames) {
             String sql = "select * from " + tableName;
@@ -655,14 +658,19 @@ public class DataUtils {
             while (rs.next()) {
                 ii++;
 
-                String[] row = new String[columnCount];
+                // String[] row = new String[columnCount];
 
                 for (int stringIdx : stringColIndex) {
                     // System.out.println(ii+"----------xxxx-----------------");
-                    row[stringIdx - 1] = rs.getString(stringIdx);
+                    String xxx = rs.getString(stringIdx);
+                    if (xxx != null) {
+                        if (xxx.getBytes().length > largestBytes)
+                            largestBytes = xxx.getBytes().length;
+                        runningBytes += xxx.getBytes().length;
+                    }
                     for (PreparedStatement ps : trgPrep) {
                         // System.out.println(row[stringIdx - 1]+"---------------------------");
-                        String xxx = row[stringIdx - 1];
+                        // String xxx = row[stringIdx - 1];
                         // if (xxx==null)
                         // {xxx="";}
                         ps.setString(stringIdx, xxx);
@@ -684,6 +692,8 @@ public class DataUtils {
                 }
                 for (int imgIdx : binaryColIndex) {
                     byte[] dataItem = rs.getBytes(imgIdx);
+                    if (dataItem.length > largestBytes){
+                        largestBytes = dataItem.length;}
                     runningBytes += dataItem.length;
                     for (PreparedStatement ps : trgPrep) {
                         ps.setBytes(imgIdx, dataItem);
@@ -724,11 +734,26 @@ public class DataUtils {
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
                         System.out.println("Batch Memory Size: " + (runningBytes / 1048576) + " MBs");
-                        System.out.println("AverageImage Size: " + ((runningBytes / 1048576) / batchSize));
+                        System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) +" MBs");
                         ps.executeBatch();
+                        ps.clearBatch();
                         runningBytes = 0;
+                        largestBytes = 0;
+                        if (Math.floorMod(2 * ii, batchSize) == 0)
+                            System.gc();
+
+
+
+                         
+
+
+
+
 
                     }
+
+
+                    
                     long endTime = System.nanoTime();
                     long totalTime = endTime - startTime;
                     long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
@@ -752,8 +777,8 @@ public class DataUtils {
             for (Statement trgStmnt : trgStmnts) {
                 trgStmnt.close();
             }
-
-        }
+        rs.close();
+        }stmt.close();
 
     }
 

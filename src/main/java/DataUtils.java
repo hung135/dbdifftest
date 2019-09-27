@@ -712,10 +712,10 @@ public class DataUtils {
                         // // after garbage collection and decrease as new objects are created.
                         long heapFreeSize = Runtime.getRuntime().freeMemory();
 
-                        System.out.println("heapsize" + convertToStringRepresentation(heapSize));
-                        System.out.println("heapmaxsize" + convertToStringRepresentation(heapMaxSize));
-                        System.out.println("heapFreesize" + convertToStringRepresentation(heapFreeSize));
-
+                        System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
+                        System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
+                        System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
+                        
                         ps.executeBatch();
 
                     }

@@ -42,18 +42,35 @@ import java.util.*;
 public class DbConn {
     public Connection conn;
     // final static Logger logger = Logger.getLogger(DbConn.class);
-    private Statement stmt; // tbd
+    public Statement stmt; // tbd
+    public PreparedStatement ps;
+    public String lastPSSql;
     public ResultSet rs;
     public DbType dbType;
     public String databaseName;
     public String url;
+
+    /**
+     * an attemp to release resource
+     * 
+     * @throws SQLException
+     */
+    public void flushReset() throws SQLException {
+        this.ps.executeBatch();
+        this.ps.clearBatch();
+        this.ps.close();
+        this.stmt.close();
+        this.stmt = this.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        System.out.println(this.lastPSSql);
+        this.ps = this.conn.prepareStatement(this.lastPSSql);
+    }
 
     public enum DbType {
         // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
         ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
         ORACLESID("oracle.jdbc.OracleDriver",
                 "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))(CONNECT_DATA=(SERVICE_NAME={2})))"),
-        SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}/{2}"),
+        SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}/{2};useLOBs=false"),
         POSTGRES("org.postgresql.Driver", "jdbc:postgresql://{0}:{1}:{2}"),
         MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql://{0}:{1}/{2}");
 
@@ -103,7 +120,7 @@ public class DbConn {
         props.setProperty("password", password);
         Class.forName(dbtype.driver);
         this.conn = DriverManager.getConnection(url, props);
-        System.out.println("Connect to Database: "+this.url);
+        System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
 
@@ -362,8 +379,8 @@ public class DbConn {
             String columnName = metadata.getColumnName(i);
             System.out.println(columnName + " -- " + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
-            List<String> dataTypes=Arrays.asList("VARBINARY","BINARY","CLOB","BLOB","IMAGE");
-            
+            List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
+
             if (dataTypes.contains(type.toUpperCase())) {
                 imageColIndex.add(i);
             } else {
@@ -384,24 +401,25 @@ public class DbConn {
         // tblName,
         // metadata.getColumnName(i), metadata.getColumnTypeName(i)));
         // }
-         
+
         // declare it once no for each row
-        int ii=0;
+        int ii = 0;
         while (rs.next()) {
             ii++;
             String[] row = new String[columnCount];
-             
+
             for (int stringIdx : stringColIndex) {
                 row[stringIdx - 1] = rs.getString(stringIdx);
             }
             for (int imgIdx : imageColIndex) {
-                
-//                InputStream in =  ByteSource.wrap().openStream();
-            
-  //              int length = in.available();
-                //get bytes faster than getinputstream but need enough memory to hold entire blob
+
+                // InputStream in = ByteSource.wrap().openStream();
+
+                // int length = in.available();
+                // get bytes faster than getinputstream but need enough memory to hold entire
+                // blob
                 byte[] blobBytes = rs.getBytes(imgIdx);
-                //in.read(blobBytes);
+                // in.read(blobBytes);
 
                 String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
 
@@ -415,10 +433,10 @@ public class DbConn {
 
                 fos.write(blobBytes);
                 fos.close();
-                //System.out.println("Image: "+ii+" "+length+" "+md5Hex);
+                // System.out.println("Image: "+ii+" "+length+" "+md5Hex);
                 row[imgIdx - 1] = dirPath;
-                if (Math.floorMod(ii, 1000)==0){
-                    System.out.println("Records Dumped: "+ii);
+                if (Math.floorMod(ii, 1000) == 0) {
+                    System.out.println("Records Dumped: " + ii);
                 }
             }
             data.add(row);

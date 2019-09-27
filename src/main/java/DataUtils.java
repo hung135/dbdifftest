@@ -568,13 +568,13 @@ public class DataUtils {
     }
 
     public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize,
-            Boolean truncate) throws SQLException {
+            Boolean truncate) throws SQLException, IOException {
 
         long startTime = System.nanoTime();
         long runningBytes = 0;
         long largestBytes = 0;
         Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-        java.sql.ResultSet.CONCUR_READ_ONLY);
+                java.sql.ResultSet.CONCUR_READ_ONLY);
         stmt.setFetchSize(batchSize);
 
         for (String tableName : tableNames) {
@@ -627,24 +627,24 @@ public class DataUtils {
             }
             String sqlInsert = "INSERT INTO " + tableName + " (" + columnsComma + ") VALUES (" + columnsQuestion + ")";
             String sqlTruncate = "Truncate table " + tableName;
-            List<Statement> trgStmnts = new ArrayList<>();
-            List<PreparedStatement> trgPrep = new ArrayList<>();
+
             trgConns.forEach(dbconn -> {
                 // System.out.println(sqlInsert+"---------sql create stmnt");
                 try {
-                    dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                    dbconn.stmt = dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 try {
                     if (truncate) {
-                        PreparedStatement truncStmnt = dbconn.conn.prepareStatement(sqlTruncate);
+                        dbconn.ps = dbconn.conn.prepareStatement(sqlTruncate);
                         System.out.println(sqlTruncate);
-                        truncStmnt.execute();
-                        truncStmnt.close();
+                        dbconn.ps.execute();
+                        dbconn.ps.close();
                     }
-                    trgPrep.add(dbconn.conn.prepareStatement(sqlInsert));
+                    dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
+                    dbconn.lastPSSql=sqlInsert;
                     // System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -668,12 +668,12 @@ public class DataUtils {
                             largestBytes = xxx.getBytes().length;
                         runningBytes += xxx.getBytes().length;
                     }
-                    for (PreparedStatement ps : trgPrep) {
+                    for (DbConn trgConn : trgConns) {
                         // System.out.println(row[stringIdx - 1]+"---------------------------");
                         // String xxx = row[stringIdx - 1];
                         // if (xxx==null)
                         // {xxx="";}
-                        ps.setString(stringIdx, xxx);
+                        trgConn.ps.setString(stringIdx, xxx);
 
                         // System.out.println(ii+"--setstring-------------------------");
                     }
@@ -681,37 +681,42 @@ public class DataUtils {
                 for (int numIdx : numberColIndex) {
                     // System.out.println(ii+"----------xxxx-----------------");
                     String dataItem = rs.getString(numIdx);
-                    for (PreparedStatement ps : trgPrep) {
+                    for (DbConn trgConn : trgConns) {
                         if (dataItem == null) {
-                            ps.setNull(numIdx, java.sql.Types.INTEGER);
+                            trgConn.ps.setNull(numIdx, java.sql.Types.INTEGER);
 
                         } else {
-                            ps.setInt(numIdx, Integer.valueOf(dataItem));
+                            trgConn.ps.setInt(numIdx, Integer.valueOf(dataItem));
                         }
                     }
                 }
                 for (int imgIdx : binaryColIndex) {
-                    byte[] dataItem = rs.getBytes(imgIdx);
-                    if (dataItem.length > largestBytes){
-                        largestBytes = dataItem.length;}
+
+                    // byte[] dataItem = rs.getBytes(imgIdx);
+                    
+                    byte [] dataItem =rs.getBytes(imgIdx);
+                    
+                    if (dataItem.length > largestBytes) {
+                        largestBytes = dataItem.length;
+                    }
                     runningBytes += dataItem.length;
-                    for (PreparedStatement ps : trgPrep) {
-                        ps.setBytes(imgIdx, dataItem);
+                    for (DbConn trgConn : trgConns) {
+                        trgConn.ps.setBytes(imgIdx, dataItem);
                     }
                 }
                 for (int idx : timeColIndex) {
                     java.sql.Date dataItem = rs.getDate(idx);
-                    for (PreparedStatement ps : trgPrep) {
-                        ps.setDate(idx, dataItem);
+                    for (DbConn trgConn : trgConns) {
+                        trgConn.ps.setDate(idx, dataItem);
                     }
                 }
-                for (PreparedStatement ps : trgPrep) {
-                    ps.addBatch();
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.addBatch();
                 }
 
                 if (Math.floorMod(ii, batchSize) == 0) {
                     // Execute the batch every 1000 rows
-                    for (PreparedStatement ps : trgPrep) {
+                    for (DbConn trgConn : trgConns) {
                         long endTime = System.nanoTime();
                         long totalTime = endTime - startTime;
                         long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
@@ -734,26 +739,17 @@ public class DataUtils {
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
                         System.out.println("Batch Memory Size: " + (runningBytes / 1048576) + " MBs");
-                        System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) +" MBs");
-                        ps.executeBatch();
-                        ps.clearBatch();
+                        System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
+
+                        trgConn.flushReset();
+
                         runningBytes = 0;
                         largestBytes = 0;
                         if (Math.floorMod(2 * ii, batchSize) == 0)
                             System.gc();
 
-
-
-                         
-
-
-
-
-
                     }
 
-
-                    
                     long endTime = System.nanoTime();
                     long totalTime = endTime - startTime;
                     long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
@@ -764,8 +760,9 @@ public class DataUtils {
                 }
 
             }
-            for (PreparedStatement ps : trgPrep) {
-                ps.executeBatch();
+            for (DbConn trgConn : trgConns) {
+                trgConn.ps.executeBatch();
+                trgConn.stmt.close();
             }
             long endTime = System.nanoTime();
             long totalTime = endTime - startTime;
@@ -774,11 +771,9 @@ public class DataUtils {
             System.out.println(
                     "Records Loaded: " + ii + "  LoadTime: " + totalTimeMins + " Mins " + totalTimeSec + " Secs");
 
-            for (Statement trgStmnt : trgStmnts) {
-                trgStmnt.close();
-            }
-        rs.close();
-        }stmt.close();
+            rs.close();
+        }
+        stmt.close();
 
     }
 

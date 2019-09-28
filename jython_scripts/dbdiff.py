@@ -78,6 +78,7 @@ def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
     parser.add_argument("-y", help="Location of the yaml file", required=True)
     parser.add_argument("-t", help="Location of tasks folder", required=True)
+    parser.add_argument("-v", help="Verbose logging", required=False)
     args = parser.parse_args()
     return args 
 

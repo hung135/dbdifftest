@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 import csv
+import datetime
 # <<<<<<< HEAD
 # import os 
 # #windows make sure you use c:\\xxx\\file.jar
@@ -25,10 +26,10 @@ sys.path.append(
 import YamlParser
 import DbConn
 import DataUtils
+import JLogger
 
 from objects.database import Database
 from objects.task import Task
-from util.logger import Logger
 
 # Task:
 #   key : str
@@ -37,6 +38,7 @@ from util.logger import Logger
 #       op_key = database_connection.key
 #       operation = sql/py to execute
 
+logger = None
 
 def readyaml(db_yaml, task_yaml):
     parser = YamlParser() # NOT THREAD SAFE
@@ -74,9 +76,9 @@ def execute_sql_test_sysbase(connection, task):
 
 def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
-    parser.add_argument("-y", help="Location of the yaml file", required=True)
-    parser.add_argument("-t", help="Location of tasks folder", required=True)
-    parser.add_argument("-v", help="Verbose logging", required=False, action="store_true")
+    # parser.add_argument("-y", help="Location of the yaml file", required=True)
+    # parser.add_argument("-t", help="Location of tasks folder", required=True)
+    parser.add_argument("-v", help="Verbose logging", required=False)
     args = parser.parse_args()
     return args 
 
@@ -114,20 +116,27 @@ def task_execution(databases_connections, task_config):
                         class_ = getattr(module, task.key)
                         instance = class_(**task.parameters[con_key])
                 else:
-                    print("Task {0} with key {1} not found".format(task.key, con_key))
+                    log.debug("Task {0} with {1} not found".format(task.key, con_key))
 
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:
         writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)
         writer.writerows(rows)
 
+def setup_logger(log_type):
+    global logger
+    logger = JLogger(os.path.join(os.getcwd(), "configs", "{0}.configurationFile".format(log_type)), str(datetime.datetime.now())).logger
+    print(logger)
+
 def execute(args):
     if args.v:
-        log = Logger()
-    db_config, task_config = readyaml(args.y, args.t)
-    databases_connections = create_db_connections(db_config)
-    task_execution(databases_connections, task_config)
-    print("Task execution complete")
+        setup_logger(args.v)
+
+    logger.debug("We be debuggin")
+    # db_config, task_config = readyaml(args.y, args.t)
+    # databases_connections = create_db_connections(db_config)
+    # task_execution(databases_connections, task_config)
+    # print("Task execution complete")
 
 
 if __name__ == "__main__":

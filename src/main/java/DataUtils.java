@@ -734,12 +734,12 @@ public class DataUtils {
                         // Get amount of free memory within the heap in bytes. This size will increase
                         // // after garbage collection and decrease as new objects are created.
                         long heapFreeSize = Runtime.getRuntime().freeMemory();
-
+                        
                         System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
-                        System.out.println("Batch Memory Size: " + (runningBytes / 1048576) + " MBs");
-                        System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
+                        System.out.println("Batch Memory Size: " + convertToStringRepresentation(runningBytes);
+                        //System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
 
                         trgConn.flushReset();
 

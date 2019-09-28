@@ -39,7 +39,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.*;
 import java.util.*;
 
-public class DbConn {
+public class DbConn implements Cloneable{
     public Connection conn;
     // final static Logger logger = Logger.getLogger(DbConn.class);
     public Statement stmt; // tbd
@@ -49,7 +49,14 @@ public class DbConn {
     public DbType dbType;
     public String databaseName;
     public String url;
+    public String username;
+    public String password;
+    public String  host;
+    public String port ;
 
+    public DbConn clone() throws CloneNotSupportedException {
+        return (DbConn) super.clone();
+}
     /**
      * an attemp to release resource
      * 
@@ -107,45 +114,39 @@ public class DbConn {
         return this.url;
     }
 
-    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
+    public DbConn(DbType dbType, String userName, String password, String host, String port, String databaseName)
             throws SQLException, PropertyVetoException, ClassNotFoundException {
 
-        this.dbType = dbtype;
+        this.dbType = dbType;
         this.databaseName = databaseName;
-
-        String url = MessageFormat.format(dbtype.url, host, port, databaseName);
+        this.username = userName;
+        this.password = password;
+        this.host= host;
+        this.port = port;
+        String url = MessageFormat.format(dbType.url, host, port, databaseName);
         this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-        Class.forName(dbtype.driver);
+        Class.forName(this.dbType.driver);
         this.conn = DriverManager.getConnection(url, props);
         System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
-
-    public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
-            throws SQLException, PropertyVetoException {
-
-        ComboPooledDataSource cpds = new ComboPooledDataSource();
-        cpds.setDriverClass(driver);
-
-        cpds.setJdbcUrl(jdbcUrl);
-        cpds.setUser(userName);
-        cpds.setPassword(password);
-        cpds.setMinPoolSize(5);
-        cpds.setAcquireIncrement(5);
-        cpds.setMaxPoolSize(20);
-        cpds.setMaxIdleTime(60);
-        cpds.setMaxStatements(100);
-        cpds.setPreferredTestQuery("SELECT 1");
-        cpds.setIdleConnectionTestPeriod(60);
-        cpds.setTestConnectionOnCheckout(true);
-
-        Connection conn = cpds.getConnection();
-        return conn;
+    public void reConnect() throws ClassNotFoundException, SQLException {
+        
+        Properties props = new Properties();
+        props.setProperty("user", this.username);
+        props.setProperty("password", this.password);
+        Class.forName(this.dbType.driver);
+        /**setting to null because closing the connection may close the memory 
+         * location of the other conns this was cloned from
+         */
+        this.conn=null;
+        this.conn = DriverManager.getConnection(this.url, props);
+        System.out.println("Re-Connected to Database: " + this.url);
     }
-
+ 
     public Connection getSybaseConn(String userName, String password, String host, String databasename, String port)
             throws SQLException {
         Connection conn = null;

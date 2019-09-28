@@ -125,7 +125,7 @@ def export_results(rows, filename):
 
 def setup_logger(log_type):
     global logger
-    logger = JLogger(os.path.join(os.getcwd(), "configs", "{0}.configurationFile".format(log_type)), str(datetime.datetime.now())).logger
+    logger = JLogger(os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", log_type), str(datetime.datetime.now())).logger
     print(logger)
 
 def execute(args):

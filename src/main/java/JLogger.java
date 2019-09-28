@@ -5,5 +5,7 @@ public class JLogger {
     public Logger logger;
     public JLogger(String path, String identifier){
         this.logger = Logger.getLogger(identifier);
+        System.out.println(path);
+        PropertyConfigurator.configure(path);
     }
 }

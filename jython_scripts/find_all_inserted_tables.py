@@ -75,7 +75,7 @@ WHERE sysobjects.type = 'P'
 # print("".join(txt))
 
 x = DbConn.DbType.SYBASE
-db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "Master")
+db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master")
 # statement = """
 # CREATE TABLE blobtest(
 #   pid int not null,
@@ -92,5 +92,5 @@ SELECT * FROM blobtest
 
 #x = DataUtils.downloadImage(db.conn, "blobtest", "img", 2, "/workspace/out.png")
 # db.queryToCSVWithBinary(statement, "/workspace/output/")
-
-DataUtils.testing()
+db.queryToList(statement)
+print("Executed")

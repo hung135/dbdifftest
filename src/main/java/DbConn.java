@@ -23,15 +23,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryPoolMXBean;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
+import javax.management.Notification;
 import javax.management.openmbean.CompositeData;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 
 import java.sql.*;
 import java.sql.SQLException;
@@ -114,7 +116,7 @@ public class DbConn {
         Class.forName(dbtype.driver);
         this.conn = DriverManager.getConnection(url, props);
         System.out.println("Connect to Oracle Successful");
-        CreateMemoryListenter();
+        MemoryListener.BindListeners();
         // System.out.println("DB Connection Successful: " + dbtype);
     }
 
@@ -567,30 +569,5 @@ public class DbConn {
         stmt.close();
 
         return currDDL;
-    }
-
-    private void CreateMemoryListenter(){
-        List<GarbageCollectorMXBean> gcbeans = java.lang.management.ManagementFactory.getGarbageCollectorMXBeans();
-        for (GarbageCollectorMXBean gcbean : gcbeans) {
-            NotificationEmitter emitter = (NotificationEmitter) gcbean;
-            System.out.println(gcbean.getName());
-
-            NotificationListener listener = (notification, handback) -> {
-                if (notification.getType().equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
-                    GarbageCollectionNotificationInfo info = GarbageCollectionNotificationInfo.from((CompositeData) notification.getUserData());
-    
-                    long duration = info.getGcInfo().getDuration();
-                    String gctype = info.getGcAction();
-    
-                    System.out.println(gctype + ": - "
-                            + info.getGcInfo().getId() + ", "
-                            + info.getGcName()
-                            + " (from " + info.getGcCause() + ") " + duration + " milliseconds");
-    
-                }
-            };
-
-            emitter.addNotificationListener(listener, null, null);
-        }
     }
 }

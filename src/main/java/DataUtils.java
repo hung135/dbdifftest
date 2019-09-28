@@ -596,10 +596,13 @@ public class DataUtils {
         List<Statement> trgStmnts = new ArrayList<>();
         List<PreparedStatement> trgPrep = new ArrayList<>();
         trgConns.forEach(conn->{
-            conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            trgPrep.add( conn.prepareStatement(sql));
-
-            });
+            try{
+                conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                trgPrep.add(conn.prepareStatement(sql));
+            } catch(Exception ex){
+                System.out.println(ex);
+            }
+        });
             
 /*************************************** */
         int ii=0;

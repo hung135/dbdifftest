@@ -28,10 +28,7 @@ import DataUtils
 
 from objects.database import Database
 from objects.task import Task
-
-# Notes:
-# jython is python 2.7.1 
-# It doesn't support list comp
+from util.logger import Logger
 
 # Task:
 #   key : str
@@ -39,6 +36,7 @@ from objects.task import Task
 #   instruction : {instruction_key : operation }
 #       op_key = database_connection.key
 #       operation = sql/py to execute
+
 
 def readyaml(db_yaml, task_yaml):
     parser = YamlParser() # NOT THREAD SAFE
@@ -78,7 +76,7 @@ def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
     parser.add_argument("-y", help="Location of the yaml file", required=True)
     parser.add_argument("-t", help="Location of tasks folder", required=True)
-    parser.add_argument("-v", help="Verbose logging", required=False)
+    parser.add_argument("-v", help="Verbose logging", required=False, action="store_true")
     args = parser.parse_args()
     return args 
 
@@ -124,6 +122,8 @@ def export_results(rows, filename):
         writer.writerows(rows)
 
 def execute(args):
+    if args.v:
+        log = Logger()
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
     task_execution(databases_connections, task_config)

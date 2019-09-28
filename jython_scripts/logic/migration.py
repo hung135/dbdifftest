@@ -11,10 +11,6 @@ import csv
 import md5
 from  .parse_proc import *
 
-class TestClass(object):
-     def __init__(self, dbConn, targetConnections):
-        DataUtils.callTest(dbConn, targetConnections)
-
 class TableDump(object):
 
     def __init__(self, dbConn, schemaOrOwner, writePath,rowlimit=0):
@@ -178,11 +174,6 @@ class ParseProcs(object):
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        
- 
-
-        
-         
         total=[]
         objType={"Func":"F","Proc":"P","Trigger":"TR"
         

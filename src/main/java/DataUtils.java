@@ -62,10 +62,6 @@ public class DataUtils {
         return set;
     }
 
-    public static void callTest(DbConn conn, List<DbConn> targetConnections){
-        System.out.println(targetConnections.size());
-    }
-
     /**
      * Take a regex and a data string and extract all the data that matches the
      * regex and returns it as a collection of string

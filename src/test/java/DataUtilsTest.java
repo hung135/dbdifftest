@@ -53,13 +53,13 @@ public class DataUtilsTest {
 
     // }
 
-    @Test
-    public void testOracleDbConn() throws SQLException, PropertyVetoException {
-    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
-    List<String> x = db.getTableNames("dbo");
-    System.out.println("Connect to Oracle Successful" + x);
-
-    }
+//    @Test
+//    public void testOracleDbConn() throws SQLException, PropertyVetoException {
+//    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
+//    List<String> x = db.getTableNames("dbo");
+//    System.out.println("Connect to Oracle Successful" + x);
+//
+//    }
 
     // @Test
     // public void testOracle() throws SQLException {

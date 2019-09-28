@@ -5,10 +5,13 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.Charsets;
+
+import java.util.EventObject;
 
 //import org.apache.log4j.Logger;
 
@@ -20,8 +23,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+
+import javax.management.NotificationEmitter;
+import javax.management.NotificationListener;
+import javax.management.openmbean.CompositeData;
+
 import java.sql.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -103,6 +114,7 @@ public class DbConn {
         Class.forName(dbtype.driver);
         this.conn = DriverManager.getConnection(url, props);
         System.out.println("Connect to Oracle Successful");
+        CreateMemoryListenter();
         // System.out.println("DB Connection Successful: " + dbtype);
     }
 
@@ -557,4 +569,28 @@ public class DbConn {
         return currDDL;
     }
 
+    private void CreateMemoryListenter(){
+        List<GarbageCollectorMXBean> gcbeans = java.lang.management.ManagementFactory.getGarbageCollectorMXBeans();
+        for (GarbageCollectorMXBean gcbean : gcbeans) {
+            NotificationEmitter emitter = (NotificationEmitter) gcbean;
+            System.out.println(gcbean.getName());
+
+            NotificationListener listener = (notification, handback) -> {
+                if (notification.getType().equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
+                    GarbageCollectionNotificationInfo info = GarbageCollectionNotificationInfo.from((CompositeData) notification.getUserData());
+    
+                    long duration = info.getGcInfo().getDuration();
+                    String gctype = info.getGcAction();
+    
+                    System.out.println(gctype + ": - "
+                            + info.getGcInfo().getId() + ", "
+                            + info.getGcName()
+                            + " (from " + info.getGcCause() + ") " + duration + " milliseconds");
+    
+                }
+            };
+
+            emitter.addNotificationListener(listener, null, null);
+        }
+    }
 }

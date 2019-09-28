@@ -5,3 +5,4 @@ target/*
 tmp/*
 jython_scripts/*.jar
 *.zip
+/target/

@@ -116,7 +116,7 @@ public class DbConn {
         Class.forName(dbtype.driver);
         this.conn = DriverManager.getConnection(url, props);
         System.out.println("Connect to Oracle Successful");
-        MemoryListener.BindListeners();
+        //MemoryListener.BindListeners(); // disabled for now
         // System.out.println("DB Connection Successful: " + dbtype);
     }
 

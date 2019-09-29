@@ -5,3 +5,5 @@ target/*
 tmp/*
 jython_scripts/*.jar
 *.zip
+*/cov-int/*
+cov-int/*

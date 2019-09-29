@@ -101,6 +101,16 @@ RUN echo 'alias deletereleases="python3 ${GITHUBRELEASE} -v -k ${GITHUBKEY} -r $
 
 # RUN echo 'alias test="mvn test"' >>~/.bashrc
 RUN wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+RUN wget https://scan.coverity.com/download/linux64 --post-data "token=6GQCVP3FzRjnpDIR8XGGFg&project=hung135%2Fdbdifftest" -O /tmp/coverity_tool.tgz
+RUN tar -xvf /tmp/coverity_tool.tgz -C /tmp/ 
 
+RUN echo 'alias coverity="/tmp/cov-analysis-linux64-2019.03/bin/cov-build --dir cov-int mvn compile assembly:single -f /workspace/pom.xml"' >>~/.bashrc
+RUN echo 'alias tarcoverity="tar czvf myproject.tgz cov-int"'
 RUN echo 'source /git-prompt.sh' >>~/.bashrc
 RUN echo 'source /workspace/env.rc' >>~/.bashrc
+RUN echo 'alias submitcoverity="curl --form token=6GQCVP3FzRjnpDIR8XGGFg \
+  --form email=hung135@hotmail.com \
+  --form file=@myproject.tgz \
+  --form version="Version" \
+  --form description="Description" \
+  https://scan.coverity.com/builds?project=hung135%2Fdbdifftest"'>>~/.bashrc

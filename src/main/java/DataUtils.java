@@ -221,7 +221,7 @@ public class DataUtils {
 
             int length = in.available();
             byte[] blobBytes = new byte[length];
-            in.read(blobBytes);
+            int bytestRead = in.read(blobBytes);
 
             String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
 
@@ -269,7 +269,7 @@ public class DataUtils {
 
             int length = in.available();
             byte[] blobBytes = new byte[length];
-            in.read(blobBytes);
+            int bytestRead = in.read(blobBytes);
 
             FileOutputStream fos = new FileOutputStream(blobFile);
             fos.write(blobBytes);

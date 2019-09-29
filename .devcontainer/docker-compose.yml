@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-version: '3'
+version: '3.7'
 services:
   docker-in-docker:
     build: 
@@ -15,9 +15,9 @@ services:
       - ~/.gitkey:/root/.gitkey
       - /var/run/docker.sock:/var/run/docker.sock 
     command: sleep infinity 
-    resources:
-        limits:
-          cpus: '2.00'
+    # resources:
+    #     limits:
+    #       cpus: '2.00'
     environment:
       DOCKERIZED: dbpg
       PGUSER: root

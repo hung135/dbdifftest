@@ -201,6 +201,7 @@ public class DbConn {
                 items.add(rs.getString(TABLE_NAME));
             }
         }
+        rs.close();
         return items;
     }
 
@@ -219,6 +220,7 @@ public class DbConn {
                 items.add(rs.getString(TABLE_NAME));
             }
         }
+        rs.close();
         return items;
     }
 
@@ -265,17 +267,21 @@ public class DbConn {
             // System.out.println(resultSet.getString("COLUMN_NAME"));
             items.add(resultSet.getString("COLUMN_NAME"));
         }
+        resultSet.close();
         return items;
+
     }
 
     public List<String> getTriggers(String tableName) throws SQLException {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
 
-        ResultSet result = databaseMetaData.getTables(this.databaseName, null, tableName, new String[] { "TRIGGER" });
-        while (result.next()) {
-            items.add(result.getString("TABLE_NAME"));
+        ResultSet resultSet = databaseMetaData.getTables(this.databaseName, null, tableName,
+                new String[] { "TRIGGER" });
+        while (resultSet.next()) {
+            items.add(resultSet.getString("TABLE_NAME"));
         }
+        resultSet.close();
         return items;
     }
 
@@ -309,7 +315,7 @@ public class DbConn {
             hasRecords = true;
             this.rs.beforeFirst();
         }
-
+        rs.close();
         return hasRecords;
     }
 
@@ -337,6 +343,7 @@ public class DbConn {
             }
             items.add(row);
         }
+        this.rs.close();
 
         return items;
     }
@@ -440,7 +447,7 @@ public class DbConn {
                 }
             }
             data.add(row);
-
+            rs.close();
         }
 
         CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath + "/index.csv"));
@@ -554,6 +561,7 @@ public class DbConn {
             String snippetDDL = rs.getString(2);
             currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
+        rs.close();
         stmt.close();
 
         return currDDL;
@@ -573,6 +581,7 @@ public class DbConn {
             String snippetDDL = rs.getString(3);
             currDDL = (snippetDDL == null) ? currDDL + " " : currDDL + snippetDDL;
         }
+        rs.close();
         stmt.close();
 
         return currDDL;

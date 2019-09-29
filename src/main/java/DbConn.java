@@ -316,6 +316,7 @@ public class DbConn {
             this.rs.beforeFirst();
         }
         rs.close();
+        stmt.close();
         return hasRecords;
     }
 
@@ -344,6 +345,7 @@ public class DbConn {
             items.add(row);
         }
         this.rs.close();
+        stmt.close();
 
         return items;
     }
@@ -370,6 +372,8 @@ public class DbConn {
         writer.writeAll(rs, includeHeaders);
 
         writer.close();
+        rs.close();
+        stmt.close();
     }
 
     public void quertyToCSVOutputBinary(String query, String fullFilePath) throws Exception {
@@ -448,6 +452,7 @@ public class DbConn {
             }
             data.add(row);
             rs.close();
+            stmt.close();
         }
 
         CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath + "/index.csv"));
@@ -469,12 +474,12 @@ public class DbConn {
         Statement stmt = this.conn.createStatement();
 
         /* Define the SQL query */
-        ResultSet query_set = stmt.executeQuery(selectQuery);
+        ResultSet rs = stmt.executeQuery(selectQuery);
         /* Create Map for Excel Data */
         Map<String, Object[]> excel_data = new HashMap<String, Object[]>(); // create a map and define data
         int row_counter = 0;
 
-        ResultSetMetaData metadata = query_set.getMetaData();
+        ResultSetMetaData metadata = rs.getMetaData();
         int columnCount = metadata.getColumnCount();
         List<String> columnNames = new ArrayList<>();
 
@@ -487,20 +492,20 @@ public class DbConn {
         }
 
         /* Populate data into the Map */
-        while (query_set.next()) {
+        while (rs.next()) {
             row_counter = row_counter + 1;
 
             String[] row_data = new String[columnCount];
 
             // Data rows
             for (int i = 1; i <= columnCount; i++) {
-                row_data[i - 1] = query_set.getString(columnNames.get(i - 1));
+                row_data[i - 1] = rs.getString(columnNames.get(i - 1));
             }
 
             excel_data.put(Integer.toString(row_counter), row_data);
         }
         /* Close all DB related objects */
-        query_set.close();
+        rs.close();
         stmt.close();
         DataUtils.writeToExcel(columnNames, excel_data, sheetName, fullFilePath);
     }

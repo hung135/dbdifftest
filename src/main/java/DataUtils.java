@@ -165,6 +165,8 @@ public class DataUtils {
 
             System.out.println(name1 + ", " + name + ", " + txt);
         }
+        rs.close();
+        stmt.close();
 
     }
 
@@ -272,10 +274,10 @@ public class DataUtils {
             FileOutputStream fos = new FileOutputStream(blobFile);
             fos.write(blobBytes);
             fos.close();
-            rs.close();
-            stmt.close();
 
         }
+        rs.close();
+        stmt.close();
 
     }
 
@@ -644,7 +646,7 @@ public class DataUtils {
                         dbconn.ps.close();
                     }
                     dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
-                    dbconn.lastPSSql=sqlInsert;
+                    dbconn.lastPSSql = sqlInsert;
                     // System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -693,9 +695,9 @@ public class DataUtils {
                 for (int imgIdx : binaryColIndex) {
 
                     // byte[] dataItem = rs.getBytes(imgIdx);
-                    
-                    byte [] dataItem =rs.getBytes(imgIdx);
-                    
+
+                    byte[] dataItem = rs.getBytes(imgIdx);
+
                     if (dataItem.length > largestBytes) {
                         largestBytes = dataItem.length;
                     }

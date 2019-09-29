@@ -1,3 +1,7 @@
+<a href="https://scan.coverity.com/projects/hung135-dbdifftest">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/19285/badge.svg"/>
+</a>
 
 RunTime Installation:
 - Download the jython 2.7 runtime:

@@ -42,13 +42,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import dataobjs.Table;
+import DatabaseObjects.Table;
 
 import java.io.FileOutputStream;
 import java.io.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.*;
+
+import Nums.DbType;
+import Utils.JLogger;
+
 import java.util.*;
 
 public class DbConn {
@@ -59,65 +63,28 @@ public class DbConn {
     public DbType dbType;
     public String databaseName;
     public String url;
-
-    public enum DbType {
-        // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
-        ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
-        ORACLESID("oracle.jdbc.OracleDriver",
-                "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))(CONNECT_DATA=(SERVICE_NAME={2})))"),
-        SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}/{2}"),
-        POSTGRES("org.postgresql.Driver", "jdbc:postgresql://{0}:{1}:{2}"),
-        MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql://{0}:{1}/{2}");
-
-        private String driver;
-        private String url;
-
-        DbType(String driver, String url) {
-            this.driver = driver;
-            this.url = url;
-            // System.out.println(url);
-        }
-
-        public String driver() {
-            // System.out.println(driver);
-            return driver;
-        }
-
-        public String url() {
-            System.out.println(url);
-            return url;
-        }
-
-        public static DbType getMyEnumIfExists(String value) {
-
-            for (DbType db : DbType.values()) {
-                if (db.name().equalsIgnoreCase(value))
-                    return db;
-            }
-            return null;
-        }
-    }
+    public JLogger logger;
 
     public String getUrl() {
         return this.url;
     }
 
-    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
+    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName, JLogger logger)
             throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbtype;
         this.databaseName = databaseName;
+        this.logger = logger;
 
-        String url = MessageFormat.format(dbtype.url, host, port, databaseName);
+        String url = MessageFormat.format(dbtype.url(), host, port, databaseName);
         this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-        Class.forName(dbtype.driver);
+        Class.forName(dbtype.driver());
         this.conn = DriverManager.getConnection(url, props);
         System.out.println("Connect to Oracle Successful");
         //MemoryListener.BindListeners(); // disabled for now
-        // System.out.println("DB Connection Successful: " + dbtype);
     }
 
     public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)

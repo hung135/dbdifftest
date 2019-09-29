@@ -60,7 +60,7 @@ def create_db_connections(database_objects):
     for base in database_objects:
         baseConnection = DbConn.DbType.getMyEnumIfExists(base.dbtype)
         if baseConnection is not None:
-            con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name)
+            con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name, logger)
             databases_connections[base.key] = con
         else:
             baseConnection[base.key] = None
@@ -131,12 +131,10 @@ def setup_logger(log_type):
 def execute(args):
     if args.v:
         setup_logger(args.v)
-
-    logger.debug("We be debuggin")
-    # db_config, task_config = readyaml(args.y, args.t)
-    # databases_connections = create_db_connections(db_config)
-    # task_execution(databases_connections, task_config)
-    # print("Task execution complete")
+    db_config, task_config = readyaml(args.y, args.t)
+    databases_connections = create_db_connections(db_config)
+    task_execution(databases_connections, task_config)
+    print("Task execution complete")
 
 
 if __name__ == "__main__":

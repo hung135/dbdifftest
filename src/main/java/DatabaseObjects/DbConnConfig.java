@@ -1,4 +1,4 @@
-package dataobjs;
+package DatabaseObjects;
 
 import java.util.Objects;
 

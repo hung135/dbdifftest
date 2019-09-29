@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 import DatabaseObjects.Table;
+import Interfaces.IDatabaseConnection;
 
 import java.io.FileOutputStream;
 import java.io.*;
@@ -55,9 +56,8 @@ import Utils.JLogger;
 
 import java.util.*;
 
-public class DbConn {
+public class DbConn implements IDatabaseConnection {
     public Connection conn;
-    // final static Logger logger = Logger.getLogger(DbConn.class);
     private Statement stmt; // tbd
     public ResultSet rs;
     public DbType dbType;

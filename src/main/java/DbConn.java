@@ -34,6 +34,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 
+import DatabaseObjects.Column;
 import DatabaseObjects.Table;
 import Nums.DbType;
 import Utils.JLogger;
@@ -152,6 +153,27 @@ public class DbConn {
         return items;
     }
 
+    public List<Table> getAllTableColumnAndTypes(String schemaName) throws SQLException {
+        List<String> tables = this.getTableNames(schemaName);
+        List<Table> items = new ArrayList<Table>();
+        DatabaseMetaData metadata = conn.getMetaData();
+
+        for(String tblName : tables){
+            Table tbl = new Table(tblName);
+            ResultSet rs = metadata.getColumns(this.databaseName, null, tblName, null);
+            ResultSetMetaData rsMetaData= rs.getMetaData();
+            
+            for(int i = 1; i <= rsMetaData.getColumnCount(); i++){
+                String colName = rsMetaData.getColumnName(i);
+                String type = rsMetaData.getColumnTypeName(i);
+                this.logger.debug("Table: " + tblName + "ColName: " + colName + ":" + type);
+                tbl.columns.add(new Column(colName, type));
+            }
+            items.add(tbl);
+        }
+        return items;
+    }
+
     public List<String> getViewNames(String schemaName) throws SQLException {
 
         String TABLE_NAME = "TABLE_NAME";
@@ -227,8 +249,6 @@ public class DbConn {
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         ResultSet resultSet = databaseMetaData.getColumns(this.databaseName, null, tabeName, null);
         while (resultSet.next()) {
-            // Print
-            // System.out.println(resultSet.getString("COLUMN_NAME"));
             items.add(resultSet.getString("COLUMN_NAME"));
         }
         return items;

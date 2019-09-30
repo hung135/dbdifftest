@@ -8,4 +8,4 @@ jython_scripts/*.jar
 /target/
 */cov-int/*
 cov-int/*
-*.log
+*.log*

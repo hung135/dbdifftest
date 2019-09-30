@@ -19,11 +19,14 @@
 #       reportHeader: TableName,Dev,Test
 #       key_columns: # 
 #         - TableName
-ParseProcs:
+# ParseProcs:
+#   sys-dev:
+#     schemaOrOwner: dbo
+#     writePath: ./reports/parsed_procs_dev.csv
+#   sys-dev1:
+#     schemaOrOwner: dbo
+#     writePath: ./reports/parsed_procs_dev1.csv
+TableInformation:
   sys-dev:
     schemaOrOwner: dbo
-    writePath: ./reports/parsed_procs_dev.csv
-  sys-dev1:
-    schemaOrOwner: dbo
-    writePath: ./reports/parsed_procs_dev1.csv
-  
+    fileName: /workspace/output.csv

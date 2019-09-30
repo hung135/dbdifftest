@@ -26,6 +26,7 @@ sys.path.append(
 import YamlParser
 import DbConn
 import DataUtils
+from Nums import DbType
 from Utils import JLogger
 
 from objects.database import Database
@@ -58,7 +59,7 @@ def readyaml(db_yaml, task_yaml):
 def create_db_connections(database_objects):
     databases_connections = {}
     for base in database_objects:
-        baseConnection = DbConn.DbType.getMyEnumIfExists(base.dbtype)
+        baseConnection = DbType.getMyEnumIfExists(base.dbtype)
         if baseConnection is not None:
             con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name, logger)
             databases_connections[base.key] = con
@@ -76,8 +77,8 @@ def execute_sql_test_sysbase(connection, task):
 
 def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
-    # parser.add_argument("-y", help="Location of the yaml file", required=True)
-    # parser.add_argument("-t", help="Location of tasks folder", required=True)
+    parser.add_argument("-y", help="Location of the yaml file", required=True)
+    parser.add_argument("-t", help="Location of tasks folder", required=True)
     parser.add_argument("-v", help="Verbose logging", required=False, default=None, choices=["debug", "warning", "all"])
     args = parser.parse_args()
     return args 
@@ -127,7 +128,7 @@ def setup_logger(log_type=None):
     global logger
     try:
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", log_type if log_type else "default")
-        logger = JLogger(path, str(datetime.datetime.now())).logger
+        logger = JLogger(path, str(datetime.datetime.now()))
     except Exception as e:
         print(e)
         sys.exit(1)

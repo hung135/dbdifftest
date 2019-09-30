@@ -262,12 +262,19 @@ public class DbConn {
         List<String> items = new ArrayList<>();
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         ResultSet resultSet = databaseMetaData.getColumns(this.databaseName, null, tabeName, null);
-        while (resultSet.next()) {
-            // Print
-            // System.out.println(resultSet.getString("COLUMN_NAME"));
-            items.add(resultSet.getString("COLUMN_NAME"));
+        try {
+            while (resultSet.next()) {
+                // Print
+                // System.out.println(resultSet.getString("COLUMN_NAME"));
+                items.add(resultSet.getString("COLUMN_NAME"));
+            }
+        } catch (Exception e) {
+
+            throw new SQLException(e);
+
+        } finally {
+            resultSet.close();
         }
-        resultSet.close();
         return items;
 
     }
@@ -540,7 +547,7 @@ public class DbConn {
 
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(file);
         for (CSVRecord record : records) {
-            for (int i = 0; i < tableColumns.size(); i++) {
+            for (int i = 1; i < tableColumns.size(); i++) {
                 preparedStatement.setString(i, record.get(tableColumns.get(i)));
             }
             preparedStatement.addBatch();

@@ -174,6 +174,7 @@ public class DataUtils {
         try {
 
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+
             Boolean includeHeaders = true;
 
             writer.writeAll(stringList, includeHeaders);

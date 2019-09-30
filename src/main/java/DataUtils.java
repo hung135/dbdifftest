@@ -67,13 +67,6 @@ public class DataUtils {
         return set;
     }
 
-<<<<<<< HEAD
-=======
-    public static void callTest(DbConn conn, List<DbConn> targetConnections) {
-        System.out.println(targetConnections.size());
-    }
-
->>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00
     /**
      * Take a regex and a data string and extract all the data that matches the
      * regex and returns it as a collection of string
@@ -613,40 +606,6 @@ public class DataUtils {
                 allColumnNames[i - 1] = columnName;
             }
 
-<<<<<<< HEAD
-        List<String[]> data = new ArrayList<String[]>();
-  /*************************************** */
-        //build the insert
-        String columnsComma = String.join(",", allColumnNames);
-        String columnsQuestion=  "?";
-        for (int jj=0;jj<columnCount;jj++){
-            if (jj>0)
-                columnsQuestion=  columnsQuestion + ",?";
-        }
-        String sqlInsert = "INSERT INTO "+tableName+" ("+allColumnNames+") VALUES ("+columnsQuestion+")";
-        List<Statement> trgStmnts = new ArrayList<>();
-        List<PreparedStatement> trgPrep = new ArrayList<>();
-        trgConns.forEach(conn->{
-            try{
-                conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-                trgPrep.add(conn.prepareStatement(sql));
-            } catch(Exception ex){
-                System.out.println(ex);
-            }
-        });
-            
-/*************************************** */
-        int ii=0;
-        while (rs.next()) {
-            ii++;
-            String[] row = new String[columnCount];
-             
-            for (int stringIdx : stringColIndex) {
-                row[stringIdx - 1] = rs.getString(stringIdx);
-                for (PreparedStatement ps: trgPrep){
-                    ps.setString(stringIdx, row[stringIdx - 1]);
-                     
-=======
             // List<String[]> data = new ArrayList<String[]>();
             /*************************************** */
             // build the insert
@@ -708,7 +667,6 @@ public class DataUtils {
 
                         // System.out.println(ii+"--setstring-------------------------");
                     }
->>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00
                 }
                 for (int numIdx : numberColIndex) {
                     // System.out.println(ii+"----------xxxx-----------------");
@@ -809,8 +767,6 @@ public class DataUtils {
 
     }
 
-<<<<<<< HEAD
-=======
     /**
      * call the proper get method
      * 
@@ -845,6 +801,5 @@ public class DataUtils {
             }
         }
         return result;
->>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00
     }
 }

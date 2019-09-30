@@ -35,11 +35,10 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 
 import DatabaseObjects.Table;
-import Interfaces.IDatabaseConnection;
 import Nums.DbType;
 import Utils.JLogger;
 
-public class DbConn implements IDatabaseConnection {
+public class DbConn {
     public Connection conn;
    //private Statement stmt; // tbd
     // final static Logger logger = Logger.getLogger(DbConn.class);

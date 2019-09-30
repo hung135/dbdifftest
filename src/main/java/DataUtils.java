@@ -65,6 +65,7 @@ public class DataUtils {
 
     public static void callTest(DbConn conn, List<DbConn> targetConnections) {
         System.out.println(targetConnections.size());
+        logger.log("My Message");
     }
 
     /**
@@ -74,8 +75,8 @@ public class DataUtils {
      * @param regExString
      * @param dataString
      */
-    public static Set<String> RegexExtract(String regExString, String dataString) {
-        Set<String> xx = new HashSet<String>();
+    public static Set<String> regexExtract(String regExString, String dataString) {
+        Set<String> xx = new HashSet<>();
 
         Pattern pattern = Pattern.compile(regExString);
         Matcher matcher = pattern.matcher(dataString);
@@ -88,8 +89,8 @@ public class DataUtils {
 
     }
 
-    public static Set<String> FindSybaseDatabase(String dataString) {
-        Set<String> xx = new HashSet<String>();
+    public static Set<String> findSybaseDatabase(String dataString) {
+        Set<String> xx = new HashSet<>();
 
         Pattern pattern = Pattern.compile("\\w*\\.\\.");
         Matcher matcher = pattern.matcher(dataString);

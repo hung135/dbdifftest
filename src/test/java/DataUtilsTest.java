@@ -25,9 +25,9 @@ public class DataUtilsTest {
     // public void testFunctions() {
 
     // System.out
-    // .println(DataUtils.RegexExtract("\\w*.\\.\\.", " from db1..table1,
+    // .println(DataUtils.regexExtract("\\w*.\\.\\.", " from db1..table1,
     // db2..table2, db3..table3 'b' 'c'"));
-    // System.out.println(DataUtils.FindSybaseDatabase(
+    // System.out.println(DataUtils.findSybaseDatabase(
     // " from db1..table1, db2..table2, db3..table3, db3.dbo.table4 where something
     // = something '"));
     // System.out.println(DataUtils.findTablesFromQuery(

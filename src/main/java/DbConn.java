@@ -32,6 +32,7 @@ import com.opencsv.CSVWriter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.log4j.Logger;
 
 import DatabaseObjects.Table;
 import Interfaces.IDatabaseConnection;
@@ -49,7 +50,7 @@ public class DbConn implements IDatabaseConnection {
     public DbType dbType;
     public String databaseName;
     public String url;
-    public JLogger logger;
+    public Logger logger;
 
 
     /**
@@ -71,12 +72,12 @@ public class DbConn implements IDatabaseConnection {
         return this.url;
     }
 
-    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName, JLogger logger)
+    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName, JLogger jLogger)
             throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbtype;
         this.databaseName = databaseName;
-        this.logger = logger;
+        this.logger = jLogger.logger;
 
         String url = MessageFormat.format(dbtype.url(), host, port, databaseName);
         this.url = url;

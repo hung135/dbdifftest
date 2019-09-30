@@ -134,10 +134,9 @@ def setup_logger(log_type=None):
 
 def execute(args):
     setup_logger(args.v)
-    logger.debug("testing")
-    # db_config, task_config = readyaml(args.y, args.t)
-    # databases_connections = create_db_connections(db_config)
-    # task_execution(databases_connections, task_config)
+    db_config, task_config = readyaml(args.y, args.t)
+    databases_connections = create_db_connections(db_config)
+    task_execution(databases_connections, task_config)
     print("Task execution complete")
 
 

@@ -1,52 +1,42 @@
 
-import com.google.common.io.ByteSource;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.Charsets;
-
-import java.util.EventObject;
-
-//import org.apache.log4j.Logger;
-
-import oracle.net.aso.i;
-
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-
-import java.util.stream.Stream;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.opencsv.CSVWriter;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 import DatabaseObjects.Table;
 import Interfaces.IDatabaseConnection;
-
-import java.io.FileOutputStream;
-import java.io.*;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.ss.usermodel.*;
-
 import Nums.DbType;
 import Utils.JLogger;
-
-import java.util.*;
 
 public class DbConn implements IDatabaseConnection {
     public Connection conn;
@@ -553,4 +543,126 @@ public class DbConn implements IDatabaseConnection {
 
         return currDDL;
     }
+
+	/**
+	 * place hold to upload images
+	 * 
+	 * @param conn
+	 * @param file
+	 * @param uniqueid
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	public static void uploadImage(Connection conn, String filep, int uniqueid) throws SQLException, IOException {
+	    File file = new File(filep);
+	
+	    String filename = file.getName();
+	    int length = (int) file.length();
+	
+	    FileInputStream filestream = null;
+	
+	    filestream = new FileInputStream(file);
+	
+	    Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+	    // String query = "UPDATE assignment SET instructions_file = ?,
+	    // instructions_filename = ? WHERE a_key = " + uniqueid;
+	    String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
+	    PreparedStatement ps = conn.prepareStatement(query);
+	    ps.setBinaryStream(1, filestream, length);
+	    // ps.setString(2, filename);
+	    ps.execute();
+	    ps.close();
+	    stmt.close();
+	    filestream.close();
+	}
+
+	/**
+	 * place holder logic to download image
+	 * 
+	 * @param conn
+	 * @param primaryKey
+	 * @throws IOException
+	 * @throws SQLException
+	 * @throws FileNotFoundException
+	 */
+	public void downloadImage(String tableName, String columnName, int primaryKey,
+	        String filePath) throws FileNotFoundException, SQLException, IOException {
+	    Statement stmt = this.conn.createStatement();
+	    String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE pid = " + primaryKey;
+	    System.out.println(query);
+	    ResultSet rs = stmt.executeQuery(query);
+	
+	    if (rs.next()) {
+	        File blobFile = null;
+	        blobFile = new File(filePath);
+	
+	        Blob blob = rs.getBlob(columnName);
+	        InputStream in = blob.getBinaryStream();
+	
+	        int length = in.available();
+	        byte[] blobBytes = new byte[length];
+	        in.read(blobBytes);
+	
+	        FileOutputStream fos = new FileOutputStream(blobFile);
+	        fos.write(blobBytes);
+	        fos.close();
+	        rs.close();
+	        stmt.close();
+	
+	    }
+	
+	}
+
+	public Map<Integer, String> outputBinary(String path, String tableName, String columnName,
+	    String columnType) throws FileNotFoundException, SQLException, IOException {
+	    Map<Integer, String> results = new HashMap<Integer, String>();
+	    Statement stmt = this.conn.createStatement();
+	    String query = "SELECT " + columnName + " FROM " + tableName;
+	
+	    ResultSet rs = stmt.executeQuery(query);
+	    while (rs.next()) {
+	        Blob blob = rs.getBlob(columnName);
+	        InputStream in = blob.getBinaryStream();
+	
+	        int length = in.available();
+	        byte[] blobBytes = new byte[length];
+	        in.read(blobBytes);
+	
+	        String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
+	
+	        // change name here
+	        String dirPath = path + "/" + columnType + "/" + md5Hex;
+	        File blobFile = new File(dirPath);
+	        if (!blobFile.getParentFile().exists()) {
+	            blobFile.getParentFile().mkdirs();
+	        }
+	        FileOutputStream fos = new FileOutputStream(blobFile);
+	
+	        results.put(rs.getRow(), dirPath);
+	        fos.write(blobBytes);
+	        fos.close();
+	    }
+	
+	    rs.close();
+	    stmt.close();
+	    return results;
+	}
+
+	public void getSybaseStoredProcs() throws SQLException {
+	    String query = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
+	            + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid";
+	
+	    Statement stmt = this.conn.createStatement();
+	
+	    ResultSet rs = stmt.executeQuery(query);
+	
+	    while (rs.next()) {
+	        String name1 = rs.getString("name1");
+	        String name = rs.getString("name");
+	        String txt = rs.getString("text");
+	
+	        System.out.println(name1 + ", " + name + ", " + txt);
+	    }
+	
+	}
 }

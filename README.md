@@ -24,6 +24,9 @@ What Can I put in tasks & reports.yaml:
   - Same Connection yaml (conn.yaml) file is here :
     - https://github.com/hung135/dbdifftest/blob/master/jython_scripts/conn.yaml
 
+Logging:
+   - Setup custom logging by following [this](https://www.tutorialspoint.com/log4j/log4j_configuration.htm)
+
 Note:
 - You can call the yaml files and have as many as you. 
 - Understand one has your connection info and one has your execution parameters

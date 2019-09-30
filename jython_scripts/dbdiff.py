@@ -26,7 +26,7 @@ sys.path.append(
 import YamlParser
 import DbConn
 import DataUtils
-import JLogger
+from Utils import JLogger
 
 from objects.database import Database
 from objects.task import Task
@@ -78,7 +78,7 @@ def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
     # parser.add_argument("-y", help="Location of the yaml file", required=True)
     # parser.add_argument("-t", help="Location of tasks folder", required=True)
-    parser.add_argument("-v", help="Verbose logging", required=False, default=None)
+    parser.add_argument("-v", help="Verbose logging", required=False, default=None, choices=["debug", "warning", "all"])
     args = parser.parse_args()
     return args 
 
@@ -134,9 +134,10 @@ def setup_logger(log_type=None):
 
 def execute(args):
     setup_logger(args.v)
-    db_config, task_config = readyaml(args.y, args.t)
-    databases_connections = create_db_connections(db_config)
-    task_execution(databases_connections, task_config)
+    logger.debug("testing")
+    # db_config, task_config = readyaml(args.y, args.t)
+    # databases_connections = create_db_connections(db_config)
+    # task_execution(databases_connections, task_config)
     print("Task execution complete")
 
 

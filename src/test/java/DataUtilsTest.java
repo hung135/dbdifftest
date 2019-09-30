@@ -55,9 +55,9 @@ public class DataUtilsTest {
 
     @Test
     public void testOracleDbConn() throws SQLException, PropertyVetoException {
-    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
-    List<String> x = db.getTableNames("dbo");
-    System.out.println("Connect to Oracle Successful" + x);
+        DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
+        List<String> x = db.getTableNames("dbo");
+        System.out.println("Connect to Oracle Successful" + x);
 
     }
 
@@ -216,5 +216,7 @@ public class DataUtilsTest {
         primaryColumn.add("TableName");
 
         DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "TableName,Dev,Test", "data");
+        assertTrue(true);
+        assertTrue(false);
     }
 }

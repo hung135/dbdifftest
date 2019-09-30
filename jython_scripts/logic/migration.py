@@ -11,10 +11,6 @@ import csv
 import md5
 from  .parse_proc import *
 
-class TestClass(object):
-     def __init__(self, dbConn, targetConnections):
-        DataUtils.callTest(dbConn, targetConnections)
-
 class TableDump(object):
 
     def __init__(self, dbConn, schemaOrOwner, writePath,rowlimit=0):
@@ -44,7 +40,6 @@ class TableDump(object):
 
 
 class TableRowCount(object):
-
     def __init__(self, dbConn, schemaOrOwner, fileName):
         path = os.path.abspath(fileName)
         tableCount = []
@@ -73,6 +68,15 @@ class TableRowCount(object):
     def __repr__(self):
         return str(self.__dict__)
 
+class TableInformation(object):
+    def __init__(self, dbConn, schemaOrOwner, fileName):
+        tables = dbConn.getAllTableColumnAndTypes(schemaOrOwner)
+        output = []
+        for tbl in tables:
+            output.append(tbl.TableInformation())
+        tblout = csv.writer(open(fileName, 'w'), delimiter=',', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
+        for row in output:
+            tblout.writerow(row)
 
 class TableSampleCheckSum(object):
     def __init__(self, dbConn, schemaOrOwner, writePath, sampleSize):
@@ -182,11 +186,6 @@ class ParseProcs(object):
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        
- 
-
-        
-         
         total=[]
         objType={"Func":"F","Proc":"P","Trigger":"TR"
         

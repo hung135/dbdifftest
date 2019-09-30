@@ -1,46 +1,47 @@
 
-import com.google.common.io.ByteSource;
+import java.beans.PropertyVetoException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.Charsets;
+import org.apache.log4j.Logger;
 
-//import org.apache.log4j.Logger;
-
-import oracle.net.aso.i;
-
-import java.beans.PropertyVetoException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-import java.util.stream.Stream;
-import java.sql.*;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import dataobjs.Table;
-
-import java.io.FileOutputStream;
-import java.io.*;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.ss.usermodel.*;
-import java.util.*;
+import DatabaseObjects.Column;
+import DatabaseObjects.Table;
+import Nums.DbType;
+import Utils.JLogger;
 
 public class DbConn {
     public Connection conn;
+   //private Statement stmt; // tbd
     // final static Logger logger = Logger.getLogger(DbConn.class);
     public Statement stmt; // tbd
     public PreparedStatement ps;
@@ -49,6 +50,8 @@ public class DbConn {
     public DbType dbType;
     public String databaseName;
     public String url;
+    public Logger logger;
+
 
     /**
      * an attemp to release resource
@@ -65,61 +68,25 @@ public class DbConn {
         this.ps = this.conn.prepareStatement(this.lastPSSql);
     }
 
-    public enum DbType {
-        // jdbc:oracle:thin:scott/tiger@//myhost:1521/myservicename
-        ORACLE("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@{0}:{1}:{2}"),
-        ORACLESID("oracle.jdbc.OracleDriver",
-                "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))(CONNECT_DATA=(SERVICE_NAME={2})))"),
-        SYBASE("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://{0}:{1}/{2};useLOBs=false"),
-        POSTGRES("org.postgresql.Driver", "jdbc:postgresql://{0}:{1}:{2}"),
-        MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql://{0}:{1}/{2}");
-
-        private String driver;
-        private String url;
-
-        DbType(String driver, String url) {
-            this.driver = driver;
-            this.url = url;
-            // System.out.println(url);
-        }
-
-        public String driver() {
-            // System.out.println(driver);
-            return driver;
-        }
-
-        public String url() {
-            System.out.println(url);
-            return url;
-        }
-
-        public static DbType getMyEnumIfExists(String value) {
-
-            for (DbType db : DbType.values()) {
-                if (db.name().equalsIgnoreCase(value))
-                    return db;
-            }
-            return null;
-        }
-    }
-
     public String getUrl() {
         return this.url;
     }
 
-    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName)
+    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName, JLogger jLogger)
             throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbtype;
         this.databaseName = databaseName;
+        this.logger = jLogger.logger;
 
-        String url = MessageFormat.format(dbtype.url, host, port, databaseName);
+        String url = MessageFormat.format(dbtype.url(), host, port, databaseName);
         this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-        Class.forName(dbtype.driver);
+        Class.forName(dbtype.driver());
         this.conn = DriverManager.getConnection(url, props);
+        //MemoryListener.BindListeners(); // disabled for now
         System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
@@ -181,6 +148,27 @@ public class DbConn {
             String tableName = tables.get(i);
             Table tbl = new Table(tableName);
             tbl.columnNames = this.getColumns(tableName);
+            items.add(tbl);
+        }
+        return items;
+    }
+
+    public List<Table> getAllTableColumnAndTypes(String schemaName) throws SQLException {
+        List<String> tables = this.getTableNames(schemaName);
+        List<Table> items = new ArrayList<Table>();
+        DatabaseMetaData metadata = conn.getMetaData();
+
+        for(String tblName : tables){
+            Table tbl = new Table(tblName);
+            ResultSet rs = metadata.getColumns(this.databaseName, null, tblName, null);
+            ResultSetMetaData rsMetaData= rs.getMetaData();
+            
+            for(int i = 1; i <= rsMetaData.getColumnCount(); i++){
+                String colName = rsMetaData.getColumnName(i);
+                String type = rsMetaData.getColumnTypeName(i);
+                this.logger.debug("Table: " + tblName + "ColName: " + colName + ":" + type);
+                tbl.columns.add(new Column(colName, type));
+            }
             items.add(tbl);
         }
         return items;
@@ -261,8 +249,6 @@ public class DbConn {
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         ResultSet resultSet = databaseMetaData.getColumns(this.databaseName, null, tabeName, null);
         while (resultSet.next()) {
-            // Print
-            // System.out.println(resultSet.getString("COLUMN_NAME"));
             items.add(resultSet.getString("COLUMN_NAME"));
         }
         return items;
@@ -578,4 +564,125 @@ public class DbConn {
         return currDDL;
     }
 
+	/**
+	 * place hold to upload images
+	 * 
+	 * @param conn
+	 * @param file
+	 * @param uniqueid
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	public static void uploadImage(Connection conn, String filep, int uniqueid) throws SQLException, IOException {
+	    File file = new File(filep);
+	
+	    String filename = file.getName();
+	    int length = (int) file.length();
+	
+	    FileInputStream filestream = null;
+	
+	    filestream = new FileInputStream(file);
+	
+	    Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+	    // String query = "UPDATE assignment SET instructions_file = ?,
+	    // instructions_filename = ? WHERE a_key = " + uniqueid;
+	    String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
+	    PreparedStatement ps = conn.prepareStatement(query);
+	    ps.setBinaryStream(1, filestream, length);
+	    // ps.setString(2, filename);
+	    ps.execute();
+	    ps.close();
+	    stmt.close();
+	    filestream.close();
+	}
+
+	/**
+	 * place holder logic to download image
+	 * 
+	 * @param conn
+	 * @param primaryKey
+	 * @throws IOException
+	 * @throws SQLException
+	 * @throws FileNotFoundException
+	 */
+	public void downloadImage(String tableName, String columnName, int primaryKey,
+	        String filePath) throws FileNotFoundException, SQLException, IOException {
+	    Statement stmt = this.conn.createStatement();
+	    String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE pid = " + primaryKey;
+	    System.out.println(query);
+	    ResultSet rs = stmt.executeQuery(query);
+	
+	    if (rs.next()) {
+	        File blobFile = null;
+	        blobFile = new File(filePath);
+	
+	        Blob blob = rs.getBlob(columnName);
+	        InputStream in = blob.getBinaryStream();
+	
+	        int length = in.available();
+	        byte[] blobBytes = new byte[length];
+	        in.read(blobBytes);
+	
+	        FileOutputStream fos = new FileOutputStream(blobFile);
+	        fos.write(blobBytes);
+	        fos.close();
+	        rs.close();
+	        stmt.close();
+	
+	    }
+	
+	}
+
+	public Map<Integer, String> outputBinary(String path, String tableName, String columnName,
+	    String columnType) throws FileNotFoundException, SQLException, IOException {
+	    Map<Integer, String> results = new HashMap<Integer, String>();
+	    Statement stmt = this.conn.createStatement();
+	    String query = "SELECT " + columnName + " FROM " + tableName;
+	
+	    ResultSet rs = stmt.executeQuery(query);
+	    while (rs.next()) {
+	        Blob blob = rs.getBlob(columnName);
+	        InputStream in = blob.getBinaryStream();
+	
+	        int length = in.available();
+	        byte[] blobBytes = new byte[length];
+	        in.read(blobBytes);
+	
+	        String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
+	
+	        // change name here
+	        String dirPath = path + "/" + columnType + "/" + md5Hex;
+	        File blobFile = new File(dirPath);
+	        if (!blobFile.getParentFile().exists()) {
+	            blobFile.getParentFile().mkdirs();
+	        }
+	        FileOutputStream fos = new FileOutputStream(blobFile);
+	
+	        results.put(rs.getRow(), dirPath);
+	        fos.write(blobBytes);
+	        fos.close();
+	    }
+	
+	    rs.close();
+	    stmt.close();
+	    return results;
+	}
+
+	public void getSybaseStoredProcs() throws SQLException {
+	    String query = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
+	            + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid";
+	
+	    Statement stmt = this.conn.createStatement();
+	
+	    ResultSet rs = stmt.executeQuery(query);
+	
+	    while (rs.next()) {
+	        String name1 = rs.getString("name1");
+	        String name = rs.getString("name");
+	        String txt = rs.getString("text");
+	
+	        System.out.println(name1 + ", " + name + ", " + txt);
+	    }
+	
+	}
 }

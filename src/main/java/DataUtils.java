@@ -1,54 +1,33 @@
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
-import com.opencsv.CSVWriter;
-import com.opencsv.CSVReader;
-
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import org.yaml.snakeyaml.Yaml;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.sql.Statement;
-
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.io.FileReader;
-import java.sql.Blob;
-import java.sql.Date;
-
-import java.security.KeyPair;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.ResultSetMetaData;
-import java.util.Map;
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
@@ -73,10 +52,6 @@ public class DataUtils {
         return set;
     }
 
-    public static void callTest(DbConn conn, List<DbConn> targetConnections) {
-        System.out.println(targetConnections.size());
-    }
-
     /**
      * Take a regex and a data string and extract all the data that matches the
      * regex and returns it as a collection of string
@@ -95,7 +70,6 @@ public class DataUtils {
         }
 
         return xx;
-
     }
 
     public static Set<String> FindSybaseDatabase(String dataString) {
@@ -109,13 +83,10 @@ public class DataUtils {
         }
 
         return xx;
-
     }
 
     public static Set<String> findTablesFromInsert(String dataString) {
-
         String x = dataString;
-
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("/\\*.*\\*/", " ");
         System.out.println(x);
@@ -129,7 +100,6 @@ public class DataUtils {
     }
 
     public static Set<String> findTablesFromQuery(String dataString) {
-
         String x = dataString;
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("^.*? select ", " select ");
@@ -149,28 +119,8 @@ public class DataUtils {
 
     }
 
-    public static void getSybaseStoredProcs(Connection conn) throws SQLException {
-
-        String query = "SELECT u.name as name1, o.name, c.text FROM sysusers u, syscomments c, sysobjects o "
-                + "WHERE o.type = 'P' AND o.id = c.id AND o.uid = u.uid  ORDER BY o.id, c.colid";
-
-        Statement stmt = conn.createStatement();
-
-        ResultSet rs = stmt.executeQuery(query);
-
-        while (rs.next()) {
-            String name1 = rs.getString("name1");
-            String name = rs.getString("name");
-            String txt = rs.getString("text");
-
-            System.out.println(name1 + ", " + name + ", " + txt);
-        }
-
-    }
-
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -204,111 +154,6 @@ public class DataUtils {
         List<String[]> results = reader.readAll();
         reader.close();
         return results;
-    }
-
-    public static Map<Integer, String> outputBinary(Connection conn, String path, String tableName, String columnName,
-            String columnType) throws FileNotFoundException, SQLException, IOException {
-        Map<Integer, String> results = new HashMap<Integer, String>();
-        Statement stmt = conn.createStatement();
-        String query = "SELECT " + columnName + " FROM " + tableName;
-
-        ResultSet rs = stmt.executeQuery(query);
-        while (rs.next()) {
-            Blob blob = rs.getBlob(columnName);
-            InputStream in = blob.getBinaryStream();
-
-            int length = in.available();
-            byte[] blobBytes = new byte[length];
-            in.read(blobBytes);
-
-            String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
-
-            // change name here
-            String dirPath = path + "/" + columnType + "/" + md5Hex;
-            File blobFile = new File(dirPath);
-            if (!blobFile.getParentFile().exists()) {
-                blobFile.getParentFile().mkdirs();
-            }
-            FileOutputStream fos = new FileOutputStream(blobFile);
-
-            results.put(rs.getRow(), dirPath);
-            fos.write(blobBytes);
-            fos.close();
-        }
-
-        rs.close();
-        stmt.close();
-        return results;
-    }
-
-    /**
-     * place holder logic to download image
-     * 
-     * @param conn
-     * @param primaryKey
-     * @throws IOException
-     * @throws SQLException
-     * @throws FileNotFoundException
-     */
-    public static void downloadImage(Connection conn, String tableName, String columnName, int primaryKey,
-            String filePath) throws FileNotFoundException, SQLException, IOException {
-
-        Statement stmt = conn.createStatement();
-        String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE pid = " + primaryKey;
-        System.out.println(query);
-        ResultSet rs = stmt.executeQuery(query);
-
-        if (rs.next()) {
-            File blobFile = null;
-            blobFile = new File(filePath);
-
-            Blob blob = rs.getBlob(columnName);
-            InputStream in = blob.getBinaryStream();
-
-            int length = in.available();
-            byte[] blobBytes = new byte[length];
-            in.read(blobBytes);
-
-            FileOutputStream fos = new FileOutputStream(blobFile);
-            fos.write(blobBytes);
-            fos.close();
-            rs.close();
-            stmt.close();
-
-        }
-
-    }
-
-    /**
-     * place hold to upload images
-     * 
-     * @param conn
-     * @param file
-     * @param uniqueid
-     * @throws SQLException
-     * @throws IOException
-     */
-    public static void uploadImage(Connection conn, String filep, int uniqueid) throws SQLException, IOException {
-        File file = new File(filep);
-
-        String filename = file.getName();
-        int length = (int) file.length();
-
-        FileInputStream filestream = null;
-
-        filestream = new FileInputStream(file);
-
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        // String query = "UPDATE assignment SET instructions_file = ?,
-        // instructions_filename = ? WHERE a_key = " + uniqueid;
-        String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
-        PreparedStatement ps = conn.prepareStatement(query);
-        ps.setBinaryStream(1, filestream, length);
-        // ps.setString(2, filename);
-        ps.execute();
-        ps.close();
-        stmt.close();
-        filestream.close();
     }
 
     /**

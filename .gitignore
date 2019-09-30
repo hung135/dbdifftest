@@ -5,4 +5,9 @@ target/*
 tmp/*
 jython_scripts/*.jar
 *.zip
+<<<<<<< HEAD
 /target/
+=======
+*/cov-int/*
+cov-int/*
+>>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00

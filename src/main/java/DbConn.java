@@ -26,15 +26,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import javax.management.NotificationEmitter;
-import javax.management.NotificationListener;
-import javax.management.Notification;
-import javax.management.openmbean.CompositeData;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryPoolMXBean;
-import java.lang.management.MemoryUsage;
-
+import java.util.stream.Stream;
 import java.sql.*;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -58,12 +50,32 @@ import java.util.*;
 
 public class DbConn implements IDatabaseConnection {
     public Connection conn;
-    private Statement stmt; // tbd
+   //private Statement stmt; // tbd
+    // final static Logger logger = Logger.getLogger(DbConn.class);
+    public Statement stmt; // tbd
+    public PreparedStatement ps;
+    public String lastPSSql;
     public ResultSet rs;
     public DbType dbType;
     public String databaseName;
     public String url;
     public JLogger logger;
+
+
+    /**
+     * an attemp to release resource
+     * 
+     * @throws SQLException
+     */
+    public void flushReset() throws SQLException {
+        this.ps.executeBatch();
+        this.ps.clearBatch();
+        this.ps.close();
+        this.stmt.close();
+        this.stmt = this.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        System.out.println(this.lastPSSql);
+        this.ps = this.conn.prepareStatement(this.lastPSSql);
+    }
 
     public String getUrl() {
         return this.url;
@@ -83,8 +95,9 @@ public class DbConn implements IDatabaseConnection {
         props.setProperty("password", password);
         Class.forName(dbtype.driver());
         this.conn = DriverManager.getConnection(url, props);
-        System.out.println("Connect to Oracle Successful");
         //MemoryListener.BindListeners(); // disabled for now
+        System.out.println("Connect to Database: " + this.url);
+        // System.out.println("DB Connection Successful: " + dbtype);
     }
 
     public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
@@ -340,9 +353,11 @@ public class DbConn implements IDatabaseConnection {
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
             String columnName = metadata.getColumnName(i);
-            //System.out.println(columnName + " -- " + type);
+            System.out.println(columnName + " -- " + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
-            if (type.equals("image")) {
+            List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
+
+            if (dataTypes.contains(type.toUpperCase())) {
                 imageColIndex.add(i);
             } else {
                 stringColIndex.add(i);
@@ -362,24 +377,25 @@ public class DbConn implements IDatabaseConnection {
         // tblName,
         // metadata.getColumnName(i), metadata.getColumnTypeName(i)));
         // }
-         
+
         // declare it once no for each row
-        int ii=0;
+        int ii = 0;
         while (rs.next()) {
             ii++;
             String[] row = new String[columnCount];
-             
+
             for (int stringIdx : stringColIndex) {
                 row[stringIdx - 1] = rs.getString(stringIdx);
             }
             for (int imgIdx : imageColIndex) {
-                
-//                InputStream in =  ByteSource.wrap().openStream();
-            
-  //              int length = in.available();
-                //get bytes faster than getinputstream but need enough memory to hold entire blob
+
+                // InputStream in = ByteSource.wrap().openStream();
+
+                // int length = in.available();
+                // get bytes faster than getinputstream but need enough memory to hold entire
+                // blob
                 byte[] blobBytes = rs.getBytes(imgIdx);
-                //in.read(blobBytes);
+                // in.read(blobBytes);
 
                 String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
 
@@ -393,10 +409,10 @@ public class DbConn implements IDatabaseConnection {
 
                 fos.write(blobBytes);
                 fos.close();
-                //System.out.println("Image: "+ii+" "+length+" "+md5Hex);
+                // System.out.println("Image: "+ii+" "+length+" "+md5Hex);
                 row[imgIdx - 1] = dirPath;
-                if (Math.floorMod(ii, 1000)==0){
-                    System.out.println("Records Dumped: "+ii);
+                if (Math.floorMod(ii, 1000) == 0) {
+                    System.out.println("Records Dumped: " + ii);
                 }
             }
             data.add(row);

@@ -1,5 +1,9 @@
 import java.util.HashSet;
 import java.util.Set;
+
+import java.util.Vector;
+import java.util.concurrent.TimeUnit;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.FileReader;
 import java.sql.Blob;
+import java.sql.Date;
 
 
 import java.sql.Connection;
@@ -62,6 +67,13 @@ public class DataUtils {
         return set;
     }
 
+<<<<<<< HEAD
+=======
+    public static void callTest(DbConn conn, List<DbConn> targetConnections) {
+        System.out.println(targetConnections.size());
+    }
+
+>>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00
     /**
      * Take a regex and a data string and extract all the data that matches the
      * regex and returns it as a collection of string
@@ -155,7 +167,7 @@ public class DataUtils {
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-             
+
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
             Boolean includeHeaders = true;
 
@@ -191,15 +203,14 @@ public class DataUtils {
         return results;
     }
 
-    public static Map<Integer, String> outputBinary(Connection conn, String path, String tableName, String columnName, String columnType)
-        throws FileNotFoundException, SQLException, IOException
-    {
+    public static Map<Integer, String> outputBinary(Connection conn, String path, String tableName, String columnName,
+            String columnType) throws FileNotFoundException, SQLException, IOException {
         Map<Integer, String> results = new HashMap<Integer, String>();
         Statement stmt = conn.createStatement();
         String query = "SELECT " + columnName + " FROM " + tableName;
 
         ResultSet rs = stmt.executeQuery(query);
-        while(rs.next()){
+        while (rs.next()) {
             Blob blob = rs.getBlob(columnName);
             InputStream in = blob.getBinaryStream();
 
@@ -212,7 +223,7 @@ public class DataUtils {
             // change name here
             String dirPath = path + "/" + columnType + "/" + md5Hex;
             File blobFile = new File(dirPath);
-            if(!blobFile.getParentFile().exists()){
+            if (!blobFile.getParentFile().exists()) {
                 blobFile.getParentFile().mkdirs();
             }
             FileOutputStream fos = new FileOutputStream(blobFile);
@@ -236,8 +247,8 @@ public class DataUtils {
      * @throws SQLException
      * @throws FileNotFoundException
      */
-    public static void downloadImage(Connection conn, String tableName, String columnName, int primaryKey, String filePath)
-            throws FileNotFoundException, SQLException, IOException {
+    public static void downloadImage(Connection conn, String tableName, String columnName, int primaryKey,
+            String filePath) throws FileNotFoundException, SQLException, IOException {
 
         Statement stmt = conn.createStatement();
         String query = "SELECT " + columnName + "  FROM " + tableName + " WHERE pid = " + primaryKey;
@@ -285,11 +296,12 @@ public class DataUtils {
         filestream = new FileInputStream(file);
 
         Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        // String query = "UPDATE assignment SET instructions_file = ?, instructions_filename = ? WHERE a_key = " + uniqueid;
+        // String query = "UPDATE assignment SET instructions_file = ?,
+        // instructions_filename = ? WHERE a_key = " + uniqueid;
         String query = "INSERT INTO blobtest (pid, img) VALUES (2, ?)";
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setBinaryStream(1, filestream, length);
-        //ps.setString(2, filename);
+        // ps.setString(2, filename);
         ps.execute();
         ps.close();
         stmt.close();
@@ -413,7 +425,7 @@ public class DataUtils {
                 hashKey = hashKey + row[keyColIndex];
                 for (int i = 0; i < row.length; i++) {
                     Integer iii = i;
-                    
+
                     if (!headerIndex.contains(iii)) {
                         data = data + row[i];
                     }
@@ -434,22 +446,23 @@ public class DataUtils {
     }
 
     public static void compareCSV(String firstCSV, String secondCSV, String outFile, List<String> primaryColumn,
-    String reportHeader,String algorithm) throws Exception {
-        String[]  headersCSV1, headersCSV2;
+            String reportHeader, String algorithm) throws Exception {
+        String[] headersCSV1, headersCSV2;
         List<String[]> csv1, csv2, results;
         // System.out.println(primaryColumn);
-        // outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column" };
+        // outputHeaders = new String[] { "File1", "File2", "Reason", "Primary Column"
+        // };
         // results = new ArrayList<String[]>() {
-        //     {
-        //         add(outputHeaders);
-        //     }
+        // {
+        // add(outputHeaders);
+        // }
         // };
         csv1 = readCSV(firstCSV);
-        csv2 = readCSV(secondCSV); 
+        csv2 = readCSV(secondCSV);
 
         headersCSV1 = csv1.get(0);
         headersCSV2 = csv2.get(0);
- 
+
         csv1.remove(0);
         csv2.remove(0);
 
@@ -472,7 +485,7 @@ public class DataUtils {
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
-                String [] xxx = {valCSV1,valCSV2};
+                String[] xxx = { valCSV1, valCSV2 };
                 descrpencyMap.put(keyCSV1, xxx);
             }
 
@@ -483,19 +496,19 @@ public class DataUtils {
             String valCSV2 = entry.getValue();
             String valCSV1 = mapCSVdata1.get(keyCSV2);
             if (!valCSV2.equals(valCSV1)) {
-                String []xxx = {valCSV1,valCSV2};
+                String[] xxx = { valCSV1, valCSV2 };
                 descrpencyMap.put(keyCSV2, xxx);
             }
 
         }
         results = new ArrayList<>();
-         
+
         results.add(reportHeader.split(","));
         for (Map.Entry<String, String[]> row : descrpencyMap.entrySet()) {
             String key = row.getKey();
-            String [] val = row.getValue();
-             
-            String [] xxx={key,val[0],val[1]};
+            String[] val = row.getValue();
+
+            String[] xxx = { key, val[0], val[1] };
             results.add(xxx);
 
         }
@@ -551,34 +564,56 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
-        public static void freeWayMigrate(Connection srcDbConn,List<Connection> trgConns,List<String> tableNames) throws SQLException {
-    
-        Statement stmt =  srcDbConn.createStatement();
+    public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize,
+            Boolean truncate) throws SQLException, IOException {
 
-        for (String tableName : tableNames){
-            String sql="select * from "+tableName;
-            
+        long startTime = System.nanoTime();
+        long runningBytes = 0;
+        long largestBytes = 0;
+        Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                java.sql.ResultSet.CONCUR_READ_ONLY);
+        stmt.setFetchSize(batchSize);
 
-        ResultSet rs = stmt.executeQuery(sql);
-        ResultSetMetaData metadata = rs.getMetaData();
+        for (String tableName : tableNames) {
+            String sql = "select * from " + tableName;
+            System.out.println(sql);
 
-        int columnCount = metadata.getColumnCount();
-        List<Integer> imageColIndex = new ArrayList<Integer>();
-        List<Integer> stringColIndex = new ArrayList<Integer>();
-        String[] allColumnNames = new String[columnCount];
-        for (int i = 1; i <= columnCount; i++) {
-            String type = metadata.getColumnTypeName(i);
-            String columnName = metadata.getColumnName(i);
-          
-            // For now; later create custom enum. "image" isn't supported by JAVA
-            if (type.equals("image")) {
-                imageColIndex.add(i);
-            } else {
-                stringColIndex.add(i);
+            ResultSet rs = stmt.executeQuery(sql);
+            ResultSetMetaData metadata = rs.getMetaData();
+
+            int columnCount = metadata.getColumnCount();
+            List<Integer> binaryColIndex = new ArrayList<Integer>();
+            List<Integer> numberColIndex = new ArrayList<Integer>();
+            List<Integer> stringColIndex = new ArrayList<Integer>();
+            List<Integer> timeColIndex = new ArrayList<Integer>();
+
+            String[] allColumnNames = new String[columnCount];
+            // System.out.println("before loop");
+            for (int i = 1; i <= columnCount; i++) {
+                String type = metadata.getColumnTypeName(i);
+
+                String columnName = metadata.getColumnName(i);
+                System.out.println(columnName + "------" + type);
+                // For now; later create custom enum. "image" isn't supported by JAVA
+                List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
+                List<String> numDataTypes = Arrays.asList("TINYINT", "INT", "SMALLINT");
+                List<String> timeDataTypes = Arrays.asList("DATE", "TIMESTAMP", "DATETIME");
+
+                if (dataTypes.contains(type.toUpperCase())) {
+                    binaryColIndex.add(i);
+                } else if (numDataTypes.contains(type.toUpperCase())) {
+                    numberColIndex.add(i);
+                } else if (timeDataTypes.contains(type.toUpperCase())) {
+                    timeColIndex.add(i);
+                }
+
+                else {
+                    stringColIndex.add(i);
+                }
+                allColumnNames[i - 1] = columnName;
             }
-            allColumnNames[i - 1] = columnName;
-        }
 
+<<<<<<< HEAD
         List<String[]> data = new ArrayList<String[]>();
   /*************************************** */
         //build the insert
@@ -611,40 +646,205 @@ public class DataUtils {
                 for (PreparedStatement ps: trgPrep){
                     ps.setString(stringIdx, row[stringIdx - 1]);
                      
+=======
+            // List<String[]> data = new ArrayList<String[]>();
+            /*************************************** */
+            // build the insert
+            String columnsComma = String.join(",", allColumnNames);
+            String columnsQuestion = "?";
+            for (int jj = 0; jj < columnCount; jj++) {
+                if (jj > 0)
+                    columnsQuestion = columnsQuestion + ",?";
+            }
+            String sqlInsert = "INSERT INTO " + tableName + " (" + columnsComma + ") VALUES (" + columnsQuestion + ")";
+            String sqlTruncate = "Truncate table " + tableName;
+
+            trgConns.forEach(dbconn -> {
+                // System.out.println(sqlInsert+"---------sql create stmnt");
+                try {
+                    dbconn.stmt = dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
-            }
-            for (int imgIdx : imageColIndex) {
-                byte[] dataBytes = rs.getBytes(imgIdx);
-                for (PreparedStatement ps: trgPrep){
-                    ps.setBytes(imgIdx, dataBytes);
-                     
-                } 
-            } 
+                try {
+                    if (truncate) {
+                        dbconn.ps = dbconn.conn.prepareStatement(sqlTruncate);
+                        System.out.println(sqlTruncate);
+                        dbconn.ps.execute();
+                        dbconn.ps.close();
+                    }
+                    dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
+                    dbconn.lastPSSql=sqlInsert;
+                    // System.out.println(sqlInsert+"---------sql create stmnt");
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
-            
-            for (PreparedStatement ps: trgPrep){
-                ps.addBatch();
-            } 
+            });
 
+            /*************************************** */
+            int ii = 0;
+            while (rs.next()) {
+                ii++;
 
-            data.add(row);
-            if (Math.floorMod(ii, 1000)==0){
-                //Execute the batch every 1000 rows
-                for (PreparedStatement ps: trgPrep){
-                    ps.executeBatch();
+                // String[] row = new String[columnCount];
+
+                for (int stringIdx : stringColIndex) {
+                    // System.out.println(ii+"----------xxxx-----------------");
+                    String xxx = rs.getString(stringIdx);
+                    if (xxx != null) {
+                        if (xxx.getBytes().length > largestBytes)
+                            largestBytes = xxx.getBytes().length;
+                        runningBytes += xxx.getBytes().length;
+                    }
+                    for (DbConn trgConn : trgConns) {
+                        // System.out.println(row[stringIdx - 1]+"---------------------------");
+                        // String xxx = row[stringIdx - 1];
+                        // if (xxx==null)
+                        // {xxx="";}
+                        trgConn.ps.setString(stringIdx, xxx);
+
+                        // System.out.println(ii+"--setstring-------------------------");
+                    }
+>>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00
+                }
+                for (int numIdx : numberColIndex) {
+                    // System.out.println(ii+"----------xxxx-----------------");
+                    String dataItem = rs.getString(numIdx);
+                    for (DbConn trgConn : trgConns) {
+                        if (dataItem == null) {
+                            trgConn.ps.setNull(numIdx, java.sql.Types.INTEGER);
+
+                        } else {
+                            trgConn.ps.setInt(numIdx, Integer.valueOf(dataItem));
+                        }
+                    }
+                }
+                for (int imgIdx : binaryColIndex) {
+
+                    // byte[] dataItem = rs.getBytes(imgIdx);
                     
-                } 
-                System.out.println("Records Dumped: "+ii);
+                    byte [] dataItem =rs.getBytes(imgIdx);
+                    
+                    if (dataItem.length > largestBytes) {
+                        largestBytes = dataItem.length;
+                    }
+                    runningBytes += dataItem.length;
+                    for (DbConn trgConn : trgConns) {
+                        trgConn.ps.setBytes(imgIdx, dataItem);
+                    }
+                }
+                for (int idx : timeColIndex) {
+                    java.sql.Date dataItem = rs.getDate(idx);
+                    for (DbConn trgConn : trgConns) {
+                        trgConn.ps.setDate(idx, dataItem);
+                    }
+                }
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.addBatch();
+                }
+
+                if (Math.floorMod(ii, batchSize) == 0) {
+                    // Execute the batch every 1000 rows
+                    for (DbConn trgConn : trgConns) {
+                        long endTime = System.nanoTime();
+                        long totalTime = endTime - startTime;
+                        long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
+                        long totalTimeSec = TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS)
+                                - (60 * totalTimeMins);
+                        System.out.println(
+                                "Executing Batch" + "  LoadTime: " + totalTimeMins + " Mins " + totalTimeSec + " Secs");
+
+                        long heapSize = Runtime.getRuntime().totalMemory();
+
+                        // Get maximum size of heap in bytes. The heap cannot grow beyond this size.//
+                        // Any attempt will result in an OutOfMemoryException.
+                        long heapMaxSize = Runtime.getRuntime().maxMemory();
+
+                        // Get amount of free memory within the heap in bytes. This size will increase
+                        // // after garbage collection and decrease as new objects are created.
+                        long heapFreeSize = Runtime.getRuntime().freeMemory();
+
+                        System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
+                        System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
+                        System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
+                        System.out.println("Batch Memory Size: " + (runningBytes / 1048576) + " MBs");
+                        System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
+
+                        trgConn.flushReset();
+
+                        runningBytes = 0;
+                        largestBytes = 0;
+                        if (Math.floorMod(2 * ii, batchSize) == 0)
+                            System.gc();
+
+                    }
+
+                    long endTime = System.nanoTime();
+                    long totalTime = endTime - startTime;
+                    long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
+                    long totalTimeSec = TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS)
+                            - (60 * totalTimeMins);
+                    System.out.println("Records Loaded: " + ii + "  LoadTime: " + totalTimeMins + " Mins "
+                            + totalTimeSec + " Secs");
+                }
+
             }
-        
+            for (DbConn trgConn : trgConns) {
+                trgConn.ps.executeBatch();
+                trgConn.stmt.close();
+            }
+            long endTime = System.nanoTime();
+            long totalTime = endTime - startTime;
+            long totalTimeMins = TimeUnit.MINUTES.convert(totalTime, TimeUnit.NANOSECONDS);
+            long totalTimeSec = TimeUnit.SECONDS.convert(totalTime, TimeUnit.NANOSECONDS) - (60 * totalTimeMins);
+            System.out.println(
+                    "Records Loaded: " + ii + "  LoadTime: " + totalTimeMins + " Mins " + totalTimeSec + " Secs");
+
+            rs.close();
         }
-        for (Statement trgStmnt: trgStmnts){
-            trgStmnt.executeBatch();
-            
-            trgStmnt.close();
-        }
+        stmt.close();
 
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * call the proper get method
+     * 
+     * @throws SQLException
+     */
+    public static void resultSetGet(ResultSet rs, int colIdx, String colType) throws SQLException {
+        rs.getString(colIdx);
+    }
+
+    private static String format(final long value, final long divider, final String unit) {
+        final double result = divider > 1 ? (double) value / (double) divider : (double) value;
+        return String.format("%.1f %s", Double.valueOf(result), unit);
+    }
+
+    public static String convertToStringRepresentation(final long value) {
+
+        final long K = 1024;
+        final long M = K * K;
+        final long G = M * K;
+        final long T = G * K;
+
+        final long[] dividers = new long[] { T, G, M, K, 1 };
+        final String[] units = new String[] { "TB", "GB", "MB", "KB", "B" };
+        if (value < 1)
+            throw new IllegalArgumentException("Invalid file size: " + value);
+        String result = null;
+        for (int i = 0; i < dividers.length; i++) {
+            final long divider = dividers[i];
+            if (value >= divider) {
+                result = format(value, divider, units[i]);
+                break;
+            }
+        }
+        return result;
+>>>>>>> 79b7541833b8bc7ebe8099bc450d8137975d1e00
     }
 }

@@ -31,6 +31,11 @@
 #         filePath: ./md5/table_row_checksum2.csv
 #       - tableName: test3
 #         filePath: ./md5/table_row_checksum3.csv
-TestClass:
-  sys-dev1:
-    targetConnections: sys-dev, sys-dev1
+moveDataToDatabases:
+  sys-dev:
+    targetConnections: sys-dev1
+    batchSize: 500
+    truncate: true
+    tableNames:
+      - spt_values
+      - spt_limit_types

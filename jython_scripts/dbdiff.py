@@ -78,7 +78,7 @@ def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
     # parser.add_argument("-y", help="Location of the yaml file", required=True)
     # parser.add_argument("-t", help="Location of tasks folder", required=True)
-    parser.add_argument("-v", help="Verbose logging", required=False)
+    parser.add_argument("-v", help="Verbose logging", required=False, default=None)
     args = parser.parse_args()
     return args 
 
@@ -123,14 +123,17 @@ def export_results(rows, filename):
         writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)
         writer.writerows(rows)
 
-def setup_logger(log_type):
+def setup_logger(log_type=None):
     global logger
-    logger = JLogger(os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", log_type), str(datetime.datetime.now())).logger
-    print(logger)
+    try:
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", log_type if log_type else "default")
+        logger = JLogger(path, str(datetime.datetime.now())).logger
+    except Exception as e:
+        print(e)
+        sys.exit(1)
 
 def execute(args):
-    if args.v:
-        setup_logger(args.v)
+    setup_logger(args.v)
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
     task_execution(databases_connections, task_config)

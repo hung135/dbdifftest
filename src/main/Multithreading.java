@@ -3,32 +3,36 @@ import DataUtils.*;
 
 public class Multithreading extends Thread {
     private DbConn connection;
-    private DbConn targetConnection;
-    private int numOfThreads;
-    private int numberPerThread;
-    private List<String> tableNames;
+    private List<DbConn> targetConnections;
+    private String tableName;
+    private String sql;
     private int batchSize;
+    private boolean truncate;
 
     public Multithreading(DbConn connection, int threads) {
         this.connection = connection;
         this.numOfThreads = threads;
     }
 
-    public Multithreading(DbConn connection, DbConn targetConnection, List<String> tableNames,  int batchSize, int threads){
+    public Multithreading(DbConn connection, List<DbConn> targetConnection, String tableName, String sql, int batchSize, boolean truncate){
         this.connection = conneciton;
-        this.numOfThreads = threads;
         this.targetConnection = targetConnection;
-        this.tableNames = tableNames;
+        this.tableName = tableName;
+        this.sql = sql;
         this.batchSize = batchSize;
+        this.truncate = truncate;
     }
 
     public void Run(){
         try {
-            DataUtils.freeWayMigrate(this.connection, 
-                this.targetConnection, 
-                this.tableNames, 
-                this.batchSize, 
-                false);
+            DataUtils.freeWayMigrateMulti(
+                this.connection,
+                this.targetConnection,
+                this.sql,
+                this.tableName,
+                this.batchSize,
+                this.truncate
+            );
         } catch(Exception ex) {
             System.out.println(ex);
         }

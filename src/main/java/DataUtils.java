@@ -84,7 +84,7 @@ public class DataUtils {
 
     public static void callTest(DbConn conn, List<DbConn> targetConnections) {
         System.out.println(targetConnections.size());
-        logger.log("My Message");
+        //logger.log("My Message");
     }
 
     /**
@@ -578,7 +578,6 @@ public class DataUtils {
         List<DbConn> trgConns, 
         String sql,
         String tableName,
-        String primaryKey,
         int batchSize,
         boolean truncate)
         throws SQLException, IOException 

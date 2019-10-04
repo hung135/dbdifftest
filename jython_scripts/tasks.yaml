@@ -38,5 +38,6 @@ moveDataToDatabases:
     truncate: true
     tableNames:
       - spt_values
-      - spt_limit_types
+      #- spt_limit_types
     threads: 10
+    pk: "hello"

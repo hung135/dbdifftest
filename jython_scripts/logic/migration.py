@@ -156,16 +156,21 @@ class QueryToCSV(object):
 class moveDataToDatabases(object):
      def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,threads=None, pk=None):
         if threads and threads is not 0 and pk:
-            for table in tableName:
-                table_min = dbConn.getAValue("SELECT min({0}) FROM {1}".format(pk, table))
-                table_max = dbConn.getAValue("select max({0}) from {1}".format(pk, table))
-                per_thread = table_max/threadSize
+            for table in tableNames:
+                table_min = 0
+                table_max = 10000
+                # table_min = dbConn.getAValue("SELECT min({0}) FROM {1}".format(pk, table))
+                # table_max = dbConn.getAValue("select max({0}) from {1}".format(pk, table))
+                per_thread = table_max/threads
+                prev = 0
                 for i in range(threads):
+                    prev+=per_thread
                     if i == 0:
                         query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, table_min, per_thread)
                     else:
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, per_thread*(2*i))
-                    print(query)
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, prev)
+                    print("{0} : {1}".format(i,query))
+                    multi = Multithreading(dbConn, targetConnections, tableName, sql, batchSize, truncate)
         else:
             DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
 

@@ -90,7 +90,8 @@ class TableSampleCheckSum(object):
 
         if str(dbConn.dbType) == 'SYBASE':
             sql = 'select TOP {2} * from {0}.{1}'
-
+        if str(dbConn.dbType) == 'ORACLE':
+            sql = 'select * from {0}.{1} WHERE ROWNUM <= {2}'
         for a in x:
 
             try:

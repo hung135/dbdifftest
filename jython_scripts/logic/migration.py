@@ -44,20 +44,31 @@ class TableRowCount(object):
         path = os.path.abspath(fileName)
         tableCount = []
         x = (dbConn.getTableNames(schemaOrOwner))
+        y = (dbConn.getViewNames(schemaOrOwner))
         for a in x:
             tmp = []
             tmp.append(a)
-            zz = []
+             
             try:
-                zz = dbConn.queryToList(
+                zz = dbConn.getAValue(
                     'select count(*) from {0}.{1}'.format(schemaOrOwner, a))
-                for b in zz:
-                    for c in b:
-                        tmp.append(c)
+                tmp.append(zz)
                 tableCount.append(tmp)
             except:
+                print("Error Querying Table: {}".format(a))
                 tableCount.append([a, 'SQL Execute Error'])
-
+        for a in y:
+            tmp = []
+            tmp.append(a)
+             
+            try:
+                zz = dbConn.getAValue(
+                    'select count(*) from {0}.{1}'.format(schemaOrOwner, a))
+                tmp.append(zz)
+                tableCount.append(tmp)
+            except:
+                print("Error Querying View: {}".format(a))
+                tableCount.append([a, 'SQL Execute Error'])
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
                                  quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)

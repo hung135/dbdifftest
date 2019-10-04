@@ -314,13 +314,21 @@ public class DbConn {
         return hasRecords;
     }
 
+    /**
+     * Given a query will return the 1st column on the first row. Yes just that
+     * simple
+     * 
+     * @param selectQuery
+     * @return
+     * @throws Exception
+     */
     public String getAValue(String selectQuery) throws Exception {
 
         String aValue = null;
         Statement stmt = this.conn.createStatement();
         this.rs = stmt.executeQuery(selectQuery);
         if (this.rs.next() == true) {
-            aValue = rs.getString(0);
+            aValue = rs.getString(1);
         }
         rs.close();
         stmt.close();

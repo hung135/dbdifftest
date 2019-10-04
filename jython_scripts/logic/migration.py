@@ -128,12 +128,14 @@ class TableLoadCsv(object):
             print("Mocking Loading csv: ", tableName, filePath)
 
 class QueryToCSV(object):
-    def __init__(self, dbConn, sql,  writePath):
-        directory = os.path.dirname(writePath)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        fqn = os.path.abspath(writePath)
-        dbConn.queryToCSV(sql, fqn)
+    def __init__(self, dbConn, create):
+        for process in create:
+            directory = os.path.dirname(process["writePath"])
+            sql = process["sql"]
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            fqn = os.path.abspath(process["writePath"])
+            dbConn.queryToCSV(sql, fqn)
             
     def __repr__(self):
         return str(self.__dict__)

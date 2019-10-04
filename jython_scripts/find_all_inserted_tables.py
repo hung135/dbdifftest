@@ -73,24 +73,26 @@ WHERE sysobjects.type = 'P'
 
 # print(len(name_proc.keys()))
 # print("".join(txt))
-
-x = DbConn.DbType.SYBASE
-db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "Master")
-# statement = """
-# CREATE TABLE blobtest(
-#   pid int not null,
-#   img image
-# )
-# """
-# DataUtils.uploadImage(db.conn, "/workspace/samples/img.png", 
+from Nums import DbType
+from Utils import JLogger
+x = DbType.SYBASE
+logger = JLogger("/", "test")
+db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
 statement = """
-SELECT * FROM blobtest
+CREATE TABLE blobtest(
+  pid int not null,
+  img image
+)
 """
+# DataUtils.uploadImage(db.conn, "/workspace/samples/img.png", 
+# statement = """
+# SELECT * FROM blobtest
+# """
 # queryList = db.queryToList(statement)
 # for y in queryList:
 #   print(y)
 
 #x = DataUtils.downloadImage(db.conn, "blobtest", "img", 2, "/workspace/out.png")
 # db.queryToCSVWithBinary(statement, "/workspace/output/")
-
-DataUtils.testing()
+db.queryToList(statement)
+print("Executed")

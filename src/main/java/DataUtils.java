@@ -1,10 +1,29 @@
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -86,7 +105,6 @@ public class DataUtils {
         }
 
         return xx;
-
     }
 
     public static Set<String> findSybaseDatabase(String dataString) {
@@ -100,13 +118,10 @@ public class DataUtils {
         }
 
         return xx;
-
     }
 
     public static Set<String> findTablesFromInsert(String dataString) {
-
         String x = dataString;
-
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("/\\*.*\\*/", " ");
         System.out.println(x);
@@ -120,7 +135,6 @@ public class DataUtils {
     }
 
     public static Set<String> findTablesFromQuery(String dataString) {
-
         String x = dataString;
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("^.*? select ", " select ");
@@ -163,7 +177,6 @@ public class DataUtils {
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
 
             Boolean includeHeaders = true;

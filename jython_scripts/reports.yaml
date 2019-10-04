@@ -2,6 +2,9 @@
 #   sys-dev:
 #     writePath: ./reports/test1.csv
 #     sql: select * from dbo.monBucketPool
+#   sys-dev:
+#     writePath: ./reports/test1.csv
+#     sql: select * from dbo.monBucketPool
 # QueryToExcel:
 #   sys-dev:
 #     writePath: ./reports/test1.xls
@@ -19,11 +22,30 @@
 #       reportHeader: TableName,Dev,Test
 #       key_columns: # 
 #         - TableName
-ParseProcs:
+# ParseProcs:
+#   sys-dev:
+#     schemaOrOwner: dbo
+#     writePath: ./reports/parsed_procs_dev.csv
+#   sys-dev1:
+#     schemaOrOwner: dbo
+#     writePath: ./reports/parsed_procs_dev1.csv
+# TableInformation:
+#   sys-dev:
+#     schemaOrOwner: dbo
+#     fileName: /workspace/output.csv
+# QueryToCSV:
+#   sys-dev:
+#     - writePath: ./reports/test1.csv
+#       sql: select * from dbo.monBucketPool
+#     - writePath: ./reports/test1.csv
+#       sql: select * from dbo.monBucketPool
+
+QueryToCSV:
   sys-dev:
-    schemaOrOwner: dbo
-    writePath: ./reports/parsed_procs_dev.csv
-  sys-dev1:
-    schemaOrOwner: dbo
-    writePath: ./reports/parsed_procs_dev1.csv
-  
+    create: 
+      - writePath: ./reports/test1.csv
+        sql: SELECT * FROM dbo.monBucketPool
+      - writePath: ./reports/test2.csv
+        sql: SELECT * FROM dbo.monBucketPool
+      - writePath: ./reports/test3.csv
+        sql: SELECT * FROM dbo.monBucketPool

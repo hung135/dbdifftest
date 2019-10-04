@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 import csv
+import datetime
 # <<<<<<< HEAD
 # import os 
 # #windows make sure you use c:\\xxx\\file.jar
@@ -25,13 +26,11 @@ sys.path.append(
 import YamlParser
 import DbConn
 import DataUtils
+from Nums import DbType
+from Utils import JLogger
 
 from objects.database import Database
 from objects.task import Task
-
-# Notes:
-# jython is python 2.7.1 
-# It doesn't support list comp
 
 # Task:
 #   key : str
@@ -39,6 +38,8 @@ from objects.task import Task
 #   instruction : {instruction_key : operation }
 #       op_key = database_connection.key
 #       operation = sql/py to execute
+
+logger = None
 
 def readyaml(db_yaml, task_yaml):
     parser = YamlParser() # NOT THREAD SAFE
@@ -58,9 +59,9 @@ def readyaml(db_yaml, task_yaml):
 def create_db_connections(database_objects):
     databases_connections = {}
     for base in database_objects:
-        baseConnection = DbConn.DbType.getMyEnumIfExists(base.dbtype)
+        baseConnection = DbType.getMyEnumIfExists(base.dbtype)
         if baseConnection is not None:
-            con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name)
+            con = DbConn(baseConnection, base.user, base.password, base.host, base.port, base.database_name, logger)
             databases_connections[base.key] = con
         else:
             baseConnection[base.key] = None
@@ -78,6 +79,7 @@ def parse_cli():
     parser = argparse.ArgumentParser(description='Process a yaml file')
     parser.add_argument("-y", help="Location of the yaml file", required=True)
     parser.add_argument("-t", help="Location of tasks folder", required=True)
+    parser.add_argument("-v", help="Verbose logging", required=False, default=None, choices=["debug", "warning", "all"])
     args = parser.parse_args()
     return args 
 
@@ -115,14 +117,24 @@ def task_execution(databases_connections, task_config):
                         class_ = getattr(module, task.key)
                         instance = class_(**task.parameters[con_key])
                 else:
-                    print("Task {0} with key {1} not found".format(task.key, con_key))
+                    log.debug("Task {0} with {1} not found".format(task.key, con_key))
 
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:
         writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)
         writer.writerows(rows)
 
+def setup_logger(log_type=None):
+    global logger
+    try:
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", log_type if log_type else "default")
+        logger = JLogger(path, str(datetime.datetime.now()))
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
 def execute(args):
+    setup_logger(args.v)
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
     task_execution(databases_connections, task_config)

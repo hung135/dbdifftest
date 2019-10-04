@@ -105,7 +105,7 @@ RUN wget https://scan.coverity.com/download/linux64 --post-data "token=6GQCVP3Fz
 RUN tar -xvf /tmp/coverity_tool.tgz -C /tmp/ 
 
 RUN echo 'alias coverity="/tmp/cov-analysis-linux64-2019.03/bin/cov-build --dir cov-int mvn compile assembly:single -f /workspace/pom.xml"' >>~/.bashrc
-RUN echo 'alias tarcoverity="tar czvf myproject.tgz cov-int"'
+RUN echo 'alias tarcoverity="tar czvf myproject.tgz cov-int"' >>~/.bashrc
 RUN echo 'source /git-prompt.sh' >>~/.bashrc
 RUN echo 'source /workspace/env.rc' >>~/.bashrc
 RUN echo 'alias submitcoverity="curl --form token=6GQCVP3FzRjnpDIR8XGGFg \
@@ -114,3 +114,8 @@ RUN echo 'alias submitcoverity="curl --form token=6GQCVP3FzRjnpDIR8XGGFg \
   --form version="Version" \
   --form description="Description" \
   https://scan.coverity.com/builds?project=hung135%2Fdbdifftest"'>>~/.bashrc
+
+RUN echo 'alias sonar="mvn sonar:sonar \
+  -Dsonar.projectKey=com.hung135 \
+  -Dsonar.host.url=http://sonarqube:9000 \
+  -Dsonar.login=f91baa6ba91b88f93c8a493405c2b79d15cc8bde"'>>/.bashrc

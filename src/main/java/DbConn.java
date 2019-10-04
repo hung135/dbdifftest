@@ -314,6 +314,19 @@ public class DbConn {
         return hasRecords;
     }
 
+    public String getAValue(String selectQuery) throws Exception {
+
+        String aValue = null;
+        Statement stmt = this.conn.createStatement();
+        this.rs = stmt.executeQuery(selectQuery);
+        if (this.rs.next() == true) {
+            aValue = rs.getString(0);
+        }
+        rs.close();
+        stmt.close();
+        return aValue;
+    }
+
     public List<String[]> queryToList(String selectQuery) throws Exception {
         List<String[]> items = new ArrayList<>();
 

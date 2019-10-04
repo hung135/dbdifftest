@@ -39,3 +39,4 @@ moveDataToDatabases:
     tableNames:
       - spt_values
       - spt_limit_types
+    threads: 10

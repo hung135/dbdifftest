@@ -6,10 +6,11 @@ from java.util import HashMap
 
 import jarray
 import DbConn
+import Multithreading # custom package
 
 import csv
 import md5
-from  .parse_proc import *
+from .parse_proc import *
 
 class TableDump(object):
 
@@ -153,8 +154,20 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
-     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate):
-        DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
+     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,threads=None, pk=None):
+        if threads and threads is not 0 and pk:
+            for table in tableName:
+                table_min = dbConn.getAValue("SELECT min({0}) FROM {1}".format(pk, table))
+                table_max = dbConn.getAValue("select max({0}) from {1}".format(pk, table))
+                per_thread = table_max/threadSize
+                for i in range(threads):
+                    if i == 0:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, table_min, per_thread)
+                    else:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, per_thread*(2*i))
+                    print(query)
+        else:
+            DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
 
 class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):

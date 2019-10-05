@@ -5,3 +5,7 @@ target/*
 tmp/*
 jython_scripts/*.jar
 *.zip
+/target/
+*/cov-int/*
+cov-int/*
+*.log*

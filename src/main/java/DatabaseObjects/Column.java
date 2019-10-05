@@ -1,7 +1,4 @@
-package dataobjs;
-
-//import java.util.ArrayList;
-//import java.util.List;
+package DatabaseObjects;
 
 public class Column {
     public String columnName;
@@ -10,8 +7,8 @@ public class Column {
         this.columnName=columnName;
         this.columnType=columnType;
     }
-    public String toString() {// overriding the toString() method
-        return "\n" + this.columnName + "\n\t -> " + this.columnType;
+    public String toString() {
+        return this.columnName + ":" + this.columnType;
     }
 } 
 

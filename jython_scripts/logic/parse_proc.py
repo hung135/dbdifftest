@@ -7,13 +7,17 @@ querypatterns = [
 # ,"from (\w+)\)?"
 # ,"exec (\w+) "
 # ,"from (\w+\.\.\w+)",
-"(\w+\.\.\w+)"
+"(\w+\.\.\w+)",
+ "(\w+\.dbo\.\w+)"
  ]
 updatepatterns =[
      
 "(insert into \w+\.\.\w+)",
 "(update \w+\.\.\w+)",
-"(delete from \w+\.\.\w+)"
+"(delete from \w+\.\.\w+)",
+ "(insert into \w+\.dbo\.\w+)",
+"(update \w+\.dbo\.\w+)",
+"(delete from \w+\.dbo\.\w+)"
 ]
 def remove_comments(dataString):
         #this replace HAS TO IN THESE ORDER

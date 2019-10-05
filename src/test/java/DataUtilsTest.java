@@ -25,9 +25,9 @@ public class DataUtilsTest {
     // public void testFunctions() {
 
     // System.out
-    // .println(DataUtils.RegexExtract("\\w*.\\.\\.", " from db1..table1,
+    // .println(DataUtils.regexExtract("\\w*.\\.\\.", " from db1..table1,
     // db2..table2, db3..table3 'b' 'c'"));
-    // System.out.println(DataUtils.FindSybaseDatabase(
+    // System.out.println(DataUtils.findSybaseDatabase(
     // " from db1..table1, db2..table2, db3..table3, db3.dbo.table4 where something
     // = something '"));
     // System.out.println(DataUtils.findTablesFromQuery(
@@ -53,13 +53,23 @@ public class DataUtilsTest {
 
     // }
 
+<<<<<<< HEAD
     @Test
     public void testOracleDbConn() throws SQLException, PropertyVetoException {
-    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
-    List<String> x = db.getTableNames("dbo");
-    System.out.println("Connect to Oracle Successful" + x);
+        DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
+        List<String> x = db.getTableNames("dbo");
+        System.out.println("Connect to Oracle Successful" + x);
 
     }
+=======
+//    @Test
+//    public void testOracleDbConn() throws SQLException, PropertyVetoException {
+//    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
+//    List<String> x = db.getTableNames("dbo");
+//    System.out.println("Connect to Oracle Successful" + x);
+//
+//    }
+>>>>>>> c74688bbaff25e664a3259d4cd6b6b0667e64091
 
     // @Test
     // public void testOracle() throws SQLException {
@@ -216,5 +226,7 @@ public class DataUtilsTest {
         primaryColumn.add("TableName");
 
         DataUtils.compareCSV(firstCSV, secondCSV, outFile, primaryColumn, "TableName,Dev,Test", "data");
+        assertTrue(true);
+        assertTrue(false);
     }
 }

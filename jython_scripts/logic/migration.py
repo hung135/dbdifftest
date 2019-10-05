@@ -3,17 +3,14 @@ import DataUtils
 
 import java.lang.Object
 from java.util import HashMap
-
+import logging
 import jarray
 import DbConn
+import Multithreading # custom package
 
 import csv
 import md5
-from  .parse_proc import *
-
-class TestClass(object):
-     def __init__(self, dbConn, targetConnections):
-        DataUtils.callTest(dbConn, targetConnections)
+from .parse_proc import *
 
 class TableDump(object):
 
@@ -44,25 +41,36 @@ class TableDump(object):
 
 
 class TableRowCount(object):
-
     def __init__(self, dbConn, schemaOrOwner, fileName):
         path = os.path.abspath(fileName)
         tableCount = []
         x = (dbConn.getTableNames(schemaOrOwner))
+        y = (dbConn.getViewNames(schemaOrOwner))
         for a in x:
             tmp = []
             tmp.append(a)
-            zz = []
+             
             try:
-                zz = dbConn.queryToList(
+                zz = dbConn.getAValue(
                     'select count(*) from {0}.{1}'.format(schemaOrOwner, a))
-                for b in zz:
-                    for c in b:
-                        tmp.append(c)
+                tmp.append(zz)
                 tableCount.append(tmp)
             except:
+                logging.exception(Exception)
+                #print("Error Querying Table: {}\n{}".format(a,e))
                 tableCount.append([a, 'SQL Execute Error'])
-
+        for a in y:
+            tmp = []
+            tmp.append(a)
+             
+            try:
+                zz = dbConn.getAValue(
+                    'select count(*) from {0}.{1}'.format(schemaOrOwner, a))
+                tmp.append(zz)
+                tableCount.append(tmp)
+            except:
+                logging.exception(Exception)
+                tableCount.append([a, 'SQL Execute Error'])
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
                                  quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
@@ -73,6 +81,15 @@ class TableRowCount(object):
     def __repr__(self):
         return str(self.__dict__)
 
+class TableInformation(object):
+    def __init__(self, dbConn, schemaOrOwner, fileName):
+        tables = dbConn.getAllTableColumnAndTypes(schemaOrOwner)
+        output = []
+        for tbl in tables:
+            output.append(tbl.TableInformation())
+        tblout = csv.writer(open(fileName, 'w'), delimiter=',', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
+        for row in output:
+            tblout.writerow(row)
 
 class TableSampleCheckSum(object):
     def __init__(self, dbConn, schemaOrOwner, writePath, sampleSize):
@@ -86,7 +103,8 @@ class TableSampleCheckSum(object):
 
         if str(dbConn.dbType) == 'SYBASE':
             sql = 'select TOP {2} * from {0}.{1}'
-
+        if str(dbConn.dbType) == 'ORACLE':
+            sql = 'select * from {0}.{1} WHERE ROWNUM <= {2}'
         for a in x:
 
             try:
@@ -124,19 +142,38 @@ class TableLoadCsv(object):
             print("Mocking Loading csv: ", tableName, filePath)
 
 class QueryToCSV(object):
-    def __init__(self, dbConn, sql,  writePath):
-        directory = os.path.dirname(writePath)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        fqn = os.path.abspath(writePath)
-        dbConn.queryToCSV(sql, fqn)
+    def __init__(self, dbConn, create):
+        for process in create:
+            directory = os.path.dirname(process["writePath"])
+            sql = process["sql"]
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            fqn = os.path.abspath(process["writePath"])
+            dbConn.queryToCSV(sql, fqn)
             
     def __repr__(self):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
-     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate):
-        DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
+     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,threads=None, pk=None):
+        if threads and threads is not 0 and pk:
+            for table in tableNames:
+                table_min = 0
+                table_max = 10000
+                # table_min = dbConn.getAValue("SELECT min({0}) FROM {1}".format(pk, table))
+                # table_max = dbConn.getAValue("select max({0}) from {1}".format(pk, table))
+                per_thread = table_max/threads
+                prev = 0
+                for i in range(threads):
+                    prev+=per_thread
+                    if i == 0:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, table_min, per_thread)
+                    else:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, prev)
+                    print("{0} : {1}".format(i,query))
+                    multi = Multithreading(dbConn, targetConnections, tableName, sql, batchSize, truncate)
+        else:
+            DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
 
 class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):
@@ -172,6 +209,7 @@ class CompareCsv(object):
     def __init__(self, csv1, csv2, outfile, key_columns,reportHeader,algorithm="hash"):
         csv1=os.path.abspath(csv1)
         csv2=os.path.abspath(csv2)
+        print("Comparying CSV: \n\t{}\n\t{}\nOutfile: {}".format(csv1,csv2,outfile))
          
         DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)
 
@@ -182,11 +220,6 @@ class ParseProcs(object):
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        
- 
-
-        
-         
         total=[]
         objType={"Func":"F","Proc":"P","Trigger":"TR"
         

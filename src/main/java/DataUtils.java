@@ -1,12 +1,29 @@
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
+
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,12 +35,8 @@ import com.opencsv.CSVReader;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import org.yaml.snakeyaml.Yaml;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.sql.Statement;
 
@@ -36,12 +49,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.io.FileReader;
 import java.sql.Blob;
-import java.sql.Date;
-
-import java.security.KeyPair;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -75,6 +84,7 @@ public class DataUtils {
 
     public static void callTest(DbConn conn, List<DbConn> targetConnections) {
         System.out.println(targetConnections.size());
+        // logger.log("My Message");
     }
 
     /**
@@ -84,8 +94,8 @@ public class DataUtils {
      * @param regExString
      * @param dataString
      */
-    public static Set<String> RegexExtract(String regExString, String dataString) {
-        Set<String> xx = new HashSet<String>();
+    public static Set<String> regexExtract(String regExString, String dataString) {
+        Set<String> xx = new HashSet<>();
 
         Pattern pattern = Pattern.compile(regExString);
         Matcher matcher = pattern.matcher(dataString);
@@ -95,11 +105,10 @@ public class DataUtils {
         }
 
         return xx;
-
     }
 
-    public static Set<String> FindSybaseDatabase(String dataString) {
-        Set<String> xx = new HashSet<String>();
+    public static Set<String> findSybaseDatabase(String dataString) {
+        Set<String> xx = new HashSet<>();
 
         Pattern pattern = Pattern.compile("\\w*\\.\\.");
         Matcher matcher = pattern.matcher(dataString);
@@ -109,13 +118,10 @@ public class DataUtils {
         }
 
         return xx;
-
     }
 
     public static Set<String> findTablesFromInsert(String dataString) {
-
         String x = dataString;
-
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("/\\*.*\\*/", " ");
         System.out.println(x);
@@ -129,7 +135,6 @@ public class DataUtils {
     }
 
     public static Set<String> findTablesFromQuery(String dataString) {
-
         String x = dataString;
         x = x.replaceAll("\n", " ");
         x = x.replaceAll("^.*? select ", " select ");
@@ -165,13 +170,15 @@ public class DataUtils {
 
             System.out.println(name1 + ", " + name + ", " + txt);
         }
+        rs.close();
+        stmt.close();
 
     }
 
     public static void writeListToCSV(List<String[]> stringList, String fullFilePath) throws Exception {
         try {
-
             CSVWriter writer = new CSVWriter(new FileWriter(fullFilePath));
+
             Boolean includeHeaders = true;
 
             writer.writeAll(stringList, includeHeaders);
@@ -219,7 +226,7 @@ public class DataUtils {
 
             int length = in.available();
             byte[] blobBytes = new byte[length];
-            in.read(blobBytes);
+            int bytestRead = in.read(blobBytes);
 
             String md5Hex = DigestUtils.md5Hex(blobBytes).toUpperCase();
 
@@ -267,15 +274,15 @@ public class DataUtils {
 
             int length = in.available();
             byte[] blobBytes = new byte[length];
-            in.read(blobBytes);
+            int bytestRead = in.read(blobBytes);
 
             FileOutputStream fos = new FileOutputStream(blobFile);
             fos.write(blobBytes);
             fos.close();
-            rs.close();
-            stmt.close();
 
         }
+        rs.close();
+        stmt.close();
 
     }
 
@@ -484,7 +491,7 @@ public class DataUtils {
 
         for (Map.Entry<String, String> entry : mapCSVdata1.entrySet()) {
             String keyCSV1 = entry.getKey();
-            String valCSV1 = entry.getValue();
+            String valCSV1 = entry.getValue().toUpperCase();
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
@@ -567,6 +574,155 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
+    public static void freeWayMigrateMulti(DbConn srcDbConn, List<DbConn> trgConns, String sql, String tableName,
+            int batchSize, boolean truncate) throws SQLException, IOException {
+        long runningBytes = 0;
+        long largestBytes = 0;
+        Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                java.sql.ResultSet.CONCUR_READ_ONLY);
+        stmt.setFetchSize(batchSize);
+
+        // org code
+        // String sql = String.Format("SELECT * FROM %s WHERE %s BETWEEN %d AND %d",
+        // tableName, primaryKey, min, max);
+        ResultSet rs = stmt.executeQuery(sql);
+        ResultSetMetaData metadata = rs.getMetaData();
+
+        int columnCount = metadata.getColumnCount();
+        List<Integer> binaryColIndex = new ArrayList<Integer>();
+        List<Integer> numberColIndex = new ArrayList<Integer>();
+        List<Integer> stringColIndex = new ArrayList<Integer>();
+        List<Integer> timeColIndex = new ArrayList<Integer>();
+
+        String[] allColumnNames = new String[columnCount];
+        for (int i = 1; i <= columnCount; i++) {
+            String type = metadata.getColumnTypeName(i);
+
+            String columnName = metadata.getColumnName(i);
+            System.out.println(columnName + "------" + type);
+            // For now; later create custom enum. "image" isn't supported by JAVA
+            List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
+            List<String> numDataTypes = Arrays.asList("TINYINT", "INT", "SMALLINT");
+            List<String> timeDataTypes = Arrays.asList("DATE", "TIMESTAMP", "DATETIME");
+
+            if (dataTypes.contains(type.toUpperCase())) {
+                binaryColIndex.add(i);
+            } else if (numDataTypes.contains(type.toUpperCase())) {
+                numberColIndex.add(i);
+            } else if (timeDataTypes.contains(type.toUpperCase())) {
+                timeColIndex.add(i);
+            }
+
+            else {
+                stringColIndex.add(i);
+            }
+            allColumnNames[i - 1] = columnName;
+        }
+
+        // List<String[]> data = new ArrayList<String[]>();
+        /*************************************** */
+        // build the insert
+        String columnsComma = String.join(",", allColumnNames);
+        String columnsQuestion = "?";
+        for (int jj = 0; jj < columnCount; jj++) {
+            if (jj > 0)
+                columnsQuestion = columnsQuestion + ",?";
+        }
+        String sqlInsert = "INSERT INTO " + tableName + " (" + columnsComma + ") VALUES (" + columnsQuestion + ")";
+        String sqlTruncate = "Truncate table " + tableName;
+
+        trgConns.forEach(dbconn -> {
+            // System.out.println(sqlInsert+"---------sql create stmnt");
+            try {
+                dbconn.stmt = dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            try {
+                if (truncate) {
+                    dbconn.ps = dbconn.conn.prepareStatement(sqlTruncate);
+                    System.out.println(sqlTruncate);
+                    dbconn.ps.execute();
+                    dbconn.ps.close();
+                }
+                dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
+                dbconn.lastPSSql = sqlInsert;
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        });
+        int ii = 0;
+        while (rs.next()) {
+            ii++;
+
+            for (int stringIdx : stringColIndex) {
+                String xxx = rs.getString(stringIdx);
+                if (xxx != null) {
+                    if (xxx.getBytes().length > largestBytes)
+                        largestBytes = xxx.getBytes().length;
+                    runningBytes += xxx.getBytes().length;
+                }
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.setString(stringIdx, xxx);
+                }
+            }
+            for (int numIdx : numberColIndex) {
+                String dataItem = rs.getString(numIdx);
+                for (DbConn trgConn : trgConns) {
+                    if (dataItem == null) {
+                        trgConn.ps.setNull(numIdx, java.sql.Types.INTEGER);
+
+                    } else {
+                        trgConn.ps.setInt(numIdx, Integer.valueOf(dataItem));
+                    }
+                }
+            }
+            for (int imgIdx : binaryColIndex) {
+                byte[] dataItem = rs.getBytes(imgIdx);
+
+                if (dataItem.length > largestBytes) {
+                    largestBytes = dataItem.length;
+                }
+                runningBytes += dataItem.length;
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.setBytes(imgIdx, dataItem);
+                }
+            }
+            for (int idx : timeColIndex) {
+                java.sql.Date dataItem = rs.getDate(idx);
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.setDate(idx, dataItem);
+                }
+            }
+            for (DbConn trgConn : trgConns) {
+                trgConn.ps.addBatch();
+            }
+
+            if (Math.floorMod(ii, batchSize) == 0) {
+                // Execute the batch every 1000 rows
+                for (DbConn trgConn : trgConns) {
+                    trgConn.flushReset();
+                    runningBytes = 0;
+                    largestBytes = 0;
+                    if (Math.floorMod(2 * ii, batchSize) == 0)
+                        System.gc();
+
+                }
+            }
+        }
+        for (DbConn trgConn : trgConns) {
+            trgConn.ps.executeBatch();
+            trgConn.stmt.close();
+        }
+
+        rs.close();
+        stmt.close();
+
+    }
+
     public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize,
             Boolean truncate) throws SQLException, IOException {
 
@@ -644,7 +800,7 @@ public class DataUtils {
                         dbconn.ps.close();
                     }
                     dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
-                    dbconn.lastPSSql=sqlInsert;
+                    dbconn.lastPSSql = sqlInsert;
                     // System.out.println(sqlInsert+"---------sql create stmnt");
                 } catch (SQLException e) {
                     // TODO Auto-generated catch block
@@ -693,9 +849,9 @@ public class DataUtils {
                 for (int imgIdx : binaryColIndex) {
 
                     // byte[] dataItem = rs.getBytes(imgIdx);
-                    
-                    byte [] dataItem =rs.getBytes(imgIdx);
-                    
+
+                    byte[] dataItem = rs.getBytes(imgIdx);
+
                     if (dataItem.length > largestBytes) {
                         largestBytes = dataItem.length;
                     }

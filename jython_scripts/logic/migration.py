@@ -176,7 +176,10 @@ class QueryToCSV(object):
 
 class moveDataToDatabases(object):
      def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,threads=None, pk=None):
+         
         if threads and threads is not 0 and pk:
+            #We'll need to clone dbConn here or make a new one for each Thread
+            #with the credential of that dbConn
             for table in tableNames:
                 table_min = 0
                 table_max = 10000

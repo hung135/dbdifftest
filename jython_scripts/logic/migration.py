@@ -209,6 +209,7 @@ class CompareCsv(object):
     def __init__(self, csv1, csv2, outfile, key_columns,reportHeader,algorithm="hash"):
         csv1=os.path.abspath(csv1)
         csv2=os.path.abspath(csv2)
+        print("Comparying CSV: \n\t{}\n\t{}\nOutfile: {}".format(csv1,csv2,outfile))
          
         DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)
 

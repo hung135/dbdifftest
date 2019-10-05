@@ -5,22 +5,22 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
-# TableRowCount:
-#   oracle-dev:
-#     schemaOrOwner: dbo
-#     fileName: ./table_rowcount.csv
-#   sys-dev1:
-#     schemaOrOwner: dbo
-#     fileName: ./table_rowcount2.csv
-# TableSampleCheckSum:
-#   sys-dev:
-#     schemaOrOwner: dbo
-#     writePath: ./md5/table_row_checksum1.csv
-#     sampleSize: 2
-#   sys-dev1:
-#     schemaOrOwner: dbo
-#     writePath: ./md5/table_row_checksum2.csv
-#     sampleSize: 2
+TableRowCount:
+  oracle-dev:
+    schemaOrOwner: dbo
+    fileName: ./table_rowcount.csv
+  sys-dev1:
+    schemaOrOwner: dbo
+    fileName: ./table_rowcount2.csv
+TableSampleCheckSum:
+  sys-dev:
+    schemaOrOwner: dbo
+    writePath: ./md5/table_row_checksum1.csv
+    sampleSize: 2
+  sys-dev1:
+    schemaOrOwner: dbo
+    writePath: ./md5/table_row_checksum2.csv
+    sampleSize: 2
 # TableLoadCsv:
 #   sys-dev1:
 #     schemaOrOwner: dbo
@@ -31,13 +31,13 @@
 #         filePath: ./md5/table_row_checksum2.csv
 #       - tableName: test3
 #         filePath: ./md5/table_row_checksum3.csv
-moveDataToDatabases:
-  sys-dev:
-    targetConnections: sys-dev1
-    batchSize: 500
-    truncate: true
-    tableNames:
-      - spt_values
-      #- spt_limit_types
-    threads: 10
-    pk: "hello"
+# moveDataToDatabases:
+#   sys-dev:
+#     targetConnections: sys-dev1
+#     batchSize: 500
+#     truncate: true
+#     tableNames:
+#       - spt_values
+#       #- spt_limit_types
+#     threads: 10
+#     pk: "hello"

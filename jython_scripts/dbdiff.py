@@ -117,7 +117,9 @@ def task_execution(databases_connections, task_config):
                         class_ = getattr(module, task.key)
                         instance = class_(**task.parameters[con_key])
                 else:
-                    log.debug("Task {0} with {1} not found".format(task.key, con_key))
+                    print("Task {0} with {1} not found".format(task.key, con_key))
+                    print("fix logger here")
+                    #logger.debug("Task {0} with {1} not found".format(task.key, con_key))
 
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:

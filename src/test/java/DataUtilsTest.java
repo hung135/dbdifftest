@@ -16,6 +16,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
+
+import Nums.DbType;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DataUtilsTest {
@@ -53,23 +56,13 @@ public class DataUtilsTest {
 
     // }
 
-<<<<<<< HEAD
     @Test
     public void testOracleDbConn() throws SQLException, PropertyVetoException {
-        DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
+        DbConn db = new DbConn(DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev", null);
         List<String> x = db.getTableNames("dbo");
         System.out.println("Connect to Oracle Successful" + x);
 
     }
-=======
-//    @Test
-//    public void testOracleDbConn() throws SQLException, PropertyVetoException {
-//    DbConn db = new DbConn(DbConn.DbType.ORACLE, "system", "Docker12345", "dboracle", "1521", "dockerdev");
-//    List<String> x = db.getTableNames("dbo");
-//    System.out.println("Connect to Oracle Successful" + x);
-//
-//    }
->>>>>>> c74688bbaff25e664a3259d4cd6b6b0667e64091
 
     // @Test
     // public void testOracle() throws SQLException {

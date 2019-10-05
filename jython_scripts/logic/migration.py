@@ -199,18 +199,26 @@ class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):
         limit=""
         top=""
+        modded_sql=sql
         if str(dbConn.dbType) == 'SYBASE' and rowlimit>0:
-            top='TOP {}'.format(rowlimit)
+            top='TOP {} '.format(rowlimit)
+            modded_sql=sql.replace("select ","select {}".format(TOP))
              
-        if str(dbConn.dbType) != 'SYBASE' and rowlimit>0:
-            limit='LIMIT {}'.format(rowlimit)
-            
+        elif str(dbConn.dbType) == 'ORACLE' and rowlimit>0:
+            limit=' WHERE ROWNUM <= {2}'.format(rowlimit)
+            if sql.contains(' where '):
+                limit=limit.replace(" WHERE ", " AND ")
+            modded_sql=sql+limit
+        elif rowlimit>0::
+            limit=' LIMIT {2}'.format(rowlimit)
+            modded_sql=sql+limit
+
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        print(fqn,sql)
-        dbConn.quertyToCSVOutputBinary(sql, fqn)
+        print(fqn,modded_sql)
+        dbConn.quertyToCSVOutputBinary(modded_sql, fqn)
             
     def __repr__(self):
         return str(self.__dict__)

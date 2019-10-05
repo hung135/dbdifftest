@@ -39,7 +39,7 @@ import DatabaseObjects.Table;
 import Nums.DbType;
 import Utils.JLogger;
 
-public class DbConn implements Cloneable{
+public class DbConn implements Cloneable {
     public Connection conn;
     // private Statement stmt; // tbd
     // final static Logger logger = Logger.getLogger(DbConn.class);
@@ -52,13 +52,14 @@ public class DbConn implements Cloneable{
     public String url;
     public String username;
     public String password;
-    public String  host;
-    public String port ;
+    public String host;
+    public String port;
     public Logger logger;
 
     public DbConn clone() throws CloneNotSupportedException {
         return (DbConn) super.clone();
-}
+    }
+
     /**
      * an attemp to release resource
      * 
@@ -85,36 +86,38 @@ public class DbConn implements Cloneable{
         this.databaseName = databaseName;
         this.username = userName;
         this.password = password;
-        this.host= host;
+        this.host = host;
         this.port = port;
         String url = MessageFormat.format(dbType.url(), host, port, databaseName);
         this.logger = jLogger.logger;
- 
+
         this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-        
+
         Class.forName(dbType.driver());
         this.conn = DriverManager.getConnection(url, props);
         // MemoryListener.BindListeners(); // disabled for now
         System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
+
     public void reConnect() throws ClassNotFoundException, SQLException {
-        
+
         Properties props = new Properties();
         props.setProperty("user", this.username);
         props.setProperty("password", this.password);
         Class.forName(this.dbType.driver());
-        /**setting to null because closing the connection may close the memory 
-         * location of the other conns this was cloned from
+        /**
+         * setting to null because closing the connection may close the memory location
+         * of the other conns this was cloned from
          */
-        this.conn=null;
+        this.conn = null;
         this.conn = DriverManager.getConnection(this.url, props);
         System.out.println("Re-Connected to Database: " + this.url);
     }
- 
+
     public Connection getSybaseConn(String userName, String password, String host, String databasename, String port)
             throws SQLException {
         Connection conn = null;
@@ -158,21 +161,36 @@ public class DbConn implements Cloneable{
     public List<Table> getAllTableColumnAndTypes(String schemaName) throws SQLException {
         List<String> tables = this.getTableNames(schemaName);
         List<Table> items = new ArrayList<Table>();
-        DatabaseMetaData metadata = conn.getMetaData();
+        Statement stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                java.sql.ResultSet.CONCUR_READ_ONLY);
+        stmt.setFetchSize(1);
+
+        // org code
+        // String sql = String.Format("SELECT * FROM %s WHERE %s BETWEEN %d AND %d",
+        // tableName, primaryKey, min, max);
 
         for (String tblName : tables) {
-            Table tbl = new Table(tblName);
-            ResultSet rs = metadata.getColumns(this.databaseName, schemaName, tblName, null);
-            ResultSetMetaData rsMetaData = rs.getMetaData();
+            try {
+                ResultSet rs = stmt.executeQuery("select * from " + schemaName + "." + tblName);
+                ResultSetMetaData metadata = rs.getMetaData();
+                int columnCount = metadata.getColumnCount();
+                Table tbl = new Table(tblName);
 
-            for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
-                String colName = rsMetaData.getColumnName(i);
-                String type = rsMetaData.getColumnTypeName(i);
-                //System.out.println("Table: " + tblName + "ColName: " + colName + ":" + type);
-                this.logger.debug("Table: " + tblName + "ColName: " + colName + ":" + type);
-                tbl.columns.add(new Column(colName, type,i));
+                for (int i = 1; i <= columnCount; i++) {
+                    String colName = metadata.getColumnName(i);
+                    String type = metadata.getColumnTypeName(i);
+
+                    // System.out.println("\t " + tblName + " ColName: " + colName + ":" + type);
+                    this.logger.debug("\t " + tblName + " ColName: " + colName + ":" + type);
+                    tbl.columns.add(new Column(colName, type, i));
+                }
+                rs.close();
+                items.add(tbl);
+            } catch (Exception e) {
+                System.out.println("ERROR with Table: " + tblName + "\n" + e);
+
             }
-            items.add(tbl);
+
         }
         return items;
     }

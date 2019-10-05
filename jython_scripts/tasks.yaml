@@ -5,6 +5,11 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
+
+TableInformation:
+  sys-dev:
+    schemaOrOwner: dbo
+    fileName: ./reports/tableinfo.csv
 QueryToCSV:
   sys-dev:
     create: 

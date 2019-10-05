@@ -894,7 +894,7 @@ public class DataUtils {
                         System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
-                        System.out.println("Batch Memory Size: " + convertToStringRepresentation(runningBytes);
+                        System.out.println("Batch Memory Size: " + convertToStringRepresentation(runningBytes));
                         //System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
 
                         trgConn.flushReset();

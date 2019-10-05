@@ -78,7 +78,7 @@ public class DbConn implements Cloneable{
         return this.url;
     }
 
-    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName,
+    public DbConn(DbType dbType, String userName, String password, String host, String port, String databaseName,
             JLogger jLogger) throws SQLException, PropertyVetoException, ClassNotFoundException {
 
         this.dbType = dbType;
@@ -87,14 +87,15 @@ public class DbConn implements Cloneable{
         this.password = password;
         this.host= host;
         this.port = port;
-        String url = MessageFormat.format(dbtype.url(), host, port, databaseName);
+        String url = MessageFormat.format(dbType.url(), host, port, databaseName);
         this.logger = jLogger.logger;
  
         this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-        Class.forName(this.dbType.driver());
+        
+        Class.forName(dbType.driver());
         this.conn = DriverManager.getConnection(url, props);
         // MemoryListener.BindListeners(); // disabled for now
         System.out.println("Connect to Database: " + this.url);
@@ -161,14 +162,15 @@ public class DbConn implements Cloneable{
 
         for (String tblName : tables) {
             Table tbl = new Table(tblName);
-            ResultSet rs = metadata.getColumns(this.databaseName, null, tblName, null);
+            ResultSet rs = metadata.getColumns(this.databaseName, schemaName, tblName, null);
             ResultSetMetaData rsMetaData = rs.getMetaData();
 
             for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
                 String colName = rsMetaData.getColumnName(i);
                 String type = rsMetaData.getColumnTypeName(i);
+                //System.out.println("Table: " + tblName + "ColName: " + colName + ":" + type);
                 this.logger.debug("Table: " + tblName + "ColName: " + colName + ":" + type);
-                tbl.columns.add(new Column(colName, type));
+                tbl.columns.add(new Column(colName, type,i));
             }
             items.add(tbl);
         }

@@ -84,11 +84,28 @@ class TableRowCount(object):
 class TableInformation(object):
     def __init__(self, dbConn, schemaOrOwner, fileName):
         tables = dbConn.getAllTableColumnAndTypes(schemaOrOwner)
+        header=["TableName","Index","Column"]
         output = []
+        output.append(header)
         for tbl in tables:
-            output.append(tbl.TableInformation())
-        tblout = csv.writer(open(fileName, 'w'), delimiter=',', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
+            tablename=""
+            for col in tbl.TableInformation():
+                x=[]
+
+                y=col.split(',')
+                
+                if(len(y)==2): 
+                    x.append(tablename[0])
+                    x.append(y[0])
+                    x.append(y[1])
+                 
+                    output.append(x)
+                else:
+                    tablename=y
+            #output.append(tbl.TableInformation())
+        tblout = csv.writer(open(fileName, 'w'), delimiter=',', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL )
         for row in output:
+
             tblout.writerow(row)
 
 class TableSampleCheckSum(object):

@@ -84,7 +84,7 @@ public class DataUtils {
 
     public static void callTest(DbConn conn, List<DbConn> targetConnections) {
         System.out.println(targetConnections.size());
-        //logger.log("My Message");
+        // logger.log("My Message");
     }
 
     /**
@@ -491,7 +491,7 @@ public class DataUtils {
 
         for (Map.Entry<String, String> entry : mapCSVdata1.entrySet()) {
             String keyCSV1 = entry.getKey();
-            String valCSV1 = entry.getValue();
+            String valCSV1 = entry.getValue().toUpperCase();
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
@@ -574,22 +574,17 @@ public class DataUtils {
         writeListToCSV(results, outFile);
     }
 
-    public static void freeWayMigrateMulti(DbConn srcDbConn,
-        List<DbConn> trgConns, 
-        String sql,
-        String tableName,
-        int batchSize,
-        boolean truncate)
-        throws SQLException, IOException 
-    {
+    public static void freeWayMigrateMulti(DbConn srcDbConn, List<DbConn> trgConns, String sql, String tableName,
+            int batchSize, boolean truncate) throws SQLException, IOException {
         long runningBytes = 0;
         long largestBytes = 0;
-        Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+        Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                java.sql.ResultSet.CONCUR_READ_ONLY);
         stmt.setFetchSize(batchSize);
 
-
         // org code
-        //String sql = String.Format("SELECT * FROM %s WHERE %s BETWEEN %d AND %d", tableName, primaryKey, min, max);
+        // String sql = String.Format("SELECT * FROM %s WHERE %s BETWEEN %d AND %d",
+        // tableName, primaryKey, min, max);
         ResultSet rs = stmt.executeQuery(sql);
         ResultSetMetaData metadata = rs.getMetaData();
 

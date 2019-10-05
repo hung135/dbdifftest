@@ -2,26 +2,26 @@
 import java.util.List;
 
 public class Multithreading extends Thread {
+    // requried
     private DbConn connection;
     private List<DbConn> targetConnections;
     private String tableName;
     private String sql;
     private int batchSize;
     private boolean truncate;
-    private int numOfThreads;
-    private List<DbConn> targetConnection;
+
+    //outs
     private Object threadNumbers;
     private Object numberPerThread;
 
     public Multithreading(DbConn connection, int threads) {
         this.connection = connection;
-        this.numOfThreads = threads;
     }
 
-    public Multithreading(DbConn connection, List<DbConn> targetConnection, String tableName, String sql, int batchSize,
+    public Multithreading(DbConn connection, List<DbConn> targetConnections, String tableName, String sql, int batchSize,
             boolean truncate) {
         this.connection = connection;
-        this.targetConnection = targetConnection;
+        this.targetConnections = targetConnections;
         this.tableName = tableName;
         this.sql = sql;
         this.batchSize = batchSize;
@@ -30,7 +30,7 @@ public class Multithreading extends Thread {
 
     public void Run() {
         try {
-            DataUtils.freeWayMigrateMulti(this.connection, this.targetConnection, this.sql, this.tableName,
+            DataUtils.freeWayMigrateMulti(this.connection, this.targetConnections, this.sql, this.tableName,
                     this.batchSize, this.truncate);
         } catch (Exception ex) {
             System.out.println(ex);

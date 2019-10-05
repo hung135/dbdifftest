@@ -84,7 +84,7 @@ class TableRowCount(object):
 class TableInformation(object):
     def __init__(self, dbConn, schemaOrOwner, fileName):
         tables = dbConn.getAllTableColumnAndTypes(schemaOrOwner)
-        header=["TableName","Index","Column"]
+        header=["TableName","Column","JDBCTYPE"]
         output = []
         output.append(header)
         for tbl in tables:
@@ -94,10 +94,13 @@ class TableInformation(object):
 
                 y=col.split(',')
                 
+                
                 if(len(y)==2): 
-                    x.append(tablename[0])
-                    x.append(y[0])
-                    x.append(y[1])
+                    z=y[1].split(':')
+                    x.append(tablename[0].upper())
+                    #x.append(y[0].upper())
+                    x.append(z[0].upper())
+                    x.append(z[1].upper())
                  
                     output.append(x)
                 else:

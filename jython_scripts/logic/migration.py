@@ -180,6 +180,8 @@ class moveDataToDatabases(object):
         if threads and threads is not 0 and pk:
             #We'll need to clone dbConn here or make a new one for each Thread
             #with the credential of that dbConn
+            #or have the logic in Multithreading take dbconn and clone it.
+            #might be easier here though
             for table in tableNames:
                 table_min = 0
                 table_max = 10000

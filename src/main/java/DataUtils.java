@@ -401,17 +401,19 @@ public class DataUtils {
      * @return
      */
     public static List<Integer> findColumnIndex(List<String> keyColumns, String[] headerRow) {
-
+        // System.out.println(keyColumns);
         List<Integer> headerIndex = new ArrayList<>();
         int ii = 0;
         for (String col : keyColumns) {
 
             int jj = 0;
             for (String headerCol : headerRow) {
-                ii++;
+
                 if (col.toLowerCase().equals(headerCol.toLowerCase())) {
                     headerIndex.add(jj);
+                    // System.out.println(jj + col);
                 }
+                jj++;
             }
             ii++;
         }
@@ -431,25 +433,40 @@ public class DataUtils {
         for (String[] row : csv) {
             String hashKey = "";
             String data = "";
+            // System.out.println("-------" + headerIndex);
             for (Integer keyColIndex : headerIndex) {
-                hashKey = hashKey + row[keyColIndex];
-                for (int i = 0; i < row.length; i++) {
-                    Integer iii = i;
 
-                    if (!headerIndex.contains(iii)) {
-                        data = data + row[i];
-                    }
-
-                }
-                String md5Hex = DigestUtils.md5Hex(data).toUpperCase();
-                if (algorithm.toLowerCase().equals("hash")) {
-
-                    mapCSVdata.put(hashKey, md5Hex);
-
+                if (hashKey.equals("")) {
+                    hashKey = row[keyColIndex].toUpperCase();
                 } else {
-                    mapCSVdata.put(hashKey, data);
+                    hashKey = hashKey + "-" + row[keyColIndex].toUpperCase();
                 }
             }
+            for (int i = 0; i < row.length; i++) {
+
+                // casting to Integer object to use in contains check
+                Integer iii = i;
+                // if this is not a key column it is a data column
+                if (!headerIndex.contains(iii)) {
+
+                    if (data.equals("")) {
+                        data = row[i];
+                    } else {
+                        data = data + "-" + row[i];
+                    }
+                }
+
+            }
+            String md5Hex = DigestUtils.md5Hex(data).toUpperCase();
+            if (algorithm.toLowerCase().equals("hash")) {
+
+                mapCSVdata.put(hashKey, md5Hex);
+
+            } else {
+
+                mapCSVdata.put(hashKey, data);
+            }
+
         }
 
         return mapCSVdata;
@@ -890,12 +907,13 @@ public class DataUtils {
                         // Get amount of free memory within the heap in bytes. This size will increase
                         // // after garbage collection and decrease as new objects are created.
                         long heapFreeSize = Runtime.getRuntime().freeMemory();
-                        
+
                         System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
                         System.out.println("Batch Memory Size: " + convertToStringRepresentation(runningBytes));
-                        //System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
+                        // System.out.println("Largest Size: " +
+                        // convertToStringRepresentation(largestBytes) + " MBs");
 
                         trgConn.flushReset();
 

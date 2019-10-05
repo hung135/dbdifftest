@@ -10,6 +10,9 @@ TableInformation:
   sys-dev:
     schemaOrOwner: dbo
     fileName: ./reports/tableinfo.csv
+  sys-dev1:
+    schemaOrOwner: dbo
+    fileName: ./reports/tableinfo2.csv
 QueryToCSV:
   sys-dev:
     create: 
@@ -19,13 +22,13 @@ QueryToCSV:
         sql: SELECT * FROM dbo.monBucketPool
       - writePath: ./reports/test3.csv
         sql: SELECT * FROM dbo.monBucketPool
-TableRowCount:
-  oracle-dev:
-    schemaOrOwner: dbo
-    fileName: ./table_rowcount.csv
-  sys-dev:
-    schemaOrOwner: dbo
-    fileName: ./table_rowcount2.csv
+# TableRowCount:
+#   oracle-dev:
+#     schemaOrOwner: dbo
+#     fileName: ./table_rowcount.csv
+#   sys-dev:
+#     schemaOrOwner: dbo
+#     fileName: ./table_rowcount2.csv
 TableSampleCheckSum:
   sys-dev:
     schemaOrOwner: dbo

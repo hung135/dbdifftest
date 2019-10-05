@@ -49,3 +49,13 @@ QueryToCSV:
         sql: SELECT * FROM dbo.monBucketPool
       - writePath: ./reports/test3.csv
         sql: SELECT * FROM dbo.monBucketPool
+CompareCsv:
+    Name:
+      csv1: ./reports/tableinfo.csv
+      csv2: ./reports/tableinfo2.csv
+      outfile: ./reports/tableinfoCompareResult.csv
+      algorithm: data
+      reportHeader: TableName,Dev,Test
+      key_columns: # 
+        - TableName
+        - column

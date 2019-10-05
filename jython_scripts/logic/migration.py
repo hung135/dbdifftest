@@ -209,7 +209,7 @@ class quertyToCSVOutputBinary(object):
             if sql.contains(' where '):
                 limit=limit.replace(" WHERE ", " AND ")
             modded_sql=sql+limit
-        elif rowlimit>0::
+        elif rowlimit>0:
             limit=' LIMIT {2}'.format(rowlimit)
             modded_sql=sql+limit
 

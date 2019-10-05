@@ -3,7 +3,7 @@ import DataUtils
 
 import java.lang.Object
 from java.util import HashMap
-
+import logging
 import jarray
 import DbConn
 import Multithreading # custom package
@@ -56,7 +56,8 @@ class TableRowCount(object):
                 tmp.append(zz)
                 tableCount.append(tmp)
             except:
-                print("Error Querying Table: {}".format(a))
+                logging.exception(Exception)
+                #print("Error Querying Table: {}\n{}".format(a,e))
                 tableCount.append([a, 'SQL Execute Error'])
         for a in y:
             tmp = []
@@ -68,7 +69,7 @@ class TableRowCount(object):
                 tmp.append(zz)
                 tableCount.append(tmp)
             except:
-                print("Error Querying View: {}".format(a))
+                logging.exception(Exception)
                 tableCount.append([a, 'SQL Execute Error'])
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',

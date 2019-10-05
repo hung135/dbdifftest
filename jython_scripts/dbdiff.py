@@ -11,7 +11,7 @@ import datetime
 # sys.path.append(jarpath)
 # # =======
 import importlib
-
+import logging
 #JAVA ITEMS
 sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
 sys.path.append("./DbTest-jar-with-dependencies.jar")
@@ -117,10 +117,9 @@ def task_execution(databases_connections, task_config):
                         class_ = getattr(module, task.key)
                         instance = class_(**task.parameters[con_key])
                 else:
-                    print("Task {0} with {1} not found".format(task.key, con_key))
-                    print("fix logger here")
-                    #logger.debug("Task {0} with {1} not found".format(task.key, con_key))
-
+                     
+                    logging.debug("Task {0} with {1} not found".format(task.key, con_key))
+                    
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:
         writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)

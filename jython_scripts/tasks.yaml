@@ -5,11 +5,20 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
+QueryToCSV:
+  sys-dev:
+    create: 
+      - writePath: ./reports/test1.csv
+        sql: SELECT * FROM dbo.monBucketPool
+      - writePath: ./reports/test2.csv
+        sql: SELECT * FROM dbo.monBucketPool
+      - writePath: ./reports/test3.csv
+        sql: SELECT * FROM dbo.monBucketPool
 TableRowCount:
   oracle-dev:
     schemaOrOwner: dbo
     fileName: ./table_rowcount.csv
-  sys-dev1:
+  sys-dev:
     schemaOrOwner: dbo
     fileName: ./table_rowcount2.csv
 TableSampleCheckSum:

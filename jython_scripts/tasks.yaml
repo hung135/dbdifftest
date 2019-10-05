@@ -54,6 +54,6 @@ moveDataToDatabases:
     batchSize: 500
     truncate: true
     tableNames:
-      - spt_values
+      - mockData1
       #- spt_limit_types
-    threads: 10
+    threads: 2

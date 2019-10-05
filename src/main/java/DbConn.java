@@ -549,24 +549,45 @@ public class DbConn implements Cloneable{
         }
         String columns = String.join(",", question);
         String sql = "Insert into " + tableName + " values(" + columns + ")";
+        System.out.println(sql);
 
         preparedStatement = this.conn.prepareStatement(sql);
 
         // CSVFormat fmt =
         // CSVFormat.DEFAULT.withDelimiter(',').withQuote('"').withRecordSeparator("\r\n");
 
-        Reader file = new FileReader("path/to/file.csv");
+        Reader file = new FileReader(filePath);
 
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(file);
         for (CSVRecord record : records) {
-            for (int i = 1; i < tableColumns.size(); i++) {
-                preparedStatement.setString(i, record.get(tableColumns.get(i)));
+            // System.out.println(String.format("%s: %s | %s: %s | %s: %s | %s: %s | %s: %s | %s: %s",
+            //     tableColumns.get(0),
+            //     record.get(tableColumns.get(0)),
+            //     tableColumns.get(1),
+            //     record.get(tableColumns.get(1)),
+            //     tableColumns.get(2),
+            //     record.get(tableColumns.get(2)),
+            //     tableColumns.get(3),
+            //     record.get(tableColumns.get(3)),
+            //     tableColumns.get(4),
+            //     record.get(tableColumns.get(4)),
+            //     tableColumns.get(5),
+            //     record.get(tableColumns.get(5))
+            // ));
+            // preparedStatement.setString(1, record.get(tableColumns.get(0)));
+            // preparedStatement.setString(2, record.get(tableColumns.get(1)));
+            // preparedStatement.setString(3, record.get(tableColumns.get(2)));
+            // preparedStatement.setString(4, record.get(tableColumns.get(3)));
+            // preparedStatement.setString(5, record.get(tableColumns.get(4)));
+            // preparedStatement.setString(6, record.get(tableColumns.get(5)));
+            for (int i = 1; i <= tableColumns.size(); i++) {
+                preparedStatement.setString(i, record.get(tableColumns.get(i-1)));
             }
             preparedStatement.addBatch();
         }
 
         int[] affectedRecords = preparedStatement.executeBatch();
-        System.out.println("Total rows Inserted: " + affectedRecords);
+        System.out.println("Total rows Inserted: " + affectedRecords.length);
         preparedStatement.close();
 
     }

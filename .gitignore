@@ -9,3 +9,4 @@ jython_scripts/*.jar
 */cov-int/*
 cov-int/*
 *.log*
+*.csv

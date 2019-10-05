@@ -1,5 +1,6 @@
 import csv
 from faker import Faker
+import tqdm
 import datetime
 
 def datagenerate(records, headers):
@@ -8,7 +9,7 @@ def datagenerate(records, headers):
     with open("People_data1.csv", 'wt') as csvFile:
         writer = csv.DictWriter(csvFile, fieldnames=headers)
         writer.writeheader()
-        for i in range(records):
+        for i in tqdm.tqdm(range(records)):
             full_name = fake.name()
             FLname = full_name.split(" ")
             Fname = FLname[0]
@@ -17,26 +18,16 @@ def datagenerate(records, headers):
             userId = Fname +"."+ Lname + domain_name
             
             writer.writerow({
-                    "Email Id" : userId,
-                    "Prefix" : fake.prefix(),
-                    "Name": fake.name(),
-                    "Birth Date" : fake.date(pattern="%d-%m-%Y", end_datetime=datetime.date(2000, 1,1)),
-                    "Phone Number" : fake1.phone_number(),
-                    "Additional Email Id": fake.email(),
-                    "Address" : fake.address(),
-                    "Zip Code" : fake.zipcode(),
-                    "City" : fake.city(),
-                    "State" : fake.state(),
-                    "Country" : fake.country(),
-                    "Year":fake.year(),
-                    "Time": fake.time(),
-                    "Link": fake.url(),
-                    "Text": fake.word(),
+                    "email_Id" : userId,
+                    "prefix" : fake.prefix(),
+                    "name": fake.name(),
+                    "city" : fake.city(),
+                    "state" : fake.state(),
+                    "country" : fake.country()
                     })
     
 if __name__ == '__main__':
-    records = 10000
-    headers = ["Email Id", "Prefix", "Name", "Birth Date", "Phone Number", "Additional Email Id",
-               "Address", "Zip Code", "City","State", "Country", "Year", "Time", "Link", "Text"]
+    records = 50000
+    headers = ["email_Id", "prefix", "name", "city", "state", "country"]
     datagenerate(records, headers)
     print("CSV generation complete!")

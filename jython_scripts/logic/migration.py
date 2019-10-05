@@ -2,12 +2,13 @@ import os
 import DataUtils
 import copy
 
+from multi import FreeWay
+
 import java.lang.Object
 from java.util import HashMap
 import logging
 import jarray
 import DbConn
-import Multithreading # custom package
 
 import csv
 import md5
@@ -190,30 +191,51 @@ class moveDataToDatabases(object):
                 per_thread = table_max/threads
                 prev = 0
                 for i in range(threads):
-                    copy_dbConn = copy.copy(dbConn)
+                    targets = []
+                    copy_dbConn = self.cloner(dbConn)
+                    copy_dbConn.reConnect()
+                    for x in targetConnections:
+                        targets.append(self.cloner(x))
+
                     prev+=per_thread
-                    if i == 0:
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, table_min, per_thread)
-                    elif i == threads-1: # Last thread takes care of the rest
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, table_max)
+                    if pk:
+                        if i == 0:
+                            query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, table_min, per_thread)
+                        elif i == threads-1: # Last thread takes care of the rest
+                            query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, table_max)
+                        else:
+                            query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, prev)
                     else:
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, prev)
-                    print("{0} : {1}".format(i,query))
-                    multi = Multithreading(copy_dbConn, targetConnections, table, query, batchSize, truncate)
-                    multi.start()
-                    print("{0} | {1}".format(multi.getId(), multi.getName()))
-                    thread_nums.append(multi.getId())
-            self.printThreadStatus(thread_nums)
+                        if i == 0:
+                            query = "SELECT * FROM {0} LIMIT {1},{2}".format(table, table_min, per_thread)
+                        elif i == threads-1: # Last thread takes care of the rest
+                            query = "SELECT * FROM {0} LIMIT {1},{2}".format(table, per_thread*i, table_max)
+                        else:
+                            query = "SELECT * FROM {0} LIMIT {1},{2}".format(table, per_thread*i, prev)
+                    fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
+                    thread_nums.append(fr)
+            self.execute(thread_nums, threads)
         else:
             DataUtils.freeWayMigrate(dbConn, targetConnections, tableNames,batchSize,truncate)
 
-    def printThreadStatus(self, threadNums):
-        from java.lang import Thread
-        threads = Thread.getAllStackTraces().keySet()
-        while(True):
-            for thread in threads:
-                if thread.getId() in threadNums:
-                    print("Thread: {0} | Status: {1}".format(thread.getId(), thread.getState()))
+    def cloner(self, con):
+        tmp = con.clone()
+        tmp.reConnect()
+        return tmp
+
+    # https://github.com/jython/book/blob/master/src/chapter19/test_completion.py
+    def execute(self, frees, threads):
+        from java.util.concurrent import Executors, ExecutorCompletionService
+        pool = Executors.newFixedThreadPool(threads)
+        ecs = ExecutorCompletionService(pool)
+        for f in frees:
+            ecs.submit(f)
+
+        submitted = len(frees)
+        while submitted > 0:
+            result = ecs.take().get()
+            print result
+            submitted -= 1
 
 class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):

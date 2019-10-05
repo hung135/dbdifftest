@@ -611,10 +611,12 @@ public class DataUtils {
         List<Integer> stringColIndex = new ArrayList<Integer>();
         List<Integer> timeColIndex = new ArrayList<Integer>();
 
+        System.out.print("Line 614");
         String[] allColumnNames = new String[columnCount];
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
 
+            System.out.print("Line 619");
             String columnName = metadata.getColumnName(i);
             System.out.println(columnName + "------" + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
@@ -633,6 +635,7 @@ public class DataUtils {
             else {
                 stringColIndex.add(i);
             }
+            System.out.print("Line 638");
             allColumnNames[i - 1] = columnName;
         }
 

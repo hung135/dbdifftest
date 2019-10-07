@@ -204,7 +204,7 @@ class moveDataToDatabases(object):
                     else:
                         query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, prev)
                     #print("thread {0} | {1}".format(i, query))
-                    self.identityManagement(targets)
+                    #self.identityManagement(targets)
                     fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
                     thread_nums.append(fr)
             self.execute(thread_nums, threads)

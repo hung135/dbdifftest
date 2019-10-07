@@ -177,16 +177,13 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
-    def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,threads=None, pk=None):
+    def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,primary_column,threads=None):
         if threads and threads is not 0:
             thread_nums = []
             for table in tableNames:
-                table_min, table_max = 0, 0
-                if pk:
-                    table_min = int(dbConn.getAValue("SELECT min({0}) FROM {1}".format(pk, table)))
-                    table_max = int(dbConn.getAValue("SELECT MAX({0}) FROM {1}".format(pk, table)))
-                else:
-                    table_max = int(dbConn.getAValue("select count(*) from {0}".format(table)))
+                table_min = int(dbConn.getAValue("SELECT min({0}) FROM {1}".format(primary_column, table)))
+                table_max = int(dbConn.getAValue("SELECT MAX({0}) FROM {1}".format(primary_column, table)))
+
                 print("table_min: {0} | table_max: {1}".format(table_min, table_max))
                 per_thread = table_max/threads
                 prev = 0
@@ -198,20 +195,12 @@ class moveDataToDatabases(object):
                         targets.append(self.cloner(x))
 
                     prev+=per_thread
-                    if pk:
-                        if i == 0:
-                            query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, table_min, per_thread)
-                        elif i == threads-1: # Last thread takes care of the rest
-                            query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, table_max)
-                        else:
-                            query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, pk, per_thread*i, prev)
+                    if i == 0:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, table_min, per_thread)
+                    elif i == threads-1: # Last thread takes care of the rest
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, table_max)
                     else:
-                        if i == 0:
-                            query = "SELECT * FROM {0} LIMIT {1},{2}".format(table, table_min, per_thread)
-                        elif i == threads-1: # Last thread takes care of the rest
-                            query = "SELECT * FROM {0} LIMIT {1},{2}".format(table, per_thread*i, table_max)
-                        else:
-                            query = "SELECT * FROM {0} LIMIT {1},{2}".format(table, per_thread*i, prev)
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, prev)
                     fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
                     thread_nums.append(fr)
             self.execute(thread_nums, threads)

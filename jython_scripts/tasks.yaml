@@ -52,8 +52,9 @@ moveDataToDatabases:
   sys-dev:
     targetConnections: sys-dev1
     batchSize: 500
-    truncate: true
+    truncate: false
     tableNames:
       - mockData1
       #- spt_limit_types
     threads: 2
+    primary_column: record_id

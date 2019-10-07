@@ -1,6 +1,7 @@
 import os
 import DataUtils
 import copy
+import datetime
 
 from multi import FreeWay
 
@@ -183,12 +184,12 @@ class moveDataToDatabases(object):
 
         if (threads and primary_column) and threads is not 0:
             thread_nums = []
-            for table in tableNames:
-                table_min = int(dbConn.getAValue("SELECT min({0}) FROM {1}".format(primary_column, table)))
-                table_max = int(dbConn.getAValue("SELECT MAX({0}) FROM {1}".format(primary_column, table)))
+            for table, key in zip(tableNames, primary_column):
+                table_min = int(dbConn.getAValue("SELECT min({0}) FROM {1}".format(key, table)))
+                table_max = int(dbConn.getAValue("SELECT MAX({0}) FROM {1}".format(key, table)))
 
-                print("table_min: {0} | table_max: {1}".format(table_min, table_max))
                 per_thread = table_max/threads
+                print("table_min: {0} | table_max: {1} | per_thread: {2}".format(table_min, table_max, per_thread))
                 prev = 0
                 for i in range(threads):
                     targets = []
@@ -198,12 +199,12 @@ class moveDataToDatabases(object):
 
                     prev+=per_thread
                     if i == 0:
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, table_min, per_thread)
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, key, table_min, per_thread)
                     elif i == threads-1: # Last thread takes care of the rest
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, table_max)
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, key, (per_thread*i)+1, table_max)
                     else:
-                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, prev)
-                    #print("thread {0} | {1}".format(i, query))
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, key, (per_thread*i)+1, prev)
+                    print("thread {0} | {1}".format(i, query))
                     #self.identityManagement(targets)
                     fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
                     thread_nums.append(fr)

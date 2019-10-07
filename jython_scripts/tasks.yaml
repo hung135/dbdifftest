@@ -56,5 +56,6 @@ moveDataToDatabases:
     tableNames:
       - mockData1
       #- spt_limit_types
-    threads: 10
-    primary_column: record_id
+    threads: 2
+    primary_column: 
+      - record_id

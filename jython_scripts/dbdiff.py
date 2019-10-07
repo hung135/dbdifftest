@@ -3,6 +3,7 @@ import os
 import argparse
 import csv
 import datetime
+import time
 # <<<<<<< HEAD
 # import os 
 # #windows make sure you use c:\\xxx\\file.jar
@@ -138,7 +139,10 @@ def execute(args):
     setup_logger(args.v)
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
+    import time
+    start_time = time.time()
     task_execution(databases_connections, task_config)
+    print("--- %s seconds ---" % (time.time() - start_time))
     print("Task execution complete")
 
 if __name__ == "__main__":

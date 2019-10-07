@@ -75,12 +75,16 @@ def start():
     db_temp = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "tempdb", logger)
     db_master = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
 
-    #pipeline(db_master, db_temp)
+    pipeline(db_master, db_temp)
     # export_data(db_master, "master")
     # export_data(db_temp, "temp")
-    compare("temp", "master")
-    get_count(db_master)
-    get_count(db_temp)
+    # compare("temp", "master")
+    # get_count(db_master)
+    # get_count(db_temp)
 
 if __name__ == "__main__":
+    ## To use this application
+    ## use the .devcontainer/data-generator/.py to create X number of records
+    ## move into /workspaces/mockData.csv
+    ## run app
     start()

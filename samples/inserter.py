@@ -1,6 +1,11 @@
 
+import sys
+sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
+
 from Nums import DbType
 from Utils import JLogger
+import DbConn
+import DataUtils
 
 
 def create_db_non_binary(db):
@@ -15,7 +20,7 @@ def create_db_non_binary(db):
             country VARCHAR(500),
         )
     """
-    db.executeQuery(statement)
+    db.executeSql(statement)
 
 def create_db_binary(db):
     statement = """
@@ -24,15 +29,15 @@ def create_db_binary(db):
             img image
         )
     """
-    db.executeQuery(statement)
+    db.executeSql(statement)
 
 def get_count(db, table):
     statement = """
-        SELECT COUNT(*) {0}
+        SELECT COUNT(*) FROM {0}
         """.format(table)
-    result = db.executeQuery(statement)
+    result = db.queryToList(statement)
     for r in result:
-        print(result)
+        print(r)
 
 def load_data(db, table, data_path):
     db.loadCSV(table, data_path)
@@ -43,6 +48,8 @@ def start():
     db_temp = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "tempdb", logger)
     db_master = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
 
+    get_count(db_master, "mockData1")
+    get_count(db_temp, "mockData1")
     # create_db_non_binary(db_master)
     # load_data(db, mockData1)
     # compare db_temp vs db_master

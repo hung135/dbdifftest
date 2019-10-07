@@ -177,7 +177,10 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
+    tableNames = []
     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,primary_column=None,threads=None):
+        self.tableNames = tableNames
+
         if (threads and primary_column) and threads is not 0:
             thread_nums = []
             for table in tableNames:
@@ -201,6 +204,7 @@ class moveDataToDatabases(object):
                     else:
                         query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, prev)
                     #print("thread {0} | {1}".format(i, query))
+                    self.identityManagement(targets)
                     fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
                     thread_nums.append(fr)
             self.execute(thread_nums, threads)
@@ -211,6 +215,11 @@ class moveDataToDatabases(object):
         tmp = con.clone()
         tmp.reConnect()
         return tmp
+
+    def identityManagement(self, targets, on=True):
+        for targ in targets:
+            for table in self.tableNames:
+                targ.executeSql("SET IDENTITY_INSERT {0} {1}".format(table, "ON" if on else "OFF"))
 
     # https://github.com/jython/book/blob/master/src/chapter19/test_completion.py
     def execute(self, frees, threads):

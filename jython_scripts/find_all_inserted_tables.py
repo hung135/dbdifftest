@@ -77,7 +77,7 @@ from Nums import DbType
 from Utils import JLogger
 x = DbType.SYBASE
 logger = JLogger("/workspace/outme.log", "test")
-db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
+db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "tempdb", logger)
 # statement = """
 # CREATE TABLE mockData(
 #   pid int not null,
@@ -92,17 +92,20 @@ db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
 # for y in queryList:
 #   print(y)
 
-statement = """
-CREATE TABLE mockData1 (
-  record_id numeric(5,0) identity not null,
-  email_Id VARCHAR(500),
-  prefix VARCHAR(500),
-  name VARCHAR(500),
-  city VARCHAR(500),
-  state VARCHAR(500),
-  country VARCHAR(500),
-)
-"""
+# statement = """
+# CREATE TABLE mockData1 (
+#   record_id numeric(5,0) identity not null,
+#   email_Id VARCHAR(500),
+#   prefix VARCHAR(500),
+#   name VARCHAR(500),
+#   city VARCHAR(500),
+#   state VARCHAR(500),
+#   country VARCHAR(500),
+# )
+# """
+
+statement = """ SELECT COUNT(*) FROM mockData1 """
+#statement = """ DELETE FROM mockData1 """
 
 # statement = """
 # alter table mockData1

@@ -611,15 +611,16 @@ public class DataUtils {
         List<Integer> stringColIndex = new ArrayList<Integer>();
         List<Integer> timeColIndex = new ArrayList<Integer>();
 
+        srcDbConn.logger.debug(sql);
         String[] allColumnNames = new String[columnCount];
         for (int i = 1; i <= columnCount; i++) {
             String type = metadata.getColumnTypeName(i);
 
             String columnName = metadata.getColumnName(i);
-            System.out.println(columnName + "------" + type);
+            //System.out.println(columnName + "------" + type);
             // For now; later create custom enum. "image" isn't supported by JAVA
             List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
-            List<String> numDataTypes = Arrays.asList("TINYINT", "INT", "SMALLINT");
+            List<String> numDataTypes = Arrays.asList("TINYINT", "INT", "SMALLINT", "NUMERIC IDENTITY");
             List<String> timeDataTypes = Arrays.asList("DATE", "TIMESTAMP", "DATETIME");
 
             if (dataTypes.contains(type.toUpperCase())) {
@@ -629,13 +630,13 @@ public class DataUtils {
             } else if (timeDataTypes.contains(type.toUpperCase())) {
                 timeColIndex.add(i);
             }
-
             else {
                 stringColIndex.add(i);
             }
             allColumnNames[i - 1] = columnName;
         }
 
+        srcDbConn.logger.debug("640");
         // List<String[]> data = new ArrayList<String[]>();
         /*************************************** */
         // build the insert
@@ -653,6 +654,7 @@ public class DataUtils {
             try {
                 dbconn.stmt = dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             } catch (SQLException e) {
+                srcDbConn.logger.debug(e);
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -666,7 +668,6 @@ public class DataUtils {
                 dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
                 dbconn.lastPSSql = sqlInsert;
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 

@@ -141,7 +141,7 @@ def execute(args):
     task_execution(databases_connections, task_config)
     print("Task execution complete")
 
-
 if __name__ == "__main__":
     args = parse_cli()
     execute(args)
+    sys.exit(1)

@@ -76,14 +76,14 @@ WHERE sysobjects.type = 'P'
 from Nums import DbType
 from Utils import JLogger
 x = DbType.SYBASE
-logger = JLogger("/", "test")
-db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
-statement = """
-CREATE TABLE blobtest(
-  pid int not null,
-  img image
-)
-"""
+logger = JLogger("/workspace/outme.log", "test")
+db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "tempdb", logger)
+# statement = """
+# CREATE TABLE mockData(
+#   pid int not null,
+#   img image
+# )
+# """
 # DataUtils.uploadImage(db.conn, "/workspace/samples/img.png", 
 # statement = """
 # SELECT * FROM blobtest
@@ -92,7 +92,34 @@ CREATE TABLE blobtest(
 # for y in queryList:
 #   print(y)
 
+# statement = """
+# CREATE TABLE mockData1 (
+#   record_id numeric(5,0) identity not null,
+#   email_Id VARCHAR(500),
+#   prefix VARCHAR(500),
+#   name VARCHAR(500),
+#   city VARCHAR(500),
+#   state VARCHAR(500),
+#   country VARCHAR(500),
+# )
+# """
+
+statement = """ SELECT COUNT(*) FROM mockData1 """
+#statement = """ DELETE FROM mockData1 """
+
+# statement = """
+# alter table mockData1
+#     add record_id numeric(5,0) identity not null
+# """
+
+# statement = """
+# SELECT * FROM mockData1 WHERE record_id BETWEEN 25 AND 300
+# """
+
 #x = DataUtils.downloadImage(db.conn, "blobtest", "img", 2, "/workspace/out.png")
 # db.queryToCSVWithBinary(statement, "/workspace/output/")
-db.queryToList(statement)
-print("Executed")
+x =db.queryToList(statement)
+for y in x:
+  print(y)
+# db.loadCSV("mockData1", "/workspace/People_data1.csv")
+# print("Executed")

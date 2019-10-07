@@ -84,7 +84,7 @@ public class DataUtils {
 
     public static void callTest(DbConn conn, List<DbConn> targetConnections) {
         System.out.println(targetConnections.size());
-        logger.log("My Message");
+        // logger.log("My Message");
     }
 
     /**
@@ -401,17 +401,19 @@ public class DataUtils {
      * @return
      */
     public static List<Integer> findColumnIndex(List<String> keyColumns, String[] headerRow) {
-
+        // System.out.println(keyColumns);
         List<Integer> headerIndex = new ArrayList<>();
         int ii = 0;
         for (String col : keyColumns) {
 
             int jj = 0;
             for (String headerCol : headerRow) {
-                ii++;
+
                 if (col.toLowerCase().equals(headerCol.toLowerCase())) {
                     headerIndex.add(jj);
+                    // System.out.println(jj + col);
                 }
+                jj++;
             }
             ii++;
         }
@@ -431,25 +433,40 @@ public class DataUtils {
         for (String[] row : csv) {
             String hashKey = "";
             String data = "";
+            // System.out.println("-------" + headerIndex);
             for (Integer keyColIndex : headerIndex) {
-                hashKey = hashKey + row[keyColIndex];
-                for (int i = 0; i < row.length; i++) {
-                    Integer iii = i;
 
-                    if (!headerIndex.contains(iii)) {
-                        data = data + row[i];
-                    }
-
-                }
-                String md5Hex = DigestUtils.md5Hex(data).toUpperCase();
-                if (algorithm.toLowerCase().equals("hash")) {
-
-                    mapCSVdata.put(hashKey, md5Hex);
-
+                if (hashKey.equals("")) {
+                    hashKey = row[keyColIndex].toUpperCase();
                 } else {
-                    mapCSVdata.put(hashKey, data);
+                    hashKey = hashKey + "-" + row[keyColIndex].toUpperCase();
                 }
             }
+            for (int i = 0; i < row.length; i++) {
+
+                // casting to Integer object to use in contains check
+                Integer iii = i;
+                // if this is not a key column it is a data column
+                if (!headerIndex.contains(iii)) {
+
+                    if (data.equals("")) {
+                        data = row[i];
+                    } else {
+                        data = data + "-" + row[i];
+                    }
+                }
+
+            }
+            String md5Hex = DigestUtils.md5Hex(data).toUpperCase();
+            if (algorithm.toLowerCase().equals("hash")) {
+
+                mapCSVdata.put(hashKey, md5Hex);
+
+            } else {
+
+                mapCSVdata.put(hashKey, data);
+            }
+
         }
 
         return mapCSVdata;
@@ -491,7 +508,7 @@ public class DataUtils {
 
         for (Map.Entry<String, String> entry : mapCSVdata1.entrySet()) {
             String keyCSV1 = entry.getKey();
-            String valCSV1 = entry.getValue();
+            String valCSV1 = entry.getValue().toUpperCase();
             String valCSV2 = mapCSVdata2.get(keyCSV1);
             if (!valCSV1.equals(valCSV2)) {
                 // add to final table
@@ -572,6 +589,156 @@ public class DataUtils {
         // }
         // }
         writeListToCSV(results, outFile);
+    }
+
+    public static void freeWayMigrateMulti(DbConn srcDbConn, List<DbConn> trgConns, String sql, String tableName,
+            int batchSize, boolean truncate) throws SQLException, IOException {
+        long runningBytes = 0;
+        long largestBytes = 0;
+        Statement stmt = srcDbConn.conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                java.sql.ResultSet.CONCUR_READ_ONLY);
+        stmt.setFetchSize(batchSize);
+
+        // org code
+        // String sql = String.Format("SELECT * FROM %s WHERE %s BETWEEN %d AND %d",
+        // tableName, primaryKey, min, max);
+        ResultSet rs = stmt.executeQuery(sql);
+        ResultSetMetaData metadata = rs.getMetaData();
+
+        int columnCount = metadata.getColumnCount();
+        List<Integer> binaryColIndex = new ArrayList<Integer>();
+        List<Integer> numberColIndex = new ArrayList<Integer>();
+        List<Integer> stringColIndex = new ArrayList<Integer>();
+        List<Integer> timeColIndex = new ArrayList<Integer>();
+
+        srcDbConn.logger.debug(sql);
+        String[] allColumnNames = new String[columnCount];
+        for (int i = 1; i <= columnCount; i++) {
+            String type = metadata.getColumnTypeName(i);
+
+            String columnName = metadata.getColumnName(i);
+            //System.out.println(columnName + "------" + type);
+            // For now; later create custom enum. "image" isn't supported by JAVA
+            List<String> dataTypes = Arrays.asList("VARBINARY", "BINARY", "CLOB", "BLOB", "IMAGE");
+            List<String> numDataTypes = Arrays.asList("TINYINT", "INT", "SMALLINT", "NUMERIC IDENTITY");
+            List<String> timeDataTypes = Arrays.asList("DATE", "TIMESTAMP", "DATETIME");
+
+            if (dataTypes.contains(type.toUpperCase())) {
+                binaryColIndex.add(i);
+            } else if (numDataTypes.contains(type.toUpperCase())) {
+                numberColIndex.add(i);
+            } else if (timeDataTypes.contains(type.toUpperCase())) {
+                timeColIndex.add(i);
+            }
+            else {
+                stringColIndex.add(i);
+            }
+            allColumnNames[i - 1] = columnName;
+        }
+
+        srcDbConn.logger.debug("640");
+        // List<String[]> data = new ArrayList<String[]>();
+        /*************************************** */
+        // build the insert
+        String columnsComma = String.join(",", allColumnNames);
+        String columnsQuestion = "?";
+        for (int jj = 0; jj < columnCount; jj++) {
+            if (jj > 0)
+                columnsQuestion = columnsQuestion + ",?";
+        }
+        String sqlInsert = "INSERT INTO " + tableName + " (" + columnsComma + ") VALUES (" + columnsQuestion + ")";
+        String sqlTruncate = "Truncate table " + tableName;
+
+        trgConns.forEach(dbconn -> {
+            // System.out.println(sqlInsert+"---------sql create stmnt");
+            try {
+                dbconn.stmt = dbconn.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            } catch (SQLException e) {
+                srcDbConn.logger.debug(e);
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            try {
+                if (truncate) {
+                    dbconn.ps = dbconn.conn.prepareStatement(sqlTruncate);
+                    System.out.println(sqlTruncate);
+                    dbconn.ps.execute();
+                    dbconn.ps.close();
+                }
+                dbconn.ps = dbconn.conn.prepareStatement(sqlInsert);
+                dbconn.lastPSSql = sqlInsert;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        int ii = 0;
+        while (rs.next()) {
+            ii++;
+
+            for (int stringIdx : stringColIndex) {
+                String xxx = rs.getString(stringIdx);
+                if (xxx != null) {
+                    if (xxx.getBytes().length > largestBytes)
+                        largestBytes = xxx.getBytes().length;
+                    runningBytes += xxx.getBytes().length;
+                }
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.setString(stringIdx, xxx);
+                }
+            }
+            for (int numIdx : numberColIndex) {
+                String dataItem = rs.getString(numIdx);
+                for (DbConn trgConn : trgConns) {
+                    if (dataItem == null) {
+                        trgConn.ps.setNull(numIdx, java.sql.Types.INTEGER);
+
+                    } else {
+                        trgConn.ps.setInt(numIdx, Integer.valueOf(dataItem));
+                    }
+                }
+            }
+            for (int imgIdx : binaryColIndex) {
+                byte[] dataItem = rs.getBytes(imgIdx);
+
+                if (dataItem.length > largestBytes) {
+                    largestBytes = dataItem.length;
+                }
+                runningBytes += dataItem.length;
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.setBytes(imgIdx, dataItem);
+                }
+            }
+            for (int idx : timeColIndex) {
+                java.sql.Date dataItem = rs.getDate(idx);
+                for (DbConn trgConn : trgConns) {
+                    trgConn.ps.setDate(idx, dataItem);
+                }
+            }
+            for (DbConn trgConn : trgConns) {
+                trgConn.ps.addBatch();
+            }
+
+            if (Math.floorMod(ii, batchSize) == 0) {
+                // Execute the batch every 1000 rows
+                for (DbConn trgConn : trgConns) {
+                    trgConn.flushReset();
+                    runningBytes = 0;
+                    largestBytes = 0;
+                    if (Math.floorMod(2 * ii, batchSize) == 0)
+                        System.gc();
+
+                }
+            }
+        }
+        for (DbConn trgConn : trgConns) {
+            trgConn.ps.executeBatch();
+            trgConn.stmt.close();
+        }
+
+        rs.close();
+        stmt.close();
+
     }
 
     public static void freeWayMigrate(DbConn srcDbConn, List<DbConn> trgConns, List<String> tableNames, int batchSize,
@@ -745,8 +912,9 @@ public class DataUtils {
                         System.out.println("heapsize: " + convertToStringRepresentation(heapSize));
                         System.out.println("heapmaxsize: " + convertToStringRepresentation(heapMaxSize));
                         System.out.println("heapFreesize: " + convertToStringRepresentation(heapFreeSize));
-                        System.out.println("Batch Memory Size: " + (runningBytes / 1048576) + " MBs");
-                        System.out.println("Largest Size: " + convertToStringRepresentation(largestBytes) + " MBs");
+                        System.out.println("Batch Memory Size: " + convertToStringRepresentation(runningBytes));
+                        // System.out.println("Largest Size: " +
+                        // convertToStringRepresentation(largestBytes) + " MBs");
 
                         trgConn.flushReset();
 

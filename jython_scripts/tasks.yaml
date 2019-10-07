@@ -5,11 +5,28 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     writePath: ./tabledump2/
+
+# TableInformation:
+#   sys-dev:
+#     schemaOrOwner: dbo
+#     fileName: ./reports/tableinfo.csv
+#   sys-dev1:
+#     schemaOrOwner: dbo
+#     fileName: ./reports/tableinfo2.csv
+# QueryToCSV:
+#   sys-dev:
+#     create: 
+#       - writePath: ./reports/test1.csv
+#         sql: SELECT * FROM dbo.monBucketPool
+#       - writePath: ./reports/test2.csv
+#         sql: SELECT * FROM dbo.monBucketPool
+#       - writePath: ./reports/test3.csv
+#         sql: SELECT * FROM dbo.monBucketPool
 # TableRowCount:
 #   oracle-dev:
 #     schemaOrOwner: dbo
 #     fileName: ./table_rowcount.csv
-#   sys-dev1:
+#   sys-dev:
 #     schemaOrOwner: dbo
 #     fileName: ./table_rowcount2.csv
 # TableSampleCheckSum:
@@ -35,7 +52,10 @@ moveDataToDatabases:
   sys-dev:
     targetConnections: sys-dev1
     batchSize: 500
-    truncate: true
+    truncate: false
     tableNames:
-      - spt_values
-      - spt_limit_types
+      - mockData1
+      #- spt_limit_types
+    threads: 2
+    primary_column: 
+      - record_id

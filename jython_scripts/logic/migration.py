@@ -1,15 +1,19 @@
 import os
 import DataUtils
+import copy
+import datetime
+
+from multi import FreeWay
 
 import java.lang.Object
 from java.util import HashMap
-
+import logging
 import jarray
 import DbConn
 
 import csv
 import md5
-from  .parse_proc import *
+from .parse_proc import *
 
 class TableDump(object):
 
@@ -44,20 +48,32 @@ class TableRowCount(object):
         path = os.path.abspath(fileName)
         tableCount = []
         x = (dbConn.getTableNames(schemaOrOwner))
+        y = (dbConn.getViewNames(schemaOrOwner))
         for a in x:
             tmp = []
             tmp.append(a)
-            zz = []
+             
             try:
-                zz = dbConn.queryToList(
+                zz = dbConn.getAValue(
                     'select count(*) from {0}.{1}'.format(schemaOrOwner, a))
-                for b in zz:
-                    for c in b:
-                        tmp.append(c)
+                tmp.append(zz)
                 tableCount.append(tmp)
             except:
+                logging.exception(Exception)
+                #print("Error Querying Table: {}\n{}".format(a,e))
                 tableCount.append([a, 'SQL Execute Error'])
-
+        for a in y:
+            tmp = []
+            tmp.append(a)
+             
+            try:
+                zz = dbConn.getAValue(
+                    'select count(*) from {0}.{1}'.format(schemaOrOwner, a))
+                tmp.append(zz)
+                tableCount.append(tmp)
+            except:
+                logging.exception(Exception)
+                tableCount.append([a, 'SQL Execute Error'])
         header = ["TableName", "RowCount"]
         outPutTable = csv.writer(open(path, 'w'), delimiter=',',
                                  quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
@@ -71,11 +87,31 @@ class TableRowCount(object):
 class TableInformation(object):
     def __init__(self, dbConn, schemaOrOwner, fileName):
         tables = dbConn.getAllTableColumnAndTypes(schemaOrOwner)
+        header=["TableName","Column","JDBCTYPE"]
         output = []
+        output.append(header)
         for tbl in tables:
-            output.append(tbl.TableInformation())
-        tblout = csv.writer(open(fileName, 'w'), delimiter=',', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL)
+            tablename=""
+            for col in tbl.TableInformation():
+                x=[]
+
+                y=col.split(',')
+                
+                
+                if(len(y)==2): 
+                    z=y[1].split(':')
+                    x.append(tablename[0].upper())
+                    #x.append(y[0].upper())
+                    x.append(z[0].upper())
+                    x.append(z[1].upper())
+                 
+                    output.append(x)
+                else:
+                    tablename=y
+            #output.append(tbl.TableInformation())
+        tblout = csv.writer(open(fileName, 'w'), delimiter=',', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_ALL )
         for row in output:
+
             tblout.writerow(row)
 
 class TableSampleCheckSum(object):
@@ -90,7 +126,8 @@ class TableSampleCheckSum(object):
 
         if str(dbConn.dbType) == 'SYBASE':
             sql = 'select TOP {2} * from {0}.{1}'
-
+        if str(dbConn.dbType) == 'ORACLE':
+            sql = 'select * from {0}.{1} WHERE ROWNUM <= {2}'
         for a in x:
 
             try:
@@ -141,25 +178,88 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
-     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate):
-        DataUtils.freeWayMigrate(dbConn, targetConnections,tableNames,batchSize,truncate)
+    tableNames = []
+    def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,primary_column=None,threads=None):
+        self.tableNames = tableNames
+
+        if (threads and primary_column) and threads is not 0:
+            thread_nums = []
+            for table, key in zip(tableNames, primary_column):
+                table_min = int(dbConn.getAValue("SELECT min({0}) FROM {1}".format(key, table)))
+                table_max = int(dbConn.getAValue("SELECT MAX({0}) FROM {1}".format(key, table)))
+
+                per_thread = table_max/threads
+                print("table_min: {0} | table_max: {1} | per_thread: {2}".format(table_min, table_max, per_thread))
+                prev = 0
+                for i in range(threads):
+                    targets = []
+                    copy_dbConn = self.cloner(dbConn)
+                    for x in targetConnections:
+                        targets.append(self.cloner(x))
+
+                    prev+=per_thread
+                    if i == 0:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, key, table_min, per_thread)
+                    elif i == threads-1: # Last thread takes care of the rest
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, key, (per_thread*i)+1, table_max)
+                    else:
+                        query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, key, (per_thread*i)+1, prev)
+                    print("thread {0} | {1}".format(i, query))
+                    #self.identityManagement(targets)
+                    fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
+                    thread_nums.append(fr)
+            self.execute(thread_nums, threads)
+        else:
+            DataUtils.freeWayMigrate(dbConn, targetConnections, tableNames,batchSize,truncate)
+
+    def cloner(self, con):
+        tmp = con.clone()
+        tmp.reConnect()
+        return tmp
+
+    def identityManagement(self, targets, on=True):
+        for targ in targets:
+            for table in self.tableNames:
+                targ.executeSql("SET IDENTITY_INSERT {0} {1}".format(table, "ON" if on else "OFF"))
+
+    # https://github.com/jython/book/blob/master/src/chapter19/test_completion.py
+    def execute(self, frees, threads):
+        from java.util.concurrent import Executors, ExecutorCompletionService
+        pool = Executors.newFixedThreadPool(threads)
+        ecs = ExecutorCompletionService(pool)
+        for f in frees:
+            ecs.submit(f)
+
+        submitted = len(frees)
+        while submitted > 0:
+            result = ecs.take().get()
+            print str(result)
+            submitted -= 1
 
 class quertyToCSVOutputBinary(object):
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):
         limit=""
         top=""
+        modded_sql=sql
         if str(dbConn.dbType) == 'SYBASE' and rowlimit>0:
-            top='TOP {}'.format(rowlimit)
+            top='TOP {} '.format(rowlimit)
+            modded_sql=sql.replace("select ","select {}".format(TOP))
              
-        if str(dbConn.dbType) != 'SYBASE' and rowlimit>0:
-            limit='LIMIT {}'.format(rowlimit)
-            
+        elif str(dbConn.dbType) == 'ORACLE' and rowlimit>0:
+            limit=' WHERE ROWNUM <= {2}'.format(rowlimit)
+            if sql.contains(' where '):
+                limit=limit.replace(" WHERE ", " AND ")
+            modded_sql=sql+limit
+        elif rowlimit>0:
+            limit=' LIMIT {2}'.format(rowlimit)
+            modded_sql=sql+limit
+
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
             os.makedirs(directory)
         fqn = os.path.abspath(writePath)
-        print(fqn,sql)
-        dbConn.quertyToCSVOutputBinary(sql, fqn)
+        print(fqn,modded_sql)
+        dbConn.quertyToCSVOutputBinary(modded_sql, fqn)
             
     def __repr__(self):
         return str(self.__dict__)
@@ -178,6 +278,7 @@ class CompareCsv(object):
     def __init__(self, csv1, csv2, outfile, key_columns,reportHeader,algorithm="hash"):
         csv1=os.path.abspath(csv1)
         csv2=os.path.abspath(csv2)
+        print("Comparying CSV: \n\t{}\n\t{}\nOutfile: {}".format(csv1,csv2,outfile))
          
         DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)
 

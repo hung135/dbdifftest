@@ -39,7 +39,7 @@ import DatabaseObjects.Table;
 import Nums.DbType;
 import Utils.JLogger;
 
-public class DbConn {
+public class DbConn implements Cloneable{
     public Connection conn;
     // private Statement stmt; // tbd
     // final static Logger logger = Logger.getLogger(DbConn.class);
@@ -50,8 +50,15 @@ public class DbConn {
     public DbType dbType;
     public String databaseName;
     public String url;
+    public String username;
+    public String password;
+    public String  host;
+    public String port ;
     public Logger logger;
 
+    public DbConn clone() throws CloneNotSupportedException {
+        return (DbConn) super.clone();
+}
     /**
      * an attemp to release resource
      * 
@@ -71,47 +78,43 @@ public class DbConn {
         return this.url;
     }
 
-    public DbConn(DbType dbtype, String userName, String password, String host, String port, String databaseName,
+    public DbConn(DbType dbType, String userName, String password, String host, String port, String databaseName,
             JLogger jLogger) throws SQLException, PropertyVetoException, ClassNotFoundException {
 
-        this.dbType = dbtype;
+        this.dbType = dbType;
         this.databaseName = databaseName;
+        this.username = userName;
+        this.password = password;
+        this.host= host;
+        this.port = port;
+        String url = MessageFormat.format(dbType.url(), host, port, databaseName);
         this.logger = jLogger.logger;
-
-        String url = MessageFormat.format(dbtype.url(), host, port, databaseName);
+ 
         this.url = url;
         Properties props = new Properties();
         props.setProperty("user", userName);
         props.setProperty("password", password);
-        Class.forName(dbtype.driver());
+        
+        Class.forName(dbType.driver());
         this.conn = DriverManager.getConnection(url, props);
         // MemoryListener.BindListeners(); // disabled for now
-        System.out.println("Connect to Database: " + this.url);
+        //System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
-
-    public Connection dbGetConnPool(String driver, String jdbcUrl, String userName, String password)
-            throws SQLException, PropertyVetoException {
-
-        ComboPooledDataSource cpds = new ComboPooledDataSource();
-        cpds.setDriverClass(driver);
-
-        cpds.setJdbcUrl(jdbcUrl);
-        cpds.setUser(userName);
-        cpds.setPassword(password);
-        cpds.setMinPoolSize(5);
-        cpds.setAcquireIncrement(5);
-        cpds.setMaxPoolSize(20);
-        cpds.setMaxIdleTime(60);
-        cpds.setMaxStatements(100);
-        cpds.setPreferredTestQuery("SELECT 1");
-        cpds.setIdleConnectionTestPeriod(60);
-        cpds.setTestConnectionOnCheckout(true);
-
-        Connection conn = cpds.getConnection();
-        return conn;
+    public void reConnect() throws ClassNotFoundException, SQLException {
+        
+        Properties props = new Properties();
+        props.setProperty("user", this.username);
+        props.setProperty("password", this.password);
+        Class.forName(this.dbType.driver());
+        /**setting to null because closing the connection may close the memory 
+         * location of the other conns this was cloned from
+         */
+        this.conn=null;
+        this.conn = DriverManager.getConnection(this.url, props);
+        //System.out.println("Re-Connected to Database: " + this.url);
     }
-
+ 
     public Connection getSybaseConn(String userName, String password, String host, String databasename, String port)
             throws SQLException {
         Connection conn = null;
@@ -159,14 +162,15 @@ public class DbConn {
 
         for (String tblName : tables) {
             Table tbl = new Table(tblName);
-            ResultSet rs = metadata.getColumns(this.databaseName, null, tblName, null);
+            ResultSet rs = metadata.getColumns(this.databaseName, schemaName, tblName, null);
             ResultSetMetaData rsMetaData = rs.getMetaData();
 
             for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
                 String colName = rsMetaData.getColumnName(i);
                 String type = rsMetaData.getColumnTypeName(i);
+                //System.out.println("Table: " + tblName + "ColName: " + colName + ":" + type);
                 this.logger.debug("Table: " + tblName + "ColName: " + colName + ":" + type);
-                tbl.columns.add(new Column(colName, type));
+                tbl.columns.add(new Column(colName, type,i));
             }
             items.add(tbl);
         }
@@ -312,6 +316,27 @@ public class DbConn {
         rs.close();
         stmt.close();
         return hasRecords;
+    }
+
+    /**
+     * Given a query will return the 1st column on the first row. Yes just that
+     * simple
+     * 
+     * @param selectQuery
+     * @return
+     * @throws Exception
+     */
+    public String getAValue(String selectQuery) throws Exception {
+
+        String aValue = null;
+        Statement stmt = this.conn.createStatement();
+        this.rs = stmt.executeQuery(selectQuery);
+        if (this.rs.next() == true) {
+            aValue = rs.getString(1);
+        }
+        rs.close();
+        stmt.close();
+        return aValue;
     }
 
     public List<String[]> queryToList(String selectQuery) throws Exception {
@@ -524,24 +549,31 @@ public class DbConn {
         }
         String columns = String.join(",", question);
         String sql = "Insert into " + tableName + " values(" + columns + ")";
+        System.out.println(sql);
 
         preparedStatement = this.conn.prepareStatement(sql);
 
         // CSVFormat fmt =
         // CSVFormat.DEFAULT.withDelimiter(',').withQuote('"').withRecordSeparator("\r\n");
 
-        Reader file = new FileReader("path/to/file.csv");
+        Reader file = new FileReader(filePath);
 
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(file);
         for (CSVRecord record : records) {
-            for (int i = 1; i < tableColumns.size(); i++) {
-                preparedStatement.setString(i, record.get(tableColumns.get(i)));
+            for (int i = 1; i <= tableColumns.size(); i++) {
+                // TO remove. Better to check column types
+                if (i == 1){
+                    int val = Integer.parseInt(record.get(tableColumns.get(i-1)));
+                    preparedStatement.setInt(i, val);
+                } else{
+                    preparedStatement.setString(i, record.get(tableColumns.get(i-1)));
+                }
             }
             preparedStatement.addBatch();
         }
 
         int[] affectedRecords = preparedStatement.executeBatch();
-        System.out.println("Total rows Inserted: " + affectedRecords);
+        System.out.println("Total rows Inserted: " + affectedRecords.length);
         preparedStatement.close();
 
     }

@@ -3,6 +3,7 @@ import os
 import argparse
 import csv
 import datetime
+import time
 # <<<<<<< HEAD
 # import os 
 # #windows make sure you use c:\\xxx\\file.jar
@@ -11,7 +12,7 @@ import datetime
 # sys.path.append(jarpath)
 # # =======
 import importlib
-
+import logging
 #JAVA ITEMS
 sys.path.append("/workspace/target/DbTest-jar-with-dependencies.jar")
 sys.path.append("./DbTest-jar-with-dependencies.jar")
@@ -117,8 +118,9 @@ def task_execution(databases_connections, task_config):
                         class_ = getattr(module, task.key)
                         instance = class_(**task.parameters[con_key])
                 else:
-                    log.debug("Task {0} with {1} not found".format(task.key, con_key))
-
+                     
+                    logging.debug("Task {0} with {1} not found".format(task.key, con_key))
+                    
 def export_results(rows, filename):
     with open(filename, "w+") as csvfile:
         writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)
@@ -137,10 +139,13 @@ def execute(args):
     setup_logger(args.v)
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
+    import time
+    start_time = time.time()
     task_execution(databases_connections, task_config)
+    print("--- %s seconds ---" % (time.time() - start_time))
     print("Task execution complete")
-
 
 if __name__ == "__main__":
     args = parse_cli()
     execute(args)
+    sys.exit(1)

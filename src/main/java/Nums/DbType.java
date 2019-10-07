@@ -17,7 +17,7 @@ public enum DbType {
     }
 
     public String driver() {
-        System.out.print(this.driver);
+        //System.out.print(this.driver);
         return driver;
     }
 

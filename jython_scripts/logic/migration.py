@@ -177,8 +177,8 @@ class QueryToCSV(object):
         return str(self.__dict__)
 
 class moveDataToDatabases(object):
-    def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,primary_column,threads=None):
-        if threads and threads is not 0:
+    def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,primary_column=None,threads=None):
+        if (threads and primary_column) and threads is not 0:
             thread_nums = []
             for table in tableNames:
                 table_min = int(dbConn.getAValue("SELECT min({0}) FROM {1}".format(primary_column, table)))
@@ -190,7 +190,6 @@ class moveDataToDatabases(object):
                 for i in range(threads):
                     targets = []
                     copy_dbConn = self.cloner(dbConn)
-                    copy_dbConn.reConnect()
                     for x in targetConnections:
                         targets.append(self.cloner(x))
 
@@ -201,6 +200,7 @@ class moveDataToDatabases(object):
                         query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, table_max)
                     else:
                         query = "SELECT * FROM {0} WHERE {1} BETWEEN {2} AND {3}".format(table, primary_column, per_thread*i, prev)
+                    #print("thread {0} | {1}".format(i, query))
                     fr = FreeWay(copy_dbConn, targets, table, query, batchSize, truncate)
                     thread_nums.append(fr)
             self.execute(thread_nums, threads)
@@ -223,7 +223,7 @@ class moveDataToDatabases(object):
         submitted = len(frees)
         while submitted > 0:
             result = ecs.take().get()
-            print result
+            print str(result)
             submitted -= 1
 
 class quertyToCSVOutputBinary(object):

@@ -98,7 +98,7 @@ public class DbConn implements Cloneable{
         Class.forName(dbType.driver());
         this.conn = DriverManager.getConnection(url, props);
         // MemoryListener.BindListeners(); // disabled for now
-        System.out.println("Connect to Database: " + this.url);
+        //System.out.println("Connect to Database: " + this.url);
         // System.out.println("DB Connection Successful: " + dbtype);
     }
     public void reConnect() throws ClassNotFoundException, SQLException {
@@ -112,7 +112,7 @@ public class DbConn implements Cloneable{
          */
         this.conn=null;
         this.conn = DriverManager.getConnection(this.url, props);
-        System.out.println("Re-Connected to Database: " + this.url);
+        //System.out.println("Re-Connected to Database: " + this.url);
     }
  
     public Connection getSybaseConn(String userName, String password, String host, String databasename, String port)

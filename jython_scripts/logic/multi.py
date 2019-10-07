@@ -36,8 +36,8 @@ class FreeWay(Callable):
         self.thread_used = threading.currentThread().getName()
         self.started = time.time()
         try:
-            print(self.con, self.targets, self.query, self.table)
             DataUtils.freeWayMigrateMulti(self.con, self.targets, self.query, self.table, self.batchSize, self.truncate)
+            print("completed")
         except Exception as ex:
             self.exception = ex
         self.completed = time.time()

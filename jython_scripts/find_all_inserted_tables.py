@@ -92,26 +92,26 @@ db = DbConn(x, "sa", "myPassword", "dbsybase", "5000", "master", logger)
 # for y in queryList:
 #   print(y)
 
-# statement = """
-# CREATE TABLE mockData1 (
-#   record_id numeric(5,0) identity not null
-#   email_Id VARCHAR(500),
-#   prefix VARCHAR(500),
-#   name VARCHAR(500),
-#   city VARCHAR(500),
-#   state VARCHAR(500),
-#   country VARCHAR(500),
-# )
-# """
+statement = """
+CREATE TABLE mockData1 (
+  record_id numeric(5,0) identity not null,
+  email_Id VARCHAR(500),
+  prefix VARCHAR(500),
+  name VARCHAR(500),
+  city VARCHAR(500),
+  state VARCHAR(500),
+  country VARCHAR(500),
+)
+"""
 
 # statement = """
 # alter table mockData1
 #     add record_id numeric(5,0) identity not null
 # """
 
-statement = """
-SELECT * FROM mockData1 WHERE record_id BETWEEN 25 AND 300
-"""
+# statement = """
+# SELECT * FROM mockData1 WHERE record_id BETWEEN 25 AND 300
+# """
 
 #x = DataUtils.downloadImage(db.conn, "blobtest", "img", 2, "/workspace/out.png")
 # db.queryToCSVWithBinary(statement, "/workspace/output/")

@@ -13,15 +13,22 @@
 #   sys-dev1:
 #     schemaOrOwner: dbo
 #     fileName: ./reports/tableinfo2.csv
-# QueryToCSV:
-#   sys-dev:
-#     create: 
-#       - writePath: ./reports/test1.csv
-#         sql: SELECT * FROM dbo.monBucketPool
-#       - writePath: ./reports/test2.csv
-#         sql: SELECT * FROM dbo.monBucketPool
-#       - writePath: ./reports/test3.csv
-#         sql: SELECT * FROM dbo.monBucketPool
+QueryToCSV:
+  sys-dev:
+    create: 
+      - writePath: ./reports/{qualifier}.csv
+        sql: SELECT * FROM dbo.monBucketPool
+      - writePath: ./reports/{taskName}.csv
+        sql: SELECT * FROM dbo.monBucketPool
+    #   - writePath: ./reports/test3.csv
+    #     sql: SELECT * FROM dbo.monBucketPool
+    create2: 
+      - writePath: ./reports/{connection}_{thismonth}.csv
+        sql: SELECT * FROM dbo.monBucketPool
+    #   - writePath: ./reports/test2.csv
+    #     sql: SELECT * FROM dbo.monBucketPool
+    #   - writePath: ./reports/test3.csv
+    #     sql: SELECT * FROM dbo.monBucketPool
 # TableRowCount:
 #   oracle-dev:
 #     schemaOrOwner: dbo
@@ -48,14 +55,14 @@
 #         filePath: ./md5/table_row_checksum2.csv
 #       - tableName: test3
 #         filePath: ./md5/table_row_checksum3.csv
-moveDataToDatabases:
-  sys-dev:
-    targetConnections: sys-dev1
-    batchSize: 500
-    truncate: false
-    tableNames:
-      - mockData1
-      #- spt_limit_types
-    threads: 2
-    primary_column: 
-      - record_id
+# moveDataToDatabases:
+#   sys-dev:
+#     targetConnections: sys-dev1
+#     batchSize: 500
+#     truncate: false
+#     tableNames:
+#       - mockData1
+#       #- spt_limit_types
+#     threads: 2
+#     primary_column: 
+#       - record_id

@@ -138,12 +138,12 @@ def setup_logger(log_type=None):
 def execute(args):
     setup_logger(args.v)
     db_config, task_config = readyaml(args.y, args.t)
-    databases_connections = create_db_connections(db_config)
-    import time
-    start_time = time.time()
-    task_execution(databases_connections, task_config)
-    print("--- %s seconds ---" % (time.time() - start_time))
-    print("Task execution complete")
+    # databases_connections = create_db_connections(db_config)
+    # import time
+    # start_time = time.time()
+    # task_execution(databases_connections, task_config)
+    # print("--- %s seconds ---" % (time.time() - start_time))
+    # print("Task execution complete")
 
 if __name__ == "__main__":
     args = parse_cli()

@@ -11,6 +11,19 @@ RUNTIME_CONSTANTS = {"{today}": now.strftime("%Y-%m-%d") ,
 }
 
 class Task(object):
+    """
+    Task object that defines a list of actions
+
+    Attributes
+    ----------
+    key: str
+        Identifier for tasks (i.e: TASKNAME)
+    parameters: dict
+        Parameters for the task
+    e: str
+        Errors
+    """
+
     key = None
     parameters = {}
     e = None
@@ -20,6 +33,24 @@ class Task(object):
         self._set_values(hashMap)
 
     def _set_runtime(self, values, connection, qualifier=None, reg=True):
+        """
+        Set's the runtime variables if any are found
+
+        Example:
+            writePath: ./reports/{taskName}_{today}_testing.csv
+            Would replace {taskName} and {today} with actual values
+        
+        Parameters
+        ----------
+        values: list, str
+            Values to search into
+        connection: str
+            Name of connection
+        qualifier: str
+            Name of qualifier (I.e from YAML: TaskName: Connection: Qualifier: Parameters)
+        reg: str
+            value is not a list its a str
+        """
         runtime = {"{qualifier}": qualifier, "{taskName}": self.key, "{connection}": connection}
         runtime.update(RUNTIME_CONSTANTS)
         if reg:
@@ -32,12 +63,20 @@ class Task(object):
         return values
 
     def _set_values(self, hashMap):
+        """
+        Sets values based on the task YAML
+
+        Parameters
+        ----------
+        hashMap: Java.HashMap
+            Values from YAML
+        """
         try:
             params = {}
             for task in hashMap.entrySet():
                 operation = {}
                 for op_type in task.value.entrySet():
-                    if op_type.key in ["targetConnections", "tableNames", "primary_column"]
+                    if op_type.key in ["targetConnections", "tableNames", "primary_column"]:
                         operation[op_type.key] =  op_type.value
                     elif isinstance(op_type.value, (str, unicode)):
                         operation[op_type.key] =  self._set_runtime(op_type.value, task.key)

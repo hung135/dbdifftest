@@ -4,13 +4,11 @@ import argparse
 import csv
 import datetime
 import time
-# <<<<<<< HEAD
 # import os 
 # #windows make sure you use c:\\xxx\\file.jar
 # jarpath=os.path.abspath("./DbTest-jar-with-dependencies.jar")
 # #JAVA ITEMS
 # sys.path.append(jarpath)
-# # =======
 import importlib
 import logging
 #JAVA ITEMS
@@ -43,6 +41,21 @@ from objects.task import Task
 logger = None
 
 def readyaml(db_yaml, task_yaml):
+    """
+    Reads two yaml files, databaseConnections and tasks, from the paths specified into the program.
+
+    Parameters
+    ----------
+    db_yaml: str
+        YAML path specified for database connections
+    yaml_path: str
+        YAML path specified for tasks
+
+    Returns
+    -------
+    database_objects, tasks: dict, list(dict)
+        Values of the yaml file
+    """
     parser = YamlParser() # NOT THREAD SAFE
     parsed_db_yaml = parser.ReadYAML(db_yaml)
     parsed_task_yaml = parser.ReadYAML(task_yaml)
@@ -58,6 +71,19 @@ def readyaml(db_yaml, task_yaml):
 
 # Returns {database.key: conn}
 def create_db_connections(database_objects):
+    """
+    Creates database connections based on the connection's yaml inputed
+
+    Parameters
+    ----------
+    database_objects: list(dict)
+        List of dictionaries containing configurations to connect to databases
+
+    Returns
+    -------
+    database_connections: list
+        List of DBConn objects
+    """
     databases_connections = {}
     for base in database_objects:
         baseConnection = DbType.getMyEnumIfExists(base.dbtype)
@@ -68,15 +94,15 @@ def create_db_connections(database_objects):
             baseConnection[base.key] = None
     return databases_connections
  
-
-def execute_sql_test_sysbase(connection, task):
-    if "sql" in task.keys():
-        result = connection.queryToList(task["sql"])
-        return result
-    else:
-        return "Operation not supported yet"
-
 def parse_cli():
+    """
+    Parses CLI input
+
+    Returns
+    -------
+    args: dict
+        List of arguments
+    """
     parser = argparse.ArgumentParser(description='Process a yaml file')
     parser.add_argument("-y", help="Location of the yaml file", required=True)
     parser.add_argument("-t", help="Location of tasks folder", required=True)
@@ -85,6 +111,16 @@ def parse_cli():
     return args 
 
 def task_execution(databases_connections, task_config):
+    """
+    Executes each task specified in the task's config YAML
+
+    Parameters
+    ----------
+    database_connections: dict
+        {"database_connection_name": DbConn, ...}
+    task_config: list(Task)
+        List of task objects defined in the task's YAML
+    """
     for task in task_config:
         print("Running task: {0}".format(task.key))
         if task.e:
@@ -121,12 +157,15 @@ def task_execution(databases_connections, task_config):
                      
                     logging.debug("Task {0} with {1} not found".format(task.key, con_key))
                     
-def export_results(rows, filename):
-    with open(filename, "w+") as csvfile:
-        writer = csv.writer(csvfile, delimiter=",",lineterminator='\n',quotechar='"',quoting=csv.QUOTE_ALL)
-        writer.writerows(rows)
-
 def setup_logger(log_type=None):
+    """
+    Sets the logger up based on CLI args
+
+    Parameters
+    ----------
+    log_type: str
+        name of type of log [all, debug, default, warning]
+    """
     global logger
     try:
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", log_type if log_type else "default")
@@ -136,16 +175,24 @@ def setup_logger(log_type=None):
         sys.exit(1)
 
 def execute(args):
+    """
+    Initial function that begins program execution
+
+    Parameters
+    ----------
+    args: dict
+        CLI Arguments
+    """
     setup_logger(args.v)
     db_config, task_config = readyaml(args.y, args.t)
     databases_connections = create_db_connections(db_config)
-    import time
-    start_time = time.time()
     task_execution(databases_connections, task_config)
-    print("--- %s seconds ---" % (time.time() - start_time))
     print("Task execution complete")
 
 if __name__ == "__main__":
+    import time 
+    start_time = time.time()
     args = parse_cli()
     execute(args)
     sys.exit(1)
+    print("--- %s seconds ---" % (time.time() - start_time))

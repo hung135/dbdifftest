@@ -58,8 +58,8 @@ def compare(fileName1, filename2):
     DataUtils.compareCSV(default.format(fileName1), default.format(filename2), default.format("compare"), keys, "name,Temp,Master","hash")
 
 def pipeline(db_master, db_temp):
-    drop_table(db_master)
-    drop_table(db_temp)
+    # drop_table(db_master)
+    # drop_table(db_temp)
 
     create_db_non_binary(db_master)
     create_db_non_binary(db_temp)

@@ -16,7 +16,20 @@ import md5
 from .parse_proc import *
 
 class TableDump(object):
-
+    """
+    Dumps a table's rows
+    
+    Parameters
+    ----------
+    dbConn: DBConn (JAVA object)
+        Database connection to use
+    schemaOrOwner: str
+        Schema or owner (i.e: dbo or myTable or dbo.myTable)
+    writePath: str
+        Output path
+    rowlimit: int default=0
+        Max limit to save
+    """
     def __init__(self, dbConn, schemaOrOwner, writePath,rowlimit=0):
         limit=""
         top=""
@@ -44,6 +57,20 @@ class TableDump(object):
 
 
 class TableRowCount(object):
+    """
+    Gets a table's row count and appends the result to CSV file
+    
+    Parameters
+    ----------
+    dbConn: DBConn (JAVA object)
+        Database connection to use
+    schemaOrOwner: str
+        Schema or owner (i.e: dbo or myTable or dbo.myTable)
+    fileName: str
+        Output path
+    Returns
+    -------
+    """
     def __init__(self, dbConn, schemaOrOwner, fileName):
         path = os.path.abspath(fileName)
         tableCount = []
@@ -85,6 +112,18 @@ class TableRowCount(object):
         return str(self.__dict__)
 
 class TableInformation(object):
+    """
+    Gets a table's column information (types)
+    
+    Parameters
+    ----------
+    dbConn: DBConn (JAVA object)
+        Database connection to use
+    schemaOrOwner: str
+        Schema or owner (i.e: dbo or myTable or dbo.myTable)
+    fileName: str
+        Output path
+    """
     def __init__(self, dbConn, schemaOrOwner, fileName):
         tables = dbConn.getAllTableColumnAndTypes(schemaOrOwner)
         header=["TableName","Column","JDBCTYPE"]
@@ -115,6 +154,20 @@ class TableInformation(object):
             tblout.writerow(row)
 
 class TableSampleCheckSum(object):
+    """
+    Saves a MD5 hash for sampleSize number of rows for a table
+    
+    Parameters
+    ----------
+    dbConn: DBConn (JAVA object)
+        Database connection to use
+    schemaOrOwner: str
+        Schema or owner (i.e: dbo or myTable or dbo.myTable)
+    writePath: str
+        Output path
+    sampleSize: int
+        limit
+    """
     def __init__(self, dbConn, schemaOrOwner, writePath, sampleSize):
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
@@ -157,14 +210,37 @@ class TableSampleCheckSum(object):
         return str(self.__dict__)
 
 
-# ToDos this in the works
 class TableLoadCsv(object):
+    """
+    TODO: This is in the works
+    Bulk loading multiple CSV's into multiple tables
+    
+    Parameters
+    ----------
+    dbConn: DBConn (JAVA object)
+        Database connection to use
+    schemaOrOwner: str
+        Schema or owner (i.e: dbo or myTable or dbo.myTable)
+    file_tables: list(dict)
+        tableName: table to load into
+        filePath: path to CSV
+    """
     def __init__(self, dbConn, schemaOrOwner, files_tables):
         for tableName, filePath in files_tables:
-
             print("Mocking Loading csv: ", tableName, filePath)
 
 class QueryToCSV(object):
+    """
+    Executes a query to a CSV
+    
+    Parameters
+    ----------
+    dbConn: DBConn (JAVA object)
+        Database connection to use
+    create: list(dict)
+        writePath: output
+        sql: statment to execute
+    """
     def __init__(self, dbConn, create):
         for process in create:
             directory = os.path.dirname(process["writePath"])
@@ -179,6 +255,26 @@ class QueryToCSV(object):
 
 class moveDataToDatabases(object):
     tableNames = []
+    """
+    Moves data from one Database's table to multiple other database connections
+    
+    Parameters
+    ----------
+    dbConn: DbConn (Custom JAVA class)
+        database connection
+    targetConnections: List(DbConn)
+        databaes to target
+    tableNames:
+        target tables fro the connection
+    batchsize: int
+        max batch size before a manual garbage collection happens
+    truncate: bool
+        truncate the original tabl
+    primary_column:
+        primary column (primary key)
+    threads:
+        number of threads
+    """
     def __init__(self, dbConn, targetConnections,tableNames,batchSize,truncate,primary_column=None,threads=None):
         self.tableNames = tableNames
 
@@ -213,17 +309,49 @@ class moveDataToDatabases(object):
             DataUtils.freeWayMigrate(dbConn, targetConnections, tableNames,batchSize,truncate)
 
     def cloner(self, con):
+        """
+        Clones a database connection and reconnects it
+        
+        Parameters
+        ----------
+        con: DbConn (Custom JAVA class)
+            database connection
+        Returns
+        -------
+        tmp: dbConn
+            Cloned database connection
+        """
         tmp = con.clone()
         tmp.reConnect()
         return tmp
 
     def identityManagement(self, targets, on=True):
+        """
+        If their is a primary key this set the IDENTITY_INSERT to on
+
+        Parameters
+        ----------
+        targets: list(DbConn) (Custom JAVA class)
+            database connection
+        on: bool
+            turn the IDENTITY_INSERT on or off
+        """
         for targ in targets:
             for table in self.tableNames:
                 targ.executeSql("SET IDENTITY_INSERT {0} {1}".format(table, "ON" if on else "OFF"))
 
     # https://github.com/jython/book/blob/master/src/chapter19/test_completion.py
     def execute(self, frees, threads):
+        """
+        Begins multithreaded execution
+
+        Parameters
+        ----------
+        frees: list(Freeway)
+            list of freeways to begin multithreaded execution
+        threads:
+            number of threads
+        """
         from java.util.concurrent import Executors, ExecutorCompletionService
         pool = Executors.newFixedThreadPool(threads)
         ecs = ExecutorCompletionService(pool)
@@ -237,6 +365,20 @@ class moveDataToDatabases(object):
             submitted -= 1
 
 class quertyToCSVOutputBinary(object):
+    """
+    Queries all the binary object's hash, if found/contains, to a CS
+    
+    Parameters
+    ----------
+    dbConn: DbConn (Custom JAVA class)
+        database connection
+    sql: str
+        Sql to execute
+    writePath: str
+        output
+    rowlimit: int
+        max number of rows to output
+    """
     def __init__(self, dbConn, sql,  writePath,rowlimit=0):
         limit=""
         top=""
@@ -266,6 +408,20 @@ class quertyToCSVOutputBinary(object):
 
 #todo..multiple sheets would be nice
 class QueryToExcel(object):
+    """
+    Execute's a query to Excel
+    
+    Parameters
+    ----------
+    dbConn: DbConn (Custom JAVA class)
+        database connection
+    sql: str
+        Sql to execute
+    writePath: str
+        output
+    sheetName: str
+        which sheetname to save the values to
+    """
     def __init__(self, dbConn, sql,  writePath, sheetName="Sheet1"):
         directory = os.path.dirname(writePath)
         if not os.path.exists(directory):
@@ -275,6 +431,24 @@ class QueryToExcel(object):
         dbConn.queryToExcel(sql,  sheetName,fqn)
 
 class CompareCsv(object):
+    """
+    Compares two CSVs
+    
+    Parameters
+    ----------
+    csv1: str
+        Path to CSV
+    csv2: str
+        Path to CSV
+    outfile:
+        path to save the results
+    key_columns:
+        columns to compare
+    reportHeader:
+        format of header
+    algorithm:
+        method which to compare, defaults to MD5 hash
+    """
     def __init__(self, csv1, csv2, outfile, key_columns,reportHeader,algorithm="hash"):
         csv1=os.path.abspath(csv1)
         csv2=os.path.abspath(csv2)
@@ -283,6 +457,18 @@ class CompareCsv(object):
         DataUtils.compareCSV(csv1, csv2, outfile, key_columns,reportHeader,algorithm)
 
 class ParseProcs(object):
+    """
+    Parses information from stored procedures and outputs results
+    
+    Parameters
+    ----------
+    dbConn: DbConn (Custom JAVA class)
+        database connection
+    schemaOrOwner: str
+        Schema or owner (i.e: dbo or myTable or dbo.myTable)
+    writePath: str
+        ouput
+    """
     def __init__(self,dbConn,schemaOrOwner,writePath):
         
         directory = os.path.dirname(writePath)

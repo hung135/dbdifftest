@@ -4,6 +4,22 @@ import DataUtils
 from java.util.concurrent import Callable
 
 class FreeWay(Callable):
+    """
+    Python class used for Java multithreading to transfer data from one table to the multiple others
+
+    Attributes
+    ----------
+    con: DbConn (Custom JAVA class)
+        database connection
+    targets: List(DbConn)
+        databaes to target
+    query: str
+        database query to get data
+    batchsize: int
+        max batch size before a manual garbage collection happens
+    truncate: bool
+        truncate the original table
+    """
     def __init__(self, con, targets, table, query, batchSize, truncate):
         self.con = con
         self.targets = targets
@@ -19,6 +35,14 @@ class FreeWay(Callable):
         self.exception = None
 
     def __str__(self):
+        """
+        String of object's current status
+
+        Returns
+        -------
+        str
+            Current state of threading
+        """
         if self.exception:
              return "[%s] error %s in %.2fs" % \
                 (self.thread_used, self.exception, self.completed - self.started, )
@@ -33,6 +57,13 @@ class FreeWay(Callable):
                 (self.thread_used)
 
     def call(self):
+        """
+        Executes the DataUtils.freewaymigrateMulti function for a thread
+
+        Returns
+        -------
+        self: FreeWay
+        """
         self.thread_used = threading.currentThread().getName()
         self.started = time.time()
         try:

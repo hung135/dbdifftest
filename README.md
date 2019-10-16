@@ -25,8 +25,8 @@ What can I put in tasks & reports.yaml:
     - https://github.com/hung135/dbdifftest/blob/master/jython_scripts/conn.yaml
 
 YAML Injection:
+
 You can now use dynamic runtime injection. 
-Example:
 
 <table>
   <th>Input YAML</th><th>Runtime</th>

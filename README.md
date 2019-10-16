@@ -26,15 +26,36 @@ What can I put in tasks & reports.yaml:
 
 YAML Injection:
 You can now use dynamic runtime injection. 
-
 Example:
-```yaml
+
+<table>
+  <th>Input YAML</th><th>Runtime</th>
+<tr>
+<td>
+
+  ```yaml
 QueryToCSV:
   sys-dev:
     create:
       - writePath: ./reports/{today}-{taskName}-{connection}-{qualifier}.csv
         sql: SELECT * FROM dbo.mockData1
 ```
+
+</td>
+<td>
+
+  ```yaml
+QueryToCSV:
+  sys-dev:
+    create:
+      - writePath: ./reports/12-22-2019-QueryToCSV-sys-dev-create.csv
+        sql: SELECT * FROM dbo.mockData1
+```
+
+</td>
+</tr>
+</table>
+
 
 Logging:
    - Setup custom logging by following [this](https://www.tutorialspoint.com/log4j/log4j_configuration.htm)

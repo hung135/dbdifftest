@@ -18,11 +18,44 @@ RunTime Installation:
     - runreports.bat 
       - jython dbdiff.py -y ../conn.yaml -t ../reports.yaml
 
-What Can I put in tasks & reports.yaml:
+What can I put in tasks & reports.yaml:
   - Every Function in this file can be configured in your tasks.yaml & reports.yaml
     - https://github.com/hung135/dbdifftest/blob/master/jython_scripts/logic/migration.py
   - Same Connection yaml (conn.yaml) file is here :
     - https://github.com/hung135/dbdifftest/blob/master/jython_scripts/conn.yaml
+
+YAML Injection:
+
+You can now use dynamic runtime injection. 
+
+<table>
+  <th>Input YAML</th><th>Runtime</th>
+<tr>
+<td>
+
+  ```yaml
+QueryToCSV:
+  sys-dev:
+    create:
+      - writePath: ./reports/{today}-{taskName}-{connection}-{qualifier}.csv
+        sql: SELECT * FROM dbo.mockData1
+```
+
+</td>
+<td>
+
+  ```yaml
+QueryToCSV:
+  sys-dev:
+    create:
+      - writePath: ./reports/12-22-2019-QueryToCSV-sys-dev-create.csv
+        sql: SELECT * FROM dbo.mockData1
+```
+
+</td>
+</tr>
+</table>
+
 
 Logging:
    - Setup custom logging by following [this](https://www.tutorialspoint.com/log4j/log4j_configuration.htm)
@@ -64,3 +97,5 @@ Changelog (no order):
 - Added the ability to export the MD5 has in sybase
 - Added `TableInformation`
 - Added logging with `-v <debug, warn, all>`
+- `YAML` injection now works
+- Basic multithreading is in place
